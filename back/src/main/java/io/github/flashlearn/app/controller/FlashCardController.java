@@ -9,10 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -26,5 +23,15 @@ public class FlashCardController {
     public ResponseEntity<FlashCardResponse> createFlashCard(@Valid @RequestBody CreateFlashCardRequest request) {
         FlashCard createdCard = flashCardService.createFlashCard(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponse(createdCard));
+    }
+
+    @PutMapping("/edit/{id}")
+    public ResponseEntity<FlashCardResponse> editFlashCard(
+            @PathVariable Long id,
+            @Valid @RequestBody CreateFlashCardRequest request) {
+
+        FlashCard response = flashCardService.editFlashCard(id, request);
+
+        return ResponseEntity.ok().body(mapper.toResponse(response));
     }
 }

@@ -36,13 +36,35 @@ public class GlobalExceptionHandler {
 
     // FlashCard already exists
     @ExceptionHandler(FlashCardAlreadyExists.class)
-    public ResponseEntity<ErrorResponse> flashCardAlreadyExistsHandler(FlashCardAlreadyExists ex) {
+    public ResponseEntity<ErrorResponse> flashCardAlreadyExistsExceptionHandler(FlashCardAlreadyExists ex) {
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.CONFLICT.value(),
                 ex.getMessage()
         );
 
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    // Can not find flashcard in DB
+    @ExceptionHandler(FlashCardNotFound.class)
+    public ResponseEntity<ErrorResponse> flashCardNotFoundExceptionHandler(FlashCardNotFound ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage()
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    // Can not find User in DB
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> userNotFoundExceptionHandler(UserNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage()
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
     // Unexpected exception
