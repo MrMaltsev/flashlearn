@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/flashcards")
@@ -33,5 +35,27 @@ public class FlashCardController {
         FlashCard response = flashCardService.editFlashCard(id, request);
 
         return ResponseEntity.ok().body(mapper.toResponse(response));
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteFlashCard(@PathVariable Long id) {
+        flashCardService.deleteFlashCard(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/get/{id}")
+    public ResponseEntity<FlashCardResponse> getFlashCard(@PathVariable Long id) {
+        FlashCard flashCard = flashCardService.findFlashCard(id);
+        return ResponseEntity.ok().body(mapper.toResponse(flashCard));
+    }
+
+    @GetMapping("/getAll/{userId}")
+    public ResponseEntity<List<FlashCardResponse>> getAllFlashCards(@PathVariable Long userId) {
+        List<FlashCardResponse> flashCards = flashCardService.getAllFlashCardsByUserId(userId)
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+
+        return ResponseEntity.ok(flashCards);
     }
 }
