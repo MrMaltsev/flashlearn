@@ -19,14 +19,15 @@ public class RegistrationService {
 
     // Service for registration attempts
     public User registerUser(UserRegistrationRequest request) {
-        String username = request.getUsername();
-        String encodedPassword = passwordEncoder.encode(request.getPassword());
+        String username = request.username();
+        String encodedPassword = passwordEncoder.encode(request.password());
+        String email = request.email();
 
         if(userRepository.existsByUsername(username)) {
             throw new UserAlreadyExistsException("User already exists");
         }
         
-        User user = new User(username, encodedPassword, Role.USER);
+        User user = new User(username, encodedPassword, email, Role.USER);
         return userRepository.save(user);
     }
 }

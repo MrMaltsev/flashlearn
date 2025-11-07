@@ -1,13 +1,6 @@
 package io.github.flashlearn.app.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class UserRegistrationRequest {
-    private String username;
-    private String password;
-}
+public record UserRegistrationRequest (
+        String username,
+        String password,
+        String email) {}

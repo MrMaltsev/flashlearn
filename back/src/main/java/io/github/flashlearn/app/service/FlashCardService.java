@@ -1,18 +1,15 @@
 package io.github.flashlearn.app.service;
 
 import io.github.flashlearn.app.dto.CreateFlashCardRequest;
-import io.github.flashlearn.app.dto.FlashCardResponse;
 import io.github.flashlearn.app.entity.FlashCard;
 import io.github.flashlearn.app.entity.Type;
 import io.github.flashlearn.app.entity.User;
-import io.github.flashlearn.app.exception.FlashCardAlreadyExists;
-import io.github.flashlearn.app.exception.FlashCardNotFound;
+import io.github.flashlearn.app.exception.FlashCardAlreadyExistsException;
+import io.github.flashlearn.app.exception.FlashCardNotFoundException;
 import io.github.flashlearn.app.exception.UserNotFoundException;
-import io.github.flashlearn.app.mapper.FlashCardMapper;
 import io.github.flashlearn.app.repository.FlashCardRepository;
 import io.github.flashlearn.app.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,7 +29,7 @@ public class FlashCardService {
         FlashCard newCard = new FlashCard(question, answer, type);
 
         if(flashCardRepository.existsByQuestionAndAnswer(question, answer)) {
-            throw new FlashCardAlreadyExists("This flash card already exists");
+            throw new FlashCardAlreadyExistsException("This flash card already exists");
         }
 
         return flashCardRepository.save(newCard);
@@ -40,7 +37,7 @@ public class FlashCardService {
 
     public FlashCard editFlashCard(Long id, CreateFlashCardRequest request) {
         FlashCard flashCard = flashCardRepository.findById(id)
-                .orElseThrow(() -> new FlashCardNotFound("FlashCard not found with id" + id));
+                .orElseThrow(() -> new FlashCardNotFoundException("FlashCard not found with id" + id));
 
         flashCard.setQuestion(request.getQuestion());
         flashCard.setAnswer(request.getAnswer());
@@ -51,14 +48,14 @@ public class FlashCardService {
 
     public void deleteFlashCard(Long id) {
         FlashCard flashCard = flashCardRepository.findById(id)
-                .orElseThrow(() -> new FlashCardNotFound("Flashcard with id not found, id: " + id));
+                .orElseThrow(() -> new FlashCardNotFoundException("Flashcard with id not found, id: " + id));
 
         flashCardRepository.deleteById(id);
     }
 
     public FlashCard findFlashCard(Long id) {
         return flashCardRepository.findById(id)
-                .orElseThrow(() -> new FlashCardNotFound("FlashCard with id not found" + id));
+                .orElseThrow(() -> new FlashCardNotFoundException("FlashCard with id not found" + id));
     }
 
     public List<FlashCard> getAllFlashCardsByUserId(Long id) {
