@@ -1,6 +1,6 @@
 package io.github.flashlearn.app.exception;
 
-import io.github.flashlearn.app.dto.ApiError;
+import io.github.flashlearn.app.dto.common.ApiError;
 import io.micrometer.tracing.Tracer;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;

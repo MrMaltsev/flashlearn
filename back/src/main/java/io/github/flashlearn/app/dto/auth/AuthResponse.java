@@ -1,4 +1,4 @@
-package io.github.flashlearn.app.dto;
+package io.github.flashlearn.app.dto.auth;
 
 public record AuthResponse(
         String token,

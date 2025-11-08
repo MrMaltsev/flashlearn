@@ -1,6 +1,5 @@
-package io.github.flashlearn.app.dto;
+package io.github.flashlearn.app.dto.flashcard;
 
-import io.github.flashlearn.app.entity.FlashCard;
 import io.github.flashlearn.app.entity.Type;
 import lombok.AllArgsConstructor;
 import lombok.Data;

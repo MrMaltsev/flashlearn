@@ -1,15 +1,11 @@
 package io.github.flashlearn.app.controller;
 
-import io.github.flashlearn.app.dto.AuthResponse;
-import io.github.flashlearn.app.dto.UserLoginRequest;
-import io.github.flashlearn.app.dto.UserResponse;
+import io.github.flashlearn.app.dto.auth.AuthResponse;
+import io.github.flashlearn.app.dto.auth.UserLoginRequest;
 import io.github.flashlearn.app.entity.User;
-import io.github.flashlearn.app.mapper.UserMapper;
 import io.github.flashlearn.app.service.AuthService;
-import io.github.flashlearn.app.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -18,7 +18,14 @@ function RegisterPage() {
         email,
         password,
       });
-      localStorage.setItem('token', response.data.token);
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+      }
+      if (response.data.username) {
+        localStorage.setItem('username', response.data.username);
+      } else {
+        localStorage.setItem('username', username);
+      }
       navigate('/dashboard');
     } catch (err) {
       setError('Ошибка регистрации: ' + (err.response?.data?.message || 'Проверьте данные'));

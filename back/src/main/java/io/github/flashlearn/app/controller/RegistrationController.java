@@ -1,10 +1,8 @@
 package io.github.flashlearn.app.controller;
 
-import io.github.flashlearn.app.dto.UserResponse;
-import io.github.flashlearn.app.dto.UserRegistrationRequest;
-import io.github.flashlearn.app.entity.FlashCard;
+import io.github.flashlearn.app.dto.auth.UserRegistrationResponse;
+import io.github.flashlearn.app.dto.auth.UserRegistrationRequest;
 import io.github.flashlearn.app.entity.User;
-import io.github.flashlearn.app.mapper.FlashCardMapper;
 import io.github.flashlearn.app.mapper.UserMapper;
 import io.github.flashlearn.app.service.RegistrationService;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +20,8 @@ public class RegistrationController {
 
     // Controller for registration attempt
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> registerUser(@RequestBody UserRegistrationRequest registrationRequest) {
+    public ResponseEntity<UserRegistrationResponse> registerUser(@RequestBody UserRegistrationRequest registrationRequest) {
         User createdUser = registrationService.registerUser(registrationRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toResponse(createdUser));
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toUserResponse(createdUser));
     }
 }

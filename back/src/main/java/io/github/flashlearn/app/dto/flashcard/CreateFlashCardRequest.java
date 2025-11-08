@@ -1,4 +1,4 @@
-package io.github.flashlearn.app.dto;
+package io.github.flashlearn.app.dto.flashcard;
 
 import io.github.flashlearn.app.entity.Type;
 import jakarta.validation.constraints.NotBlank;

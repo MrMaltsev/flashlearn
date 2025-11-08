@@ -23,6 +23,11 @@ public class User implements UserDetails {
     private String username;
 
     @Column(nullable = false)
+    private String aboutMe;
+
+    // private Avatar avatarUrl;
+
+    @Column(nullable = false)
     private String password;
 
     // For the future improvements

@@ -1,6 +1,6 @@
 package io.github.flashlearn.app.mapper;
 
-import io.github.flashlearn.app.dto.FlashCardResponse;
+import io.github.flashlearn.app.dto.flashcard.FlashCardResponse;
 import io.github.flashlearn.app.entity.FlashCard;
 import org.springframework.stereotype.Component;
 

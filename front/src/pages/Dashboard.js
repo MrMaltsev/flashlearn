@@ -14,11 +14,19 @@ function Dashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('username');
     navigate('/login');
   };
 
   const goHome = () => navigate('/');
-  const goProfile = () => navigate('/profile');
+  const goProfile = () => {
+    const username = localStorage.getItem('username');
+    if (username) {
+      navigate(`/${username}`);
+    } else {
+      navigate('/login');
+    }
+  };
 
   return (
     <div className="dashboard-layout">

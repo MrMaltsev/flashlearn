@@ -1,8 +1,7 @@
 package io.github.flashlearn.app.service;
 
-import io.github.flashlearn.app.dto.UserLoginRequest;
+import io.github.flashlearn.app.dto.auth.UserLoginRequest;
 import io.github.flashlearn.app.entity.User;
-import io.github.flashlearn.app.exception.InvalidCredentialsException;
 import io.github.flashlearn.app.exception.UserNotFoundException;
 import io.github.flashlearn.app.repository.UserRepository;
 import io.github.flashlearn.app.security.JwtTokenProvider;
@@ -10,8 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service

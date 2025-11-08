@@ -1,28 +1,35 @@
 package io.github.flashlearn.app.controller;
 
-import io.github.flashlearn.app.dto.UserEditRequest;
-import io.github.flashlearn.app.dto.UserResponse;
-import io.github.flashlearn.app.entity.User;
+import io.github.flashlearn.app.dto.profile.UpdateUserProfileRequest;
+import io.github.flashlearn.app.dto.profile.UserProfileResponse;
 import io.github.flashlearn.app.mapper.UserMapper;
-import io.github.flashlearn.app.service.ProfileEditService;
+import io.github.flashlearn.app.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@RequestMapping("/api/users")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/users")
 public class UserProfileController {
 
-    private final ProfileEditService profileEditService;
+    private final UserProfileService userProfileService;
     private final UserMapper mapper;
 
-    @PutMapping("/edit/{id}")
-    public ResponseEntity<UserResponse> editProfileInformation(
-            @PathVariable Long id,
-            @RequestBody UserEditRequest request) {
-        User response = profileEditService.editUserInfo(id, request);
-        return ResponseEntity.ok().body(mapper.toResponse(response));
+    @GetMapping("/{username}")
+    public ResponseEntity<UserProfileResponse> getProfileInfo(@PathVariable String username) {
+        UserProfileResponse userProfileResponse = mapper.toUserProfileResponse(userProfileService.findByUsername(username));
+        return ResponseEntity.status(HttpStatus.OK).body(userProfileResponse);
+    }
+
+    @PutMapping("/{username}/update")
+    public ResponseEntity<UserProfileResponse> updateProfile(@PathVariable String username,
+                                                             @RequestBody UpdateUserProfileRequest updatedUser) {
+        UserProfileResponse userProfileResponse =
+                mapper.toUserProfileResponse(userProfileService.updateProfile(username, updatedUser));
+
+        return ResponseEntity.status(HttpStatus.OK).body(userProfileResponse);
     }
 
 }

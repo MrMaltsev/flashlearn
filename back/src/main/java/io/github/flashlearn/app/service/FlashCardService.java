@@ -1,6 +1,6 @@
 package io.github.flashlearn.app.service;
 
-import io.github.flashlearn.app.dto.CreateFlashCardRequest;
+import io.github.flashlearn.app.dto.flashcard.CreateFlashCardRequest;
 import io.github.flashlearn.app.entity.FlashCard;
 import io.github.flashlearn.app.entity.Type;
 import io.github.flashlearn.app.entity.User;

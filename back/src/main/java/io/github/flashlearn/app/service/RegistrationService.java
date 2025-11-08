@@ -1,7 +1,6 @@
 package io.github.flashlearn.app.service;
 
-import io.github.flashlearn.app.dto.UserResponse;
-import io.github.flashlearn.app.dto.UserRegistrationRequest;
+import io.github.flashlearn.app.dto.auth.UserRegistrationRequest;
 import io.github.flashlearn.app.entity.Role;
 import io.github.flashlearn.app.entity.User;
 import io.github.flashlearn.app.exception.UserAlreadyExistsException;

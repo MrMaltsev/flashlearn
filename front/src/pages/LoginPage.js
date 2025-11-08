@@ -17,6 +17,9 @@ function LoginPage() {
         password,
       });
       localStorage.setItem('token', response.data.token);
+      if (response.data.username) {
+        localStorage.setItem('username', response.data.username);
+      }
       navigate('/dashboard');
     } catch (err) {
       setError('Ошибка логина: ' + (err.response?.data?.message || 'Проверьте данные'));
