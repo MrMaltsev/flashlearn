@@ -1,0 +1,32 @@
+package io.github.flashlearn.app.auth.service;
+
+import io.github.flashlearn.app.auth.dto.UserRegistrationRequest;
+import io.github.flashlearn.app.user.entity.Role;
+import io.github.flashlearn.app.user.entity.User;
+import io.github.flashlearn.app.user.exception.UserAlreadyExistsException;
+import io.github.flashlearn.app.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class RegistrationService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    // Service for registration attempts
+    public User registerUser(UserRegistrationRequest request) {
+        String username = request.username();
+        String encodedPassword = passwordEncoder.encode(request.password());
+        String email = request.email();
+
+        if(userRepository.existsByUsername(username)) {
+            throw new UserAlreadyExistsException("User already exists");
+        }
+        
+        User user = new User(username, encodedPassword, email, Role.USER);
+        return userRepository.save(user);
+    }
+}

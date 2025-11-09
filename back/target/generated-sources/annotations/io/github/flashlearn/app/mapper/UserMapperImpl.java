@@ -1,9 +1,11 @@
 package io.github.flashlearn.app.mapper;
 
-import io.github.flashlearn.app.dto.auth.UserRegistrationResponse;
-import io.github.flashlearn.app.dto.profile.UserProfileResponse;
-import io.github.flashlearn.app.entity.User;
+import io.github.flashlearn.app.auth.dto.UserRegistrationResponse;
+import io.github.flashlearn.app.profile.dto.UserProfileResponse;
+import io.github.flashlearn.app.user.entity.User;
 import javax.annotation.processing.Generated;
+
+import io.github.flashlearn.app.user.mapper.UserMapper;
 import org.springframework.stereotype.Component;
 
 @Generated(
