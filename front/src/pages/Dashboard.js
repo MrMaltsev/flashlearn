@@ -1,26 +1,27 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { isLoggedIn, clearAuthData, getUsername } from '../utils/auth';
 import '../styles/Dashboard.css';
 
 function Dashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    // Проверяем, аутентифицирован ли пользователь
+    if (!isLoggedIn()) {
       navigate('/login');
     }
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
+    // Очищаем данные аутентификации
+    clearAuthData();
     navigate('/login');
   };
 
   const goHome = () => navigate('/');
   const goProfile = () => {
-    const username = localStorage.getItem('username');
+    const username = getUsername();
     if (username) {
       navigate(`/${username}`);
     } else {

@@ -23,14 +23,20 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
+    /**
+     * Генерирует JWT токен для пользователя с указанным именем
+     * @param username имя пользователя
+     * @return JWT токен
+     */
     public String generateToken(String username) {
         Date now = new Date();
+        // Вычисляем дату истечения токена: текущее время + время жизни токена
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
         return Jwts.builder()
                 .subject(username)
-                .issuedAt(now)
-                .expiration(now)
+                .issuedAt(now) // Время создания токена
+                .expiration(expiryDate) // Время истечения токена
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

@@ -4,6 +4,7 @@ import io.github.flashlearn.app.auth.exception.InvalidCredentialsException;
 import io.github.flashlearn.app.common.dto.ApiError;
 import io.github.flashlearn.app.flashcard.exception.FlashCardAlreadyExistsException;
 import io.github.flashlearn.app.flashcard.exception.FlashCardNotFoundException;
+import io.github.flashlearn.app.flashcard.exception.UnauthorizedAccessException;
 import io.github.flashlearn.app.user.exception.UserAlreadyExistsException;
 import io.github.flashlearn.app.user.exception.UserNotFoundException;
 import io.micrometer.tracing.Tracer;
@@ -97,6 +98,21 @@ public class GlobalExceptionHandler{
         ApiError body = new ApiError(HttpStatus.NOT_FOUND.value(), "USER_NOT_FOUND", ex.getMessage(),
                                     Instant.now(), request.getRequestURI(), traceId);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    // Unauthorized access attempt - пользователь пытается получить доступ к ресурсу, к которому у него нет прав
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<ApiError> unauthorizedAccessExceptionHandler(UnauthorizedAccessException ex,
+                                                                       HttpServletRequest request) {
+        String traceId = tracer.currentSpan() != null
+                ? tracer.currentSpan().context().traceId()
+                : "N/A";
+
+        log.warn("Unauthorized access attempt: {}", ex.getMessage());
+
+        ApiError body = new ApiError(HttpStatus.FORBIDDEN.value(), "UNAUTHORIZED_ACCESS", ex.getMessage(),
+                                    Instant.now(), request.getRequestURI(), traceId);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 
     // Unexpected exception

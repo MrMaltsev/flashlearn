@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
+import { saveAuthData } from '../utils/auth';
 import '../styles/RegisterPage.css';
 
 function RegisterPage() {
@@ -12,23 +13,38 @@ function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(''); // Очищаем предыдущие ошибки
+    
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/register', {
+      // Используем api instance для регистрации (это публичный endpoint)
+      const response = await api.post('/auth/register', {
         username,
         email,
         password,
       });
+      
+      // Сохраняем данные аутентификации (если регистрация возвращает токен)
+      // Обычно после регистрации пользователь должен войти, но если токен приходит, сохраняем
       if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-      }
-      if (response.data.username) {
-        localStorage.setItem('username', response.data.username);
+        saveAuthData(response.data.token, response.data.username || username);
+        navigate('/dashboard');
       } else {
-        localStorage.setItem('username', username);
+        // Если токен не приходит, перенаправляем на страницу логина
+        navigate('/login');
       }
-      navigate('/dashboard');
     } catch (err) {
-      setError('Ошибка регистрации: ' + (err.response?.data?.message || 'Проверьте данные'));
+      // Обрабатываем ошибки регистрации
+      if (err.response) {
+        const status = err.response.status;
+        if (status === 400 || status === 409) {
+          // 400 - неверные данные, 409 - пользователь уже существует
+          setError(err.response?.data?.message || 'Ошибка регистрации. Проверьте данные.');
+        } else {
+          setError('Ошибка регистрации: ' + (err.response?.data?.message || 'Не удалось зарегистрироваться'));
+        }
+      } else {
+        setError('Ошибка сети. Проверьте подключение к интернету.');
+      }
     }
   };
 

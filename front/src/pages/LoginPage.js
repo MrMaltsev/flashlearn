@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
+import { saveAuthData } from '../utils/auth';
 import '../styles/LoginPage.css';
 
 function LoginPage() {
@@ -11,18 +12,30 @@ function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(''); // Очищаем предыдущие ошибки
+    
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/login', {
+      // Используем прямой axios запрос для логина (без interceptor, т.к. это публичный endpoint)
+      const response = await api.post('/auth/login', {
         username,
         password,
       });
-      localStorage.setItem('token', response.data.token);
-      if (response.data.username) {
-        localStorage.setItem('username', response.data.username);
-      }
+      
+      // Сохраняем данные аутентификации
+      saveAuthData(response.data.token, response.data.username || username);
       navigate('/dashboard');
     } catch (err) {
-      setError('Ошибка логина: ' + (err.response?.data?.message || 'Проверьте данные'));
+      // Обрабатываем ошибки логина
+      if (err.response) {
+        const status = err.response.status;
+        if (status === 401 || status === 403) {
+          setError('Неверное имя пользователя или пароль');
+        } else {
+          setError('Ошибка логина: ' + (err.response?.data?.message || 'Проверьте данные'));
+        }
+      } else {
+        setError('Ошибка сети. Проверьте подключение к интернету.');
+      }
     }
   };
 

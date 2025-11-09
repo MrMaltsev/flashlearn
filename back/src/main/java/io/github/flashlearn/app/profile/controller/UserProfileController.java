@@ -7,6 +7,7 @@ import io.github.flashlearn.app.profile.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/api/users")
@@ -17,13 +18,23 @@ public class UserProfileController {
     private final UserProfileService userProfileService;
     private final UserMapper mapper;
 
+    /**
+     * Получение информации о профиле пользователя. Требуется аутентификация.
+     * Любой аутентифицированный пользователь может просматривать профили других пользователей.
+     */
     @GetMapping("/{username}")
+    @PreAuthorize("isAuthenticated()") // Проверяем, что пользователь аутентифицирован
     public ResponseEntity<UserProfileResponse> getProfileInfo(@PathVariable String username) {
         UserProfileResponse userProfileResponse = mapper.toUserProfileResponse(userProfileService.findByUsername(username));
         return ResponseEntity.status(HttpStatus.OK).body(userProfileResponse);
     }
 
+    /**
+     * Обновление профиля пользователя. Требуется аутентификация.
+     * Пользователь может обновлять только свой собственный профиль (проверка в сервисе).
+     */
     @PutMapping("/{username}/update")
+    @PreAuthorize("isAuthenticated()") // Проверяем, что пользователь аутентифицирован
     public ResponseEntity<UserProfileResponse> updateProfile(@PathVariable String username,
                                                              @RequestBody UpdateUserProfileRequest updatedUser) {
         UserProfileResponse userProfileResponse =

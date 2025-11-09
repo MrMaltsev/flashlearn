@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
+import { isLoggedIn, clearAuthData, getUsername } from '../utils/auth';
 import '../styles/ProfilePage.css';
 import '../styles/Dashboard.css';
 
@@ -12,23 +13,35 @@ function ProfilePage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    // Проверяем, аутентифицирован ли пользователь
+    if (!isLoggedIn()) {
       navigate('/login');
       return;
     }
 
     const fetchProfile = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/users/${username}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        // Используем api instance, который автоматически добавляет токен и обрабатывает ошибки
+        const response = await api.get(`/users/${username}`);
         setProfile(response.data);
         setLoading(false);
       } catch (err) {
-        setError('Ошибка загрузки профиля: ' + (err.response?.data?.message || 'Пользователь не найден'));
+        // Обрабатываем различные типы ошибок
+        if (err.response) {
+          const status = err.response.status;
+          if (status === 401) {
+            // 401 обрабатывается в interceptor, просто перенаправляем
+            navigate('/login');
+          } else if (status === 403) {
+            setError('У вас нет прав для просмотра этого профиля');
+          } else if (status === 404) {
+            setError('Пользователь не найден');
+          } else {
+            setError('Ошибка загрузки профиля: ' + (err.response?.data?.message || 'Неизвестная ошибка'));
+          }
+        } else {
+          setError('Ошибка сети. Проверьте подключение к интернету.');
+        }
         setLoading(false);
       }
     };
@@ -37,8 +50,8 @@ function ProfilePage() {
   }, [username, navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
+    // Очищаем данные аутентификации
+    clearAuthData();
     navigate('/login');
   };
 
@@ -85,7 +98,7 @@ function ProfilePage() {
         <div className="sidebar-header">Меню</div>
         <button className="sidebar-btn sidebar-btn-primary" onClick={goHome}>Главная страница</button>
         <button className="sidebar-btn" onClick={() => {
-          const currentUsername = localStorage.getItem('username');
+          const currentUsername = getUsername();
           if (currentUsername) {
             navigate(`/${currentUsername}`);
           }

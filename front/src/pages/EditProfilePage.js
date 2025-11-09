@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
+import { isLoggedIn, getUsername, clearAuthData } from '../utils/auth';
 import '../styles/ProfilePage.css';
 import '../styles/Dashboard.css';
 
@@ -17,19 +18,24 @@ function EditProfilePage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    // Проверяем, аутентифицирован ли пользователь
+    if (!isLoggedIn()) {
       navigate('/login');
+      return;
+    }
+
+    // Проверяем, что пользователь редактирует свой собственный профиль
+    const currentUsername = getUsername();
+    if (currentUsername && currentUsername !== username) {
+      setError('Вы можете редактировать только свой профиль');
+      setLoading(false);
       return;
     }
 
     const fetchProfile = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/users/${username}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        // Используем api instance, который автоматически добавляет токен и обрабатывает ошибки
+        const response = await api.get(`/users/${username}`);
         setProfile(response.data);
         setFormData({
           username: response.data.username || '',
@@ -37,7 +43,22 @@ function EditProfilePage() {
         });
         setLoading(false);
       } catch (err) {
-        setError('Ошибка загрузки профиля: ' + (err.response?.data?.message || 'Пользователь не найден'));
+        // Обрабатываем различные типы ошибок
+        if (err.response) {
+          const status = err.response.status;
+          if (status === 401) {
+            // 401 обрабатывается в interceptor, просто перенаправляем
+            navigate('/login');
+          } else if (status === 403) {
+            setError('У вас нет прав для редактирования этого профиля');
+          } else if (status === 404) {
+            setError('Пользователь не найден');
+          } else {
+            setError('Ошибка загрузки профиля: ' + (err.response?.data?.message || 'Неизвестная ошибка'));
+          }
+        } else {
+          setError('Ошибка сети. Проверьте подключение к интернету.');
+        }
         setLoading(false);
       }
     };
@@ -50,23 +71,14 @@ function EditProfilePage() {
     setSaving(true);
     setError('');
 
-    const token = localStorage.getItem('token');
     try {
-      const response = await axios.put(
-        `http://localhost:8080/api/users/${username}/update`,
-        {
-          username: formData.username,
-          aboutMe: formData.aboutMe
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      // Используем api instance для отправки запроса
+      const response = await api.put(`/users/${username}/update`, {
+        username: formData.username,
+        aboutMe: formData.aboutMe
+      });
 
-      // Update username in localStorage if it changed
+      // Обновляем имя пользователя в localStorage, если оно изменилось
       if (response.data.username && response.data.username !== username) {
         localStorage.setItem('username', response.data.username);
         navigate(`/${response.data.username}`);
@@ -74,7 +86,20 @@ function EditProfilePage() {
         navigate(`/${username}`);
       }
     } catch (err) {
-      setError('Ошибка сохранения: ' + (err.response?.data?.message || 'Не удалось обновить профиль'));
+      // Обрабатываем различные типы ошибок
+      if (err.response) {
+        const status = err.response.status;
+        if (status === 401) {
+          // 401 обрабатывается в interceptor
+          navigate('/login');
+        } else if (status === 403) {
+          setError('У вас нет прав для обновления этого профиля');
+        } else {
+          setError('Ошибка сохранения: ' + (err.response?.data?.message || 'Не удалось обновить профиль'));
+        }
+      } else {
+        setError('Ошибка сети. Проверьте подключение к интернету.');
+      }
       setSaving(false);
     }
   };
@@ -84,8 +109,8 @@ function EditProfilePage() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
+    // Очищаем данные аутентификации
+    clearAuthData();
     navigate('/login');
   };
 
@@ -114,7 +139,7 @@ function EditProfilePage() {
         <div className="sidebar-header">Меню</div>
         <button className="sidebar-btn sidebar-btn-primary" onClick={goHome}>Главная страница</button>
         <button className="sidebar-btn" onClick={() => {
-          const currentUsername = localStorage.getItem('username');
+          const currentUsername = getUsername();
           if (currentUsername) {
             navigate(`/${currentUsername}`);
           }
