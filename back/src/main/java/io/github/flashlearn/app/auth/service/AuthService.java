@@ -1,6 +1,10 @@
 package io.github.flashlearn.app.auth.service;
 
 import io.github.flashlearn.app.auth.dto.UserLoginRequest;
+import io.github.flashlearn.app.auth.entity.VerificationToken;
+import io.github.flashlearn.app.auth.exception.TokenExpiredException;
+import io.github.flashlearn.app.auth.exception.TokenNotFoundException;
+import io.github.flashlearn.app.auth.repository.VerificationTokenRepository;
 import io.github.flashlearn.app.user.entity.User;
 import io.github.flashlearn.app.user.exception.UserNotFoundException;
 import io.github.flashlearn.app.user.repository.UserRepository;
@@ -11,6 +15,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -18,6 +25,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtTokenProvider tokenProvider;
     private final AuthenticationManager authenticationManager;
+    private final VerificationTokenRepository verificationTokenRepository;
 
     // Service for login attempts
     public String loginUser(UserLoginRequest request) {
@@ -32,6 +40,20 @@ public class AuthService {
         User user = (User) authentication.getPrincipal();
 
         return tokenProvider.generateToken(user.getUsername());
+    }
+
+    public void verifyToken(String token) {
+        VerificationToken t = verificationTokenRepository.findById(token)
+                .orElseThrow(() -> new TokenNotFoundException("Token not found: " + token));
+
+        if(t.getExpiresAt().isBefore(LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()))
+            throw new TokenExpiredException("Token expired: " + token);
+
+        User user = userRepository.findById(t.getUser().getId()).get();
+        user.setEmailVerified(true);
+        userRepository.save(user);
+
+        verificationTokenRepository.delete(t);
     }
 
     public User findUserByUsername(String username) {

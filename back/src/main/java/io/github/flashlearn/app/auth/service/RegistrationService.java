@@ -6,15 +6,18 @@ import io.github.flashlearn.app.user.entity.User;
 import io.github.flashlearn.app.user.exception.UserAlreadyExistsException;
 import io.github.flashlearn.app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RegistrationService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailConfirmationService emailConfirmationService;
 
     // Service for registration attempts
     public User registerUser(UserRegistrationRequest request) {
@@ -27,6 +30,12 @@ public class RegistrationService {
         }
         
         User user = new User(username, encodedPassword, email, Role.USER);
-        return userRepository.save(user);
+        userRepository.save(user);
+        
+        // Send confirmation email
+        emailConfirmationService.sendConfirmation(user);
+
+        return user;
     }
+
 }

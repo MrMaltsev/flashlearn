@@ -20,10 +20,9 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String username;
 
-    @Column(nullable = false)
     private String aboutMe;
 
     // private Avatar avatarUrl;
@@ -32,8 +31,14 @@ public class User implements UserDetails {
     private String password;
 
     // For the future improvements
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
+    /*
+    * 1. Contains @ and variations of <email>.<com>
+    * 2. Email exists
+    */
+
+    private boolean emailVerified = false;
 
     @Enumerated(EnumType.STRING)
     private Role role;

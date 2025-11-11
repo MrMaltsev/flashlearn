@@ -1,6 +1,9 @@
 package io.github.flashlearn.app.common.exception;
 
+import io.github.flashlearn.app.auth.exception.EmailSendingException;
 import io.github.flashlearn.app.auth.exception.InvalidCredentialsException;
+import io.github.flashlearn.app.auth.exception.TokenExpiredException;
+import io.github.flashlearn.app.auth.exception.TokenNotFoundException;
 import io.github.flashlearn.app.common.dto.ApiError;
 import io.github.flashlearn.app.flashcard.exception.FlashCardAlreadyExistsException;
 import io.github.flashlearn.app.flashcard.exception.FlashCardNotFoundException;
@@ -8,6 +11,7 @@ import io.github.flashlearn.app.flashcard.exception.UnauthorizedAccessException;
 import io.github.flashlearn.app.user.exception.UserAlreadyExistsException;
 import io.github.flashlearn.app.user.exception.UserNotFoundException;
 import io.micrometer.tracing.Tracer;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +117,68 @@ public class GlobalExceptionHandler{
         ApiError body = new ApiError(HttpStatus.FORBIDDEN.value(), "UNAUTHORIZED_ACCESS", ex.getMessage(),
                                     Instant.now(), request.getRequestURI(), traceId);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+    }
+
+    // Verification token expired
+    @ExceptionHandler(TokenExpiredException.class)
+    public ResponseEntity<ApiError> tokenExpiredExceptionHandler(TokenExpiredException ex,
+                                                                 HttpServletRequest request) {
+        String traceId = tracer.currentSpan() != null
+                ? tracer.currentSpan().context().traceId()
+                : "N/A";
+
+        log.warn("Token expired: {}", ex.getMessage());
+
+        ApiError body = new ApiError(HttpStatus.BAD_REQUEST.value(), "TOKEN_EXPIRED", ex.getMessage(),
+                                    Instant.now(), request.getRequestURI(), traceId);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    // Verification token not found
+    @ExceptionHandler(TokenNotFoundException.class)
+    public ResponseEntity<ApiError> tokenNotFoundExceptionHandler(TokenNotFoundException ex,
+                                                                  HttpServletRequest request) {
+        String traceId = tracer.currentSpan() != null
+                ? tracer.currentSpan().context().traceId()
+                : "N/A";
+
+        log.warn("Token not found: {}", ex.getMessage());
+
+        ApiError body = new ApiError(HttpStatus.BAD_REQUEST.value(), "TOKEN_NOT_FOUND", ex.getMessage(),
+                Instant.now(), request.getRequestURI(), traceId);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    // Email sending error
+    @ExceptionHandler(EmailSendingException.class)
+    public ResponseEntity<ApiError> emailSendingExceptionHandler(EmailSendingException ex,
+                                                                 HttpServletRequest request) {
+        String traceId = tracer.currentSpan() != null
+                ? tracer.currentSpan().context().traceId()
+                : "N/A";
+
+        log.error("Failed to send email: {}", ex.getMessage(), ex);
+
+        String message = "Не удалось отправить email подтверждения. Пожалуйста, попробуйте еще раз или обратитесь в поддержку.";
+        ApiError body = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "EMAIL_SENDING_FAILED", message,
+                Instant.now(), request.getRequestURI(), traceId);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+    }
+
+    // MessagingException (jakarta.mail) - fallback handler
+    @ExceptionHandler(MessagingException.class)
+    public ResponseEntity<ApiError> messagingExceptionHandler(MessagingException ex,
+                                                             HttpServletRequest request) {
+        String traceId = tracer.currentSpan() != null
+                ? tracer.currentSpan().context().traceId()
+                : "N/A";
+
+        log.error("Failed to send email: {}", ex.getMessage(), ex);
+
+        String message = "Не удалось отправить email. Проверьте настройки почтового сервера.";
+        ApiError body = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "EMAIL_SENDING_FAILED", message,
+                Instant.now(), request.getRequestURI(), traceId);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 
     // Unexpected exception

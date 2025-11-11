@@ -6,10 +6,7 @@ import io.github.flashlearn.app.user.entity.User;
 import io.github.flashlearn.app.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("api/auth")
 @RestController
@@ -25,5 +22,11 @@ public class AuthController {
         User user = authService.findUserByUsername(loginRequest.username());
 
         return ResponseEntity.ok(new AuthResponse(token, user.getUsername(), user.getRole().name()));
+    }
+
+    @GetMapping("/verify")
+    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+        authService.verifyToken(token);
+        return ResponseEntity.ok("Email verified!");
     }
 }
