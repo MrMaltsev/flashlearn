@@ -2,6 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../utils/api';
 import { isLoggedIn, clearAuthData, getUsername } from '../utils/auth';
+import {
+  HomeIcon,
+  ProfileIcon,
+  SettingsIcon,
+  SearchIcon,
+  FAQIcon,
+  LogoutIcon,
+  LightningIcon
+} from '../components/Icons';
 import '../styles/ProfilePage.css';
 import '../styles/Dashboard.css';
 
@@ -57,77 +66,173 @@ function ProfilePage() {
 
   const goHome = () => navigate('/dashboard');
   const goToEdit = () => navigate(`/${username}/edit`);
+  const goSettings = () => navigate('/settings');
+  const goSearch = () => navigate('/search');
+  const currentUsername = getUsername();
+  const isOwnProfile = currentUsername === username;
 
   if (loading) {
     return (
-      <div className="dashboard-layout">
+      <div className="dashboard-container">
         <aside className="dashboard-sidebar">
-          <div className="sidebar-header">Меню</div>
-          <button className="sidebar-btn sidebar-btn-primary" onClick={goHome}>Главная страница</button>
-          <button className="sidebar-btn sidebar-btn-danger" onClick={handleLogout}>Выход</button>
-        </aside>
-        <main className="dashboard-content">
-          <div className="profile-container">
-            <p>Загрузка...</p>
+          <div className="sidebar-icon-group">
+            <button className="sidebar-icon-btn" onClick={goHome} title="Главная страница">
+              <HomeIcon />
+            </button>
+            <button className="sidebar-icon-btn active" onClick={() => {}} title="Профиль">
+              <ProfileIcon active={true} />
+            </button>
+            <button className="sidebar-icon-btn" onClick={goSettings} title="Настройки">
+              <SettingsIcon />
+            </button>
+            <button className="sidebar-icon-btn" onClick={goSearch} title="Поиск">
+              <SearchIcon />
+            </button>
           </div>
-        </main>
+          <div className="sidebar-icon-group-bottom">
+            <button className="sidebar-icon-btn" onClick={() => navigate('/faq')} title="FAQ">
+              <FAQIcon />
+            </button>
+            <button className="sidebar-icon-btn" onClick={handleLogout} title="Выход">
+              <LogoutIcon />
+            </button>
+          </div>
+        </aside>
+        <div className="dashboard-main">
+          <header className="dashboard-header">
+            <div className="header-left">
+              <LightningIcon />
+              <span className="header-logo">Flashlearn</span>
+            </div>
+            <div className="header-right">
+              <div className="user-avatar">
+                {currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U'}
+              </div>
+            </div>
+          </header>
+          <main className="dashboard-content">
+            <div className="stats-card">
+              <p>Загрузка...</p>
+            </div>
+          </main>
+        </div>
       </div>
     );
   }
 
   if (error || !profile) {
     return (
-      <div className="dashboard-layout">
+      <div className="dashboard-container">
         <aside className="dashboard-sidebar">
-          <div className="sidebar-header">Меню</div>
-          <button className="sidebar-btn sidebar-btn-primary" onClick={goHome}>Главная страница</button>
-          <button className="sidebar-btn sidebar-btn-danger" onClick={handleLogout}>Выход</button>
-        </aside>
-        <main className="dashboard-content">
-          <div className="profile-container">
-            <p className="profile-error">{error || 'Профиль не найден'}</p>
+          <div className="sidebar-icon-group">
+            <button className="sidebar-icon-btn" onClick={goHome} title="Главная страница">
+              <HomeIcon />
+            </button>
+            <button className="sidebar-icon-btn active" onClick={() => {}} title="Профиль">
+              <ProfileIcon active={true} />
+            </button>
+            <button className="sidebar-icon-btn" onClick={goSettings} title="Настройки">
+              <SettingsIcon />
+            </button>
+            <button className="sidebar-icon-btn" onClick={goSearch} title="Поиск">
+              <SearchIcon />
+            </button>
           </div>
-        </main>
+          <div className="sidebar-icon-group-bottom">
+            <button className="sidebar-icon-btn" onClick={() => navigate('/faq')} title="FAQ">
+              <FAQIcon />
+            </button>
+            <button className="sidebar-icon-btn" onClick={handleLogout} title="Выход">
+              <LogoutIcon />
+            </button>
+          </div>
+        </aside>
+        <div className="dashboard-main">
+          <header className="dashboard-header">
+            <div className="header-left">
+              <LightningIcon />
+              <span className="header-logo">Flashlearn</span>
+            </div>
+            <div className="header-right">
+              <div className="user-avatar">
+                {currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U'}
+              </div>
+            </div>
+          </header>
+          <main className="dashboard-content">
+            <div className="stats-card">
+              <p className="profile-error">{error || 'Профиль не найден'}</p>
+            </div>
+          </main>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="dashboard-layout">
+    <div className="dashboard-container">
       <aside className="dashboard-sidebar">
-        <div className="sidebar-header">Меню</div>
-        <button className="sidebar-btn sidebar-btn-primary" onClick={goHome}>Главная страница</button>
-        <button className="sidebar-btn" onClick={() => {
-          const currentUsername = getUsername();
-          if (currentUsername) {
-            navigate(`/${currentUsername}`);
-          }
-        }}>Профиль</button>
-        <button className="sidebar-btn sidebar-btn-danger" onClick={handleLogout}>Выход</button>
+        <div className="sidebar-icon-group">
+          <button className="sidebar-icon-btn" onClick={goHome} title="Главная страница">
+            <HomeIcon />
+          </button>
+          <button className="sidebar-icon-btn active" onClick={() => {}} title="Профиль">
+            <ProfileIcon active={true} />
+          </button>
+          <button className="sidebar-icon-btn" onClick={goSettings} title="Настройки">
+            <SettingsIcon />
+          </button>
+          <button className="sidebar-icon-btn" onClick={goSearch} title="Поиск">
+            <SearchIcon />
+          </button>
+        </div>
+        <div className="sidebar-icon-group-bottom">
+          <button className="sidebar-icon-btn" onClick={() => navigate('/faq')} title="FAQ">
+            <FAQIcon />
+          </button>
+          <button className="sidebar-icon-btn" onClick={handleLogout} title="Выход">
+            <LogoutIcon />
+          </button>
+        </div>
       </aside>
-      <main className="dashboard-content">
-        <div className="profile-container">
-          <div className="profile-card">
-            <div className="profile-avatar">
-              {/* Placeholder for avatar */}
-            </div>
-            <div className="profile-info">
-              <h2 className="profile-username">{profile.username}</h2>
-              <div className="profile-field">
-                <label className="profile-label">Уникальный ID:</label>
-                <span className="profile-value">{profile.uniqueId}</span>
-              </div>
-              <div className="profile-field">
-                <label className="profile-label">О себе:</label>
-                <p className="profile-about">{profile.aboutMe || 'Не указано'}</p>
-              </div>
-              <button className="profile-edit-btn" onClick={goToEdit}>
-                Редактировать
-              </button>
+      <div className="dashboard-main">
+        <header className="dashboard-header">
+          <div className="header-left">
+            <LightningIcon />
+            <span className="header-logo">Flashlearn</span>
+          </div>
+          <div className="header-right">
+            <div className="user-avatar">
+              {currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U'}
             </div>
           </div>
-        </div>
-      </main>
+        </header>
+        <main className="dashboard-content">
+          <div className="profile-container">
+            <div className="profile-card">
+              <div className="profile-avatar">
+                {profile.username ? profile.username.charAt(0).toUpperCase() : 'U'}
+              </div>
+              <div className="profile-info">
+                <h2 className="profile-username">{profile.username}</h2>
+                <div className="profile-field">
+                  <label className="profile-label">Уникальный ID:</label>
+                  <span className="profile-value">{profile.id || 'N/A'}</span>
+                </div>
+                <div className="profile-field">
+                  <label className="profile-label">О себе:</label>
+                  <p className="profile-about">{profile.aboutMe || 'Не указано'}</p>
+                </div>
+                {isOwnProfile && (
+                  <button className="profile-edit-btn" onClick={goToEdit}>
+                    Редактировать
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

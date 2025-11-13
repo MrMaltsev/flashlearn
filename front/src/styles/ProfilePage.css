@@ -7,8 +7,8 @@
 
 .profile-card {
   background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   padding: 40px;
   display: flex;
   flex-direction: column;
@@ -20,11 +20,14 @@
   width: 150px;
   height: 150px;
   border-radius: 50%;
-  background-color: #e6e9ee;
-  border: 3px solid #007bff;
+  background-color: #FF6B35;
+  color: #ffffff;
+  border: 3px solid #FF6B35;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 48px;
+  font-weight: 600;
   /* Placeholder for future avatar */
 }
 
@@ -84,8 +87,8 @@
 .profile-edit-btn {
   padding: 12px 24px;
   border: none;
-  border-radius: 6px;
-  background-color: #007bff;
+  border-radius: 8px;
+  background-color: #FF6B35;
   color: #ffffff;
   cursor: pointer;
   font-size: 1em;
@@ -95,7 +98,7 @@
 }
 
 .profile-edit-btn:hover {
-  background-color: #0056b3;
+  background-color: #e55a2b;
 }
 
 .profile-edit-btn:active {
@@ -154,7 +157,7 @@
 .profile-edit-input:focus,
 .profile-edit-textarea:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: #FF6B35;
 }
 
 .profile-edit-textarea {
@@ -170,12 +173,12 @@
 }
 
 .profile-edit-btn-primary {
-  background-color: #007bff;
+  background-color: #FF6B35;
   color: #ffffff;
 }
 
 .profile-edit-btn-primary:hover {
-  background-color: #0056b3;
+  background-color: #e55a2b;
 }
 
 .profile-edit-btn-primary:disabled {

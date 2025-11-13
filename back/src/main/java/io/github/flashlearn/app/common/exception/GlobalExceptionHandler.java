@@ -8,6 +8,7 @@ import io.github.flashlearn.app.common.dto.ApiError;
 import io.github.flashlearn.app.flashcard.exception.FlashCardAlreadyExistsException;
 import io.github.flashlearn.app.flashcard.exception.FlashCardNotFoundException;
 import io.github.flashlearn.app.flashcard.exception.UnauthorizedAccessException;
+import io.github.flashlearn.app.settings.exception.UserSettingsNotFoundException;
 import io.github.flashlearn.app.user.exception.UserAlreadyExistsException;
 import io.github.flashlearn.app.user.exception.UserNotFoundException;
 import io.micrometer.tracing.Tracer;
@@ -179,6 +180,21 @@ public class GlobalExceptionHandler{
         ApiError body = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "EMAIL_SENDING_FAILED", message,
                 Instant.now(), request.getRequestURI(), traceId);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+    }
+
+    //User settings not found
+    @ExceptionHandler(UserSettingsNotFoundException.class)
+    public ResponseEntity<ApiError> UserSettingsNotFoundExceptionHandler(UserSettingsNotFoundException ex,
+                                                                         HttpServletRequest request) {
+        String traceId = tracer.currentSpan() != null
+                ? tracer.currentSpan().context().traceId()
+                : "N/A";
+
+        log.error("Can not find user settings: {}", ex.getMessage(), ex);
+
+        ApiError body = new ApiError(HttpStatus.NOT_FOUND.value(), "USER_SETTINGS_NOT_FOUND", ex.getMessage(),
+                Instant.now(), request.getRequestURI(), traceId);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
     // Unexpected exception

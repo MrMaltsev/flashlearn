@@ -2,6 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../utils/api';
 import { isLoggedIn, getUsername, clearAuthData } from '../utils/auth';
+import {
+  HomeIcon,
+  ProfileIcon,
+  SettingsIcon,
+  SearchIcon,
+  FAQIcon,
+  LogoutIcon,
+  LightningIcon
+} from '../components/Icons';
 import '../styles/ProfilePage.css';
 import '../styles/Dashboard.css';
 
@@ -115,74 +124,141 @@ function EditProfilePage() {
   };
 
   const goHome = () => navigate('/dashboard');
+  const goProfile = () => {
+    const currentUsername = getUsername();
+    if (currentUsername) {
+      navigate(`/${currentUsername}`);
+    }
+  };
+  const goSettings = () => navigate('/settings');
+  const goSearch = () => navigate('/search');
+  const currentUsername = getUsername();
 
   if (loading) {
     return (
-      <div className="dashboard-layout">
+      <div className="dashboard-container">
         <aside className="dashboard-sidebar">
-          <div className="sidebar-header">Меню</div>
-          <button className="sidebar-btn sidebar-btn-primary" onClick={goHome}>Главная страница</button>
-          <button className="sidebar-btn sidebar-btn-danger" onClick={handleLogout}>Выход</button>
-        </aside>
-        <main className="dashboard-content">
-          <div className="profile-container">
-            <p>Загрузка...</p>
+          <div className="sidebar-icon-group">
+            <button className="sidebar-icon-btn" onClick={goHome} title="Главная страница">
+              <HomeIcon />
+            </button>
+            <button className="sidebar-icon-btn active" onClick={goProfile} title="Профиль">
+              <ProfileIcon active={true} />
+            </button>
+            <button className="sidebar-icon-btn" onClick={goSettings} title="Настройки">
+              <SettingsIcon />
+            </button>
+            <button className="sidebar-icon-btn" onClick={goSearch} title="Поиск">
+              <SearchIcon />
+            </button>
           </div>
-        </main>
+          <div className="sidebar-icon-group-bottom">
+            <button className="sidebar-icon-btn" onClick={() => navigate('/faq')} title="FAQ">
+              <FAQIcon />
+            </button>
+            <button className="sidebar-icon-btn" onClick={handleLogout} title="Выход">
+              <LogoutIcon />
+            </button>
+          </div>
+        </aside>
+        <div className="dashboard-main">
+          <header className="dashboard-header">
+            <div className="header-left">
+              <LightningIcon />
+              <span className="header-logo">Flashlearn</span>
+            </div>
+            <div className="header-right">
+              <div className="user-avatar">
+                {currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U'}
+              </div>
+            </div>
+          </header>
+          <main className="dashboard-content">
+            <div className="stats-card">
+              <p>Загрузка...</p>
+            </div>
+          </main>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="dashboard-layout">
+    <div className="dashboard-container">
       <aside className="dashboard-sidebar">
-        <div className="sidebar-header">Меню</div>
-        <button className="sidebar-btn sidebar-btn-primary" onClick={goHome}>Главная страница</button>
-        <button className="sidebar-btn" onClick={() => {
-          const currentUsername = getUsername();
-          if (currentUsername) {
-            navigate(`/${currentUsername}`);
-          }
-        }}>Профиль</button>
-        <button className="sidebar-btn sidebar-btn-danger" onClick={handleLogout}>Выход</button>
-      </aside>
-      <main className="dashboard-content">
-        <div className="profile-container">
-          <div className="profile-card">
-            <h2 className="profile-edit-title">Редактирование профиля</h2>
-            {error && <p className="profile-error">{error}</p>}
-            <form onSubmit={handleSubmit} className="profile-edit-form">
-              <div className="profile-edit-field">
-                <label className="profile-edit-label">Имя пользователя:</label>
-                <input
-                  type="text"
-                  value={formData.username}
-                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  className="profile-edit-input"
-                  required
-                />
-              </div>
-              <div className="profile-edit-field">
-                <label className="profile-edit-label">О себе:</label>
-                <textarea
-                  value={formData.aboutMe}
-                  onChange={(e) => setFormData({ ...formData, aboutMe: e.target.value })}
-                  className="profile-edit-textarea"
-                  rows="5"
-                />
-              </div>
-              <div className="profile-edit-buttons">
-                <button type="submit" className="profile-edit-btn profile-edit-btn-primary" disabled={saving}>
-                  {saving ? 'Сохранение...' : 'Сохранить'}
-                </button>
-                <button type="button" className="profile-edit-btn profile-edit-btn-secondary" onClick={handleCancel}>
-                  Отмена
-                </button>
-              </div>
-            </form>
-          </div>
+        <div className="sidebar-icon-group">
+          <button className="sidebar-icon-btn" onClick={goHome} title="Главная страница">
+            <HomeIcon />
+          </button>
+          <button className="sidebar-icon-btn active" onClick={goProfile} title="Профиль">
+            <ProfileIcon active={true} />
+          </button>
+          <button className="sidebar-icon-btn" onClick={goSettings} title="Настройки">
+            <SettingsIcon />
+          </button>
+          <button className="sidebar-icon-btn" onClick={goSearch} title="Поиск">
+            <SearchIcon />
+          </button>
         </div>
-      </main>
+        <div className="sidebar-icon-group-bottom">
+          <button className="sidebar-icon-btn" onClick={() => navigate('/faq')} title="FAQ">
+            <FAQIcon />
+          </button>
+          <button className="sidebar-icon-btn" onClick={handleLogout} title="Выход">
+            <LogoutIcon />
+          </button>
+        </div>
+      </aside>
+      <div className="dashboard-main">
+        <header className="dashboard-header">
+          <div className="header-left">
+            <LightningIcon />
+            <span className="header-logo">Flashlearn</span>
+          </div>
+          <div className="header-right">
+            <div className="user-avatar">
+              {currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U'}
+            </div>
+          </div>
+        </header>
+        <main className="dashboard-content">
+          <div className="profile-container">
+            <div className="profile-card">
+              <h2 className="profile-edit-title">Редактирование профиля</h2>
+              {error && <p className="profile-error">{error}</p>}
+              <form onSubmit={handleSubmit} className="profile-edit-form">
+                <div className="profile-edit-field">
+                  <label className="profile-edit-label">Имя пользователя:</label>
+                  <input
+                    type="text"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    className="profile-edit-input"
+                    required
+                  />
+                </div>
+                <div className="profile-edit-field">
+                  <label className="profile-edit-label">О себе:</label>
+                  <textarea
+                    value={formData.aboutMe}
+                    onChange={(e) => setFormData({ ...formData, aboutMe: e.target.value })}
+                    className="profile-edit-textarea"
+                    rows="5"
+                  />
+                </div>
+                <div className="profile-edit-buttons">
+                  <button type="submit" className="profile-edit-btn profile-edit-btn-primary" disabled={saving}>
+                    {saving ? 'Сохранение...' : 'Сохранить'}
+                  </button>
+                  <button type="button" className="profile-edit-btn profile-edit-btn-secondary" onClick={handleCancel}>
+                    Отмена
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
