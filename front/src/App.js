@@ -16,10 +16,10 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/search" element={<SearchPage />} />
-        <Route path="/faq" element={<FAQPage />} />
+        <Route path="/:username/dashboard" element={<Dashboard />} />
+        <Route path="/:username/settings" element={<SettingsPage />} />
+        <Route path="/:username/search" element={<SearchPage />} />
+        <Route path="/:username/faq" element={<FAQPage />} />
         <Route path="/:username" element={<ProfilePage />} />
         <Route path="/:username/edit" element={<EditProfilePage />} />
       </Routes>

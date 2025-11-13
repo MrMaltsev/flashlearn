@@ -17,6 +17,7 @@ import api from '../utils/api';
 function SettingsPage() {
   const navigate = useNavigate();
   const username = getUsername();
+  const base = username ? `/${username}` : '';
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
   const [settings, setSettings] = useState({
@@ -39,10 +40,7 @@ function SettingsPage() {
       if (!username) return;
       try {
         setLoading(true);
-        const profileResp = await api.get(`/users/${username}`);
-        const id = profileResp.data.id;
-        setUserId(id);
-        const resp = await api.get(`/settings/${id}`);
+        const resp = await api.get(`/settings/${username}`);
         if (resp && resp.data) {
           // Expecting an object with language, showHints, autoPlay, darkMode
           setSettings((prev) => ({ ...prev, ...resp.data }));
@@ -62,13 +60,13 @@ function SettingsPage() {
     navigate('/login');
   };
 
-  const goHome = () => navigate('/dashboard');
+  const goHome = () => navigate(`${base}/dashboard`);
   const goProfile = () => {
     if (username) {
-      navigate(`/${username}`);
+      navigate(`${base}`);
     }
   };
-  const goSearch = () => navigate('/search');
+  const goSearch = () => navigate(`${base}/search`);
 
   const handleToggle = (key) => {
     setSettings((s) => ({ ...s, [key]: !s[key] }));
@@ -85,13 +83,8 @@ function SettingsPage() {
 
   const handleSave = async () => {
     try {
-      if (!userId) {
-        // try to fetch id first
-        const profileResp = await api.get(`/users/${username}`);
-        setUserId(profileResp.data.id);
-      }
-      // Save settings to backend (POST/PUT)
-      await api.post(`/settings/${userId}`, settings);
+      // Save settings to backend (POST/PUT) - use username from URL
+      await api.post(`/settings/${username}`, settings);
       showNotification('success', 'Настройки сохранены');
     } catch (err) {
       console.error('Failed to save settings', err);
@@ -135,7 +128,7 @@ function SettingsPage() {
         <div className="sidebar-icon-group-bottom">
           <button 
             className="sidebar-icon-btn" 
-            onClick={() => navigate('/faq')}
+            onClick={() => navigate(`${base}/faq`)}
             title="FAQ"
           >
             <FAQIcon />

@@ -12,8 +12,8 @@ public class SettingsService {
 
     private final UserSettingsRepository userSettingsRepository;
 
-    public UserSettings getUserSettings(Long userId) {
-        return userSettingsRepository.findByUserId(userId)
-                .orElseThrow(() -> new UserSettingsNotFoundException("user with id not found: " + userId));
+    public UserSettings getUserSettings(String username) {
+        return userSettingsRepository.findByUser_Username(username)
+                .orElseThrow(() -> new UserSettingsNotFoundException("user with username not found: " + username));
     }   
 }

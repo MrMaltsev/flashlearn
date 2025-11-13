@@ -123,16 +123,16 @@ function EditProfilePage() {
     navigate('/login');
   };
 
-  const goHome = () => navigate('/dashboard');
+  const currentUsername = getUsername();
+  const base = currentUsername ? `/${currentUsername}` : '';
+  const goHome = () => navigate(`${base}/dashboard`);
   const goProfile = () => {
-    const currentUsername = getUsername();
     if (currentUsername) {
-      navigate(`/${currentUsername}`);
+      navigate(`${base}`);
     }
   };
-  const goSettings = () => navigate('/settings');
-  const goSearch = () => navigate('/search');
-  const currentUsername = getUsername();
+  const goSettings = () => navigate(`${base}/settings`);
+  const goSearch = () => navigate(`${base}/search`);
 
   if (loading) {
     return (
@@ -153,7 +153,7 @@ function EditProfilePage() {
             </button>
           </div>
           <div className="sidebar-icon-group-bottom">
-            <button className="sidebar-icon-btn" onClick={() => navigate('/faq')} title="FAQ">
+              <button className="sidebar-icon-btn" onClick={() => navigate(`${base}/faq`)} title="FAQ">
               <FAQIcon />
             </button>
             <button className="sidebar-icon-btn" onClick={handleLogout} title="Выход">
@@ -201,7 +201,7 @@ function EditProfilePage() {
           </button>
         </div>
         <div className="sidebar-icon-group-bottom">
-          <button className="sidebar-icon-btn" onClick={() => navigate('/faq')} title="FAQ">
+            <button className="sidebar-icon-btn" onClick={() => navigate(`${base}/faq`)} title="FAQ">
             <FAQIcon />
           </button>
           <button className="sidebar-icon-btn" onClick={handleLogout} title="Выход">

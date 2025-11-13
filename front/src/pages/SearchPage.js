@@ -15,6 +15,7 @@ import '../styles/Dashboard.css';
 function SearchPage() {
   const navigate = useNavigate();
   const username = getUsername();
+  const base = username ? `/${username}` : '';
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -27,13 +28,13 @@ function SearchPage() {
     navigate('/login');
   };
 
-  const goHome = () => navigate('/dashboard');
+  const goHome = () => navigate(`${base}/dashboard`);
   const goProfile = () => {
     if (username) {
-      navigate(`/${username}`);
+      navigate(`${base}`);
     }
   };
-  const goSettings = () => navigate('/settings');
+  const goSettings = () => navigate(`${base}/settings`);
 
   return (
     <div className="dashboard-container">
@@ -71,7 +72,7 @@ function SearchPage() {
         <div className="sidebar-icon-group-bottom">
           <button 
             className="sidebar-icon-btn" 
-            onClick={() => navigate('/faq')}
+            onClick={() => navigate(`${base}/faq`)}
             title="FAQ"
           >
             <FAQIcon />

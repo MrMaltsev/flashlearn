@@ -22,8 +22,10 @@ function LoginPage() {
       });
       
       // Сохраняем данные аутентификации
-      saveAuthData(response.data.token, response.data.username || username);
-      navigate('/dashboard');
+      const savedUsername = response.data.username || username;
+      saveAuthData(response.data.token, savedUsername);
+      // Навигация на приватную страницу с префиксом username
+      navigate(`/${savedUsername}/dashboard`);
     } catch (err) {
       // Обрабатываем ошибки логина
       if (err.response) {

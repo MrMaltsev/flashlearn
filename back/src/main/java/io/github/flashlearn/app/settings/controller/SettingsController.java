@@ -18,9 +18,9 @@ public class SettingsController {
     private final SettingsService settingsService;
     private final UserSettingsMapper userSettingsMapper;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserSettingsResponse> getSettings(@PathVariable Long userId) {
-        UserSettingsResponse userSettings = userSettingsMapper.toUserSettingsResponse(settingsService.getUserSettings(userId));
+    @GetMapping("/{username}")
+    public ResponseEntity<UserSettingsResponse> getSettings(@PathVariable String username) {
+        UserSettingsResponse userSettings = userSettingsMapper.toUserSettingsResponse(settingsService.getUserSettings(username));
         return ResponseEntity.ok(userSettings);
     }
 

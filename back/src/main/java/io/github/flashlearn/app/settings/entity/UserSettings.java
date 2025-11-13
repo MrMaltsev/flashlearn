@@ -18,7 +18,13 @@ public class UserSettings {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    private Theme theme = Theme.LIGHT;
-    private Language language = Language.EN;
-    private boolean notificationsEnabled = false;
+    private Theme theme;
+    private Language language;
+    private boolean notificationsEnabled;
+
+    public UserSettings() {
+        this.theme = Theme.LIGHT;
+        this.language = Language.EN;
+        this.notificationsEnabled = false;
+    }
 }

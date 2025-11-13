@@ -73,18 +73,21 @@ function Dashboard() {
     navigate('/login');
   };
 
+  const currentUsername = getUsername();
+  const base = currentUsername ? `/${currentUsername}` : '';
+
   const goProfile = () => {
-    if (username) {
-      navigate(`/${username}`);
+    if (currentUsername) {
+      navigate(`${base}`);
     }
   };
 
   const goSettings = () => {
-    navigate('/settings');
+    navigate(`${base}/settings`);
   };
 
   const goSearch = () => {
-    navigate('/search');
+    navigate(`${base}/search`);
   };
 
   const handleNewSet = () => {
@@ -152,7 +155,7 @@ function Dashboard() {
         <div className="sidebar-icon-group-bottom">
           <button 
             className="sidebar-icon-btn" 
-            onClick={() => navigate('/faq')}
+            onClick={() => navigate(`${base}/faq`)}
             title="FAQ"
           >
             <FAQIcon />

@@ -64,11 +64,12 @@ function ProfilePage() {
     navigate('/login');
   };
 
-  const goHome = () => navigate('/dashboard');
-  const goToEdit = () => navigate(`/${username}/edit`);
-  const goSettings = () => navigate('/settings');
-  const goSearch = () => navigate('/search');
   const currentUsername = getUsername();
+  const base = currentUsername ? `/${currentUsername}` : '';
+  const goHome = () => navigate(`${base}/dashboard`);
+  const goToEdit = () => navigate(`/${username}/edit`);
+  const goSettings = () => navigate(`${base}/settings`);
+  const goSearch = () => navigate(`${base}/search`);
   const isOwnProfile = currentUsername === username;
 
   if (loading) {
@@ -90,7 +91,7 @@ function ProfilePage() {
             </button>
           </div>
           <div className="sidebar-icon-group-bottom">
-            <button className="sidebar-icon-btn" onClick={() => navigate('/faq')} title="FAQ">
+              <button className="sidebar-icon-btn" onClick={() => navigate(`${base}/faq`)} title="FAQ">
               <FAQIcon />
             </button>
             <button className="sidebar-icon-btn" onClick={handleLogout} title="Выход">
@@ -139,7 +140,7 @@ function ProfilePage() {
             </button>
           </div>
           <div className="sidebar-icon-group-bottom">
-            <button className="sidebar-icon-btn" onClick={() => navigate('/faq')} title="FAQ">
+              <button className="sidebar-icon-btn" onClick={() => navigate(`${base}/faq`)} title="FAQ">
               <FAQIcon />
             </button>
             <button className="sidebar-icon-btn" onClick={handleLogout} title="Выход">
@@ -187,7 +188,7 @@ function ProfilePage() {
           </button>
         </div>
         <div className="sidebar-icon-group-bottom">
-          <button className="sidebar-icon-btn" onClick={() => navigate('/faq')} title="FAQ">
+            <button className="sidebar-icon-btn" onClick={() => navigate(`${base}/faq`)} title="FAQ">
             <FAQIcon />
           </button>
           <button className="sidebar-icon-btn" onClick={handleLogout} title="Выход">
