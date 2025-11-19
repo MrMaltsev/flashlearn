@@ -50,9 +50,12 @@ export function Navigation({ activeSection }: NavigationProps) {
             ))}
           </div>
 
-          {/* Login Button */}
-          <Button className="bg-orange-500 hover:bg-orange-600">
-            Login
+          <Button
+            asChild
+            className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-5 py-2.5 shadow-sm hover:shadow-md transition-shadow">
+            <a href="/login" aria-label="Go to login page">
+              Login
+            </a>
           </Button>
         </div>
       </div>

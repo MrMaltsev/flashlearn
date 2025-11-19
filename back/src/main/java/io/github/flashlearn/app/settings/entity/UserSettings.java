@@ -18,13 +18,22 @@ public class UserSettings {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    private Theme theme;
     private Language language;
+    private boolean theme;
+    private boolean autoPlay;
     private boolean notificationsEnabled;
 
     public UserSettings() {
-        this.theme = Theme.LIGHT;
         this.language = Language.EN;
-        this.notificationsEnabled = false;
+        this.theme = false;
+        this.notificationsEnabled = true;
+        this.autoPlay = false;
+    }
+
+    public UserSettings(String language, boolean theme, boolean notificationsEnabled, boolean autoPlay) {
+        this.language = Language.valueOf(language.toUpperCase());
+        this.theme = theme;
+        this.notificationsEnabled = notificationsEnabled;
+        this.autoPlay = autoPlay;
     }
 }

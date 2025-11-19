@@ -42,8 +42,14 @@ function SettingsPage() {
         setLoading(true);
         const resp = await api.get(`/settings/${username}`);
         if (resp && resp.data) {
-          // Expecting an object with language, showHints, autoPlay, darkMode
-          setSettings((prev) => ({ ...prev, ...resp.data }));
+          // Ensuring boolean values are correctly typed
+          const normalizedSettings = {
+            language: resp.data.language || 'en',
+            showHints: resp.data.showHints === true || resp.data.showHints === 'true',
+            autoPlay: resp.data.autoPlay === true || resp.data.autoPlay === 'true',
+            darkMode: resp.data.darkMode === true || resp.data.darkMode === 'true'
+          };
+          setSettings(normalizedSettings);
         }
       } catch (err) {
         console.error('Failed to load settings, using defaults', err);
@@ -83,8 +89,8 @@ function SettingsPage() {
 
   const handleSave = async () => {
     try {
-      // Save settings to backend (POST/PUT) - use username from URL
-      await api.post(`/settings/${username}`, settings);
+      // Save settings to backend using PUT method
+      await api.put(`/settings/${username}/save`, settings);
       showNotification('success', 'Настройки сохранены');
     } catch (err) {
       console.error('Failed to save settings', err);
