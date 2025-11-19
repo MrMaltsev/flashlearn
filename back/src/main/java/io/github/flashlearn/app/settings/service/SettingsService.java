@@ -3,7 +3,6 @@ package io.github.flashlearn.app.settings.service;
 import io.github.flashlearn.app.settings.entity.UserSettings;
 import io.github.flashlearn.app.settings.exception.UserSettingsNotFoundException;
 import io.github.flashlearn.app.settings.repository.UserSettingsRepository;
-import io.github.flashlearn.app.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +22,8 @@ public class SettingsService {
                 .orElseThrow(() -> new UserSettingsNotFoundException("user settings not found: " + username));
 
         userSettings.setLanguage(newUserSettings.getLanguage());
-        userSettings.setTheme(newUserSettings.isTheme());
-        userSettings.setNotificationsEnabled(newUserSettings.isNotificationsEnabled());
+        userSettings.setDarkMode(newUserSettings.isDarkMode());
+        userSettings.setShowHints(newUserSettings.isShowHints());
         userSettings.setAutoPlay(newUserSettings.isAutoPlay());
 
         return userSettingsRepository.save(userSettings);

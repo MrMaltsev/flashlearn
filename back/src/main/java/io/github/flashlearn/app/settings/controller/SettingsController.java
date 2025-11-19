@@ -29,9 +29,7 @@ public class SettingsController {
                                                                @RequestBody UserSettingsUpdateRequest request) {
         UserSettingsResponse response =
                 userSettingsMapper.toUserSettingsResponse(
-                        settingsService.updateUserSettings(username,
-                                new UserSettings(request.language(), request.theme(),
-                                        request.notificationsEnabled(), request.autoPlay())));
+                        settingsService.updateUserSettings(username, userSettingsMapper.toUserSettings(request)));
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }

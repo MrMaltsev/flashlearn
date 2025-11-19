@@ -19,21 +19,21 @@ public class UserSettings {
     private User user;
 
     private Language language;
-    private boolean theme;
+    private boolean darkMode;
     private boolean autoPlay;
-    private boolean notificationsEnabled;
+    private boolean showHints;
 
     public UserSettings() {
         this.language = Language.EN;
-        this.theme = false;
-        this.notificationsEnabled = true;
+        this.darkMode = false;
+        this.showHints = true;
         this.autoPlay = false;
     }
 
     public UserSettings(String language, boolean theme, boolean notificationsEnabled, boolean autoPlay) {
         this.language = Language.valueOf(language.toUpperCase());
-        this.theme = theme;
-        this.notificationsEnabled = notificationsEnabled;
+        this.darkMode = theme;
+        this.showHints = notificationsEnabled;
         this.autoPlay = autoPlay;
     }
 }
