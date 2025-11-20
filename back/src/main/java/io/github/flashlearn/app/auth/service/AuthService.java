@@ -38,8 +38,39 @@ public class AuthService {
         );
 
         User user = (User) authentication.getPrincipal();
+        
+        // Обновляем серию заходов
+        updateStreak(user);
 
         return tokenProvider.generateToken(user.getUsername());
+    }
+    
+    /**
+     * Обновляет серию заходов пользователя
+     * @param user пользователь, для которого обновляется серия
+     */
+    private void updateStreak(User user) {
+        LocalDate today = LocalDate.now();
+        LocalDate lastLogin = user.getLastLoginDate();
+        
+        if (lastLogin == null) {
+            // Первый вход пользователя
+            user.setLastLoginDate(today);
+            user.setStreakCount(1);
+        } else if (lastLogin.equals(today)) {
+            // Пользователь уже заходил сегодня - не обновляем
+            return;
+        } else if (lastLogin.plusDays(1).equals(today)) {
+            // Пользователь заходил вчера - увеличиваем серию
+            user.setStreakCount(user.getStreakCount() + 1);
+            user.setLastLoginDate(today);
+        } else if (lastLogin.isBefore(today)) {
+            // Пользователь заходил раньше - сбрасываем серию
+            user.setStreakCount(1);
+            user.setLastLoginDate(today);
+        }
+        
+        userRepository.save(user);
     }
 
     public void verifyToken(String token) {

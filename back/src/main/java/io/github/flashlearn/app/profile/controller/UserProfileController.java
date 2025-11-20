@@ -43,4 +43,17 @@ public class UserProfileController {
         return ResponseEntity.status(HttpStatus.OK).body(userProfileResponse);
     }
 
+    /**
+     * Обновление ежедневной цели пользователя
+     */
+    @PutMapping("/{username}/daily-goal")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserProfileResponse> updateDailyGoal(@PathVariable String username,
+                                                              @RequestBody DailyGoalRequest request) {
+        UserProfileResponse userProfileResponse =
+                mapper.toUserProfileResponse(userProfileService.updateDailyGoal(username, request.dailyGoal()));
+
+        return ResponseEntity.status(HttpStatus.OK).body(userProfileResponse);
+    }
+
 }

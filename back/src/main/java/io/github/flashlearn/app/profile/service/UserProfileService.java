@@ -56,4 +56,18 @@ public class UserProfileService {
         return userRepository.save(user);
     }
 
+    /**
+     * Обновляет ежедневную цель пользователя
+     * @param username имя пользователя
+     * @param dailyGoal новое значение ежедневной цели
+     * @return обновленный пользователь
+     */
+    public User updateDailyGoal(String username, int dailyGoal) {
+        User user = userRepository.findByUsername(username).
+                orElseThrow(() -> new UserNotFoundException("user not found: " + username));
+        
+        user.setDailyGoal(dailyGoal);
+        return userRepository.save(user);
+    }
+
 }

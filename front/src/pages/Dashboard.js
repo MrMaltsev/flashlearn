@@ -33,12 +33,14 @@ function Dashboard() {
   const [flashCards, setFlashCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
-    todayReviewed: 34,
-    dailyGoal: 50,
-    timeSpent: 22,
-    accuracy: 86,
-    streak: 12
+    todayReviewed: 0,
+    dailyGoal: 0,
+    timeSpent: 0,
+    accuracy: 0,
+    streak: 0
   });
+  const [showGoalModal, setShowGoalModal] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState(10);
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -46,18 +48,24 @@ function Dashboard() {
       return;
     }
 
-    // Загружаем данные о флешкартах
-    const fetchFlashCards = async () => {
+    // Загружаем данные о профиле пользователя для получения статистики
+    const fetchProfileData = async () => {
       try {
-        // Получаем userId из профиля пользователя
         const profileResponse = await api.get(`/users/${username}`);
-        const userId = profileResponse.data.id;
+        const userData = profileResponse.data;
+        
+        // Обновляем статистику из профиля пользователя
+        setStats(prevStats => ({
+          ...prevStats,
+          dailyGoal: userData.dailyGoal,
+          streak: userData.streakCount
+        }));
         
         // Получаем все флешкарты пользователя
-        const cardsResponse = await api.get(`/flashcards/getAll/${userId}`);
+        const cardsResponse = await api.get(`/flashcards/getAll/${userData.uniqueId}`);
         setFlashCards(cardsResponse.data || []);
       } catch (err) {
-        console.error('Ошибка загрузки флешкарт:', err);
+        console.error('Ошибка загрузки данных:', err);
         // Используем mock данные при ошибке
         setFlashCards([]);
       } finally {
@@ -65,12 +73,30 @@ function Dashboard() {
       }
     };
 
-    fetchFlashCards();
+    fetchProfileData();
   }, [username, navigate]);
 
   const handleLogout = () => {
     clearAuthData();
     navigate('/login');
+  }
+
+  const updateDailyGoal = async () => {
+    try {
+      const response = await api.put(`/users/${username}/daily-goal`, {
+        dailyGoal: selectedGoal
+      });
+      
+      // Обновляем статистику с новой целью
+      setStats(prevStats => ({
+        ...prevStats,
+        dailyGoal: response.data.dailyGoal
+      }));
+      
+      setShowGoalModal(false);
+    } catch (error) {
+      console.error('Ошибка при обновлении ежедневной цели:', error);
+    }
   };
 
   const currentUsername = getUsername();
@@ -194,7 +220,15 @@ function Dashboard() {
           <div className="stats-row">
             {/* Today's goal карточка */}
             <div className="stats-card goal-card">
-              <h3 className="stats-card-title">Today's goal</h3>
+              <div className="goal-card-header">
+                <h3 className="stats-card-title">Today's goal</h3>
+                <button 
+                  className="set-goal-btn" 
+                  onClick={() => setShowGoalModal(true)}
+                >
+                  Set daily goal
+                </button>
+              </div>
               <div className="goal-progress">
                 <span className="goal-progress-text">
                   {stats.todayReviewed}/{stats.dailyGoal} cards reviewed
@@ -263,6 +297,42 @@ function Dashboard() {
         </main>
       </div>
     </div>
+
+    {/* Модальное окно для установки ежедневной цели */}
+    {showGoalModal && (
+      <div className="modal-overlay" onClick={() => setShowGoalModal(false)}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h3>Set Daily Goal</h3>
+            <button className="modal-close" onClick={() => setShowGoalModal(false)}>
+              &times;
+            </button>
+          </div>
+          <div className="modal-body">
+            <p>How many cards would you like to review today?</p>
+            <div className="goal-options">
+              {[5, 10, 15, 20, 25, 30, 50, 100].map((goal) => (
+                <button
+                  key={goal}
+                  className={`goal-option ${selectedGoal === goal ? 'selected' : ''}`}
+                  onClick={() => setSelectedGoal(goal)}
+                >
+                  {goal} cards
+                </button>
+              ))}
+            </div>
+            <div className="modal-actions">
+              <button className="btn-secondary" onClick={() => setShowGoalModal(false)}>
+                Cancel
+              </button>
+              <button className="btn-primary" onClick={updateDailyGoal}>
+                Set Goal
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
   );
 }
 

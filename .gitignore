@@ -3,9 +3,19 @@
 *.class
 *.o
 *.obj
+*.exe
+*.dll
+*.so
+*.a
 *.out
 
 # Dependencies
+node_modules/
+venv/
+.venv/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
 target/
 .gradle/
 
@@ -23,21 +33,16 @@ target/
 .vscode/
 .idea/
 
-# Python specific (if applicable)
-__pycache__/
-*.pyc
-*.pyo
-.Python
-*.so
-*.egg-info/
-dist/
-build/
-.venv/
-venv/
-.mypy_cache/
-.pytest_cache/
+# System files
+.DS_Store
+Thumbs.db
 
-# Archives
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Compressed files
 *.zip
 *.gz
 *.tar
