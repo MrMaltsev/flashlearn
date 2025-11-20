@@ -12,5 +12,7 @@ public interface UserMapper {
     UserRegistrationResponse toUserResponse(User user);
     
     @Mapping(target = "uniqueId", source = "id")
+    @Mapping(target = "streakCount", source = "streakCount")
+    @Mapping(target = "dailyGoal", source = "dailyGoal")
     UserProfileResponse toUserProfileResponse(User user);
 }

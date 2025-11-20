@@ -21,10 +21,14 @@ public class UserSettings {
     private Theme theme;
     private Language language;
     private boolean notificationsEnabled;
+    private boolean showHints;
+    private boolean autoPlay;
 
     public UserSettings() {
         this.theme = Theme.LIGHT;
         this.language = Language.EN;
         this.notificationsEnabled = false;
+        this.showHints = true;
+        this.autoPlay = false;
     }
 }

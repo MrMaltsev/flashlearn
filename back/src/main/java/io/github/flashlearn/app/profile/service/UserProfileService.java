@@ -2,12 +2,15 @@ package io.github.flashlearn.app.profile.service;
 
 import io.github.flashlearn.app.auth.security.SecurityUtils;
 import io.github.flashlearn.app.flashcard.exception.UnauthorizedAccessException;
+import io.github.flashlearn.app.profile.dto.DailyGoalRequest;
 import io.github.flashlearn.app.profile.dto.UpdateUserProfileRequest;
 import io.github.flashlearn.app.user.entity.User;
 import io.github.flashlearn.app.user.exception.UserNotFoundException;
 import io.github.flashlearn.app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor

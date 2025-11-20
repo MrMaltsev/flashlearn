@@ -50,6 +50,10 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FlashCard> flashCards = new ArrayList<>();
 
+    private int streakCount = 0;
+    private int dailyGoal = 0;
+    private java.time.LocalDate lastLoginDate;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

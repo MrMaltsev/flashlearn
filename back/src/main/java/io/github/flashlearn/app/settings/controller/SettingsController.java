@@ -1,14 +1,12 @@
 package io.github.flashlearn.app.settings.controller;
 
 import io.github.flashlearn.app.settings.dto.UserSettingsResponse;
+import io.github.flashlearn.app.settings.dto.UserSettingsUpdateRequest;
 import io.github.flashlearn.app.settings.mapper.UserSettingsMapper;
 import io.github.flashlearn.app.settings.service.SettingsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/settings")
@@ -22,6 +20,13 @@ public class SettingsController {
     public ResponseEntity<UserSettingsResponse> getSettings(@PathVariable String username) {
         UserSettingsResponse userSettings = userSettingsMapper.toUserSettingsResponse(settingsService.getUserSettings(username));
         return ResponseEntity.ok(userSettings);
+    }
+
+    @PostMapping("/{username}")
+    public ResponseEntity<UserSettingsResponse> updateSettings(@PathVariable String username, @RequestBody UserSettingsUpdateRequest request) {
+        var updatedSettings = settingsService.updateUserSettings(username, request);
+        var response = userSettingsMapper.toUserSettingsResponse(updatedSettings);
+        return ResponseEntity.ok(response);
     }
 
 }

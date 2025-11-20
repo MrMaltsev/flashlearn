@@ -4,4 +4,6 @@ public record UserProfileResponse (
         Long uniqueId,
         String username,
         // Avatar avatar,
-        String aboutMe) {}
+        String aboutMe,
+        int streakCount,
+        int dailyGoal) {}

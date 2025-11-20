@@ -1,9 +1,7 @@
 package io.github.flashlearn.app.settings.dto;
 
-public record UserSettingsResponse(
+public record UserSettingsUpdateRequest(
     String language,
-    String theme,
-    boolean notificationsEnabled,
     boolean showHints,
     boolean autoPlay,
     boolean darkMode
