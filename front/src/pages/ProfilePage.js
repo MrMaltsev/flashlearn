@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../utils/api';
+import usePing from '../hooks/usePing';
 import { isLoggedIn, clearAuthData, getUsername } from '../utils/auth';
 import {
   HomeIcon,
@@ -21,6 +22,9 @@ function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Вызываем ping при загрузке страницы
+  usePing();
+
   useEffect(() => {
     // Проверяем, аутентифицирован ли пользователь
     if (!isLoggedIn()) {
@@ -30,8 +34,8 @@ function ProfilePage() {
 
     const fetchProfile = async () => {
       try {
-        // Используем api instance, который автоматически добавляет токен и обрабатывает ошибки
-        const response = await api.get(`/users/${username}`);
+        // Получаем информацию о профиле с контроллера profile
+        const response = await api.get(`/profile/${username}`);
         setProfile(response.data);
         setLoading(false);
       } catch (err) {

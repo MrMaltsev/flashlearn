@@ -115,16 +115,16 @@ public class FlashCardService {
 
     /**
      * Получает все флешкарты пользователя. Пользователь может получить только свои карточки.
-     * @param userId идентификатор пользователя
+     * @param username идентификатор пользователя
      * @return список флешкарт пользователя
      * @throws UnauthorizedAccessException если пользователь пытается получить карточки другого пользователя
      */
-    public List<FlashCard> getAllFlashCardsByUserId(Long userId) {
+    public List<FlashCard> getAllFlashCardsByUsername(String username) {
         // Получаем текущего аутентифицированного пользователя
         User currentUser = securityUtils.getCurrentUser();
         
         // Проверяем, что пользователь запрашивает свои собственные карточки
-        if (!currentUser.getId().equals(userId)) {
+        if (!currentUser.getUsername().equals(username)) {
             throw new UnauthorizedAccessException("У вас нет прав для просмотра карточек другого пользователя");
         }
 

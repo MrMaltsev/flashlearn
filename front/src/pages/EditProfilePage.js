@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../utils/api';
+import usePing from '../hooks/usePing';
 import { isLoggedIn, getUsername, clearAuthData } from '../utils/auth';
 import {
   HomeIcon,
@@ -26,6 +27,9 @@ function EditProfilePage() {
   });
   const [saving, setSaving] = useState(false);
 
+  // Вызываем ping при загрузке страницы
+  usePing();
+
   useEffect(() => {
     // Проверяем, аутентифицирован ли пользователь
     if (!isLoggedIn()) {
@@ -43,8 +47,8 @@ function EditProfilePage() {
 
     const fetchProfile = async () => {
       try {
-        // Используем api instance, который автоматически добавляет токен и обрабатывает ошибки
-        const response = await api.get(`/users/${username}`);
+        // Получаем информацию о профиле с контроллера profile
+        const response = await api.get(`/profile/${username}`);
         setProfile(response.data);
         setFormData({
           username: response.data.username || '',
@@ -82,7 +86,7 @@ function EditProfilePage() {
 
     try {
       // Используем api instance для отправки запроса
-      const response = await api.put(`/users/${username}/update`, {
+      const response = await api.put(`/profile/update/${username}`, {
         username: formData.username,
         aboutMe: formData.aboutMe
       });

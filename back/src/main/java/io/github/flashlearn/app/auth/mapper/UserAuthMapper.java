@@ -1,4 +1,4 @@
-package io.github.flashlearn.app.user.mapper;
+package io.github.flashlearn.app.auth.mapper;
 
 import io.github.flashlearn.app.profile.dto.UserProfileResponse;
 import io.github.flashlearn.app.auth.dto.UserRegistrationResponse;
@@ -7,9 +7,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
-public interface UserMapper {
+public interface UserAuthMapper {
     @Mapping(target = "role", expression = "java(user.getRole().name())")
-    UserRegistrationResponse toUserResponse(User user);
+    UserRegistrationResponse toUserRegistrationResponse(User user);
     
     @Mapping(target = "uniqueId", source = "id")
     UserProfileResponse toUserProfileResponse(User user);

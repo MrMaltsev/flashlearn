@@ -24,7 +24,7 @@ public class SettingsController {
         return ResponseEntity.ok(userSettings);
     }
 
-    @PutMapping("/{username}/save")
+    @PutMapping("/update/{username}")
     public ResponseEntity<UserSettingsResponse> updateSettings(@PathVariable String username,
                                                                @RequestBody UserSettingsUpdateRequest request) {
         UserSettingsResponse response =

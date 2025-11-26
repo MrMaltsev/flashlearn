@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isLoggedIn, clearAuthData, getUsername } from '../utils/auth';
+import usePing from '../hooks/usePing';
 import api from '../utils/api';
 import {
   HomeIcon,
@@ -33,12 +34,15 @@ function Dashboard() {
   const [flashCards, setFlashCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
-    todayReviewed: 34,
+    todayReviewed: 0,
     dailyGoal: 50,
-    timeSpent: 22,
-    accuracy: 86,
-    streak: 12
+    timeSpent: 0,
+    accuracy: 0,
+    streak: 0
   });
+
+  // Вызываем ping при загрузке страницы
+  usePing();
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -46,19 +50,34 @@ function Dashboard() {
       return;
     }
 
-    // Загружаем данные о флешкартах
+    // Загружаем данные о флешкартах и статистике
     const fetchFlashCards = async () => {
       try {
-        // Получаем userId из профиля пользователя
-        const profileResponse = await api.get(`/users/${username}`);
-        const userId = profileResponse.data.id;
+        setLoading(true);
         
-        // Получаем все флешкарты пользователя
-        const cardsResponse = await api.get(`/flashcards/getAll/${userId}`);
-        setFlashCards(cardsResponse.data || []);
+        // Получаем данные с эндпоинта dashboard
+        const dashboardResponse = await api.get(`/dashboard/${username}`);
+        const dashboardData = dashboardResponse.data;
+        
+        // Обновляем статистику из полученных данных
+        setStats({
+          todayReviewed: dashboardData.todayReviewed || 0,
+          dailyGoal: dashboardData.dailyGoal || 50,
+          timeSpent: dashboardData.timeSpent || 0,
+          accuracy: dashboardData.accuracy   || 0,
+          streak: dashboardData.streak || 0
+        });
+        
+        // Если есть флешкарты в ответе, загружаем их
+        if (dashboardData.flashcards) {
+          setFlashCards(dashboardData.flashcards);
+        } else {
+          // Если нет, загружаем отдельно через flashcards контроллер
+          const cardsResponse = await api.get(`/flashcards/getAll/${username}`);
+          setFlashCards(cardsResponse.data || []);
+        }
       } catch (err) {
-        console.error('Ошибка загрузки флешкарт:', err);
-        // Используем mock данные при ошибке
+        console.error('Ошибка загрузки данных:', err);
         setFlashCards([]);
       } finally {
         setLoading(false);
@@ -100,21 +119,8 @@ function Dashboard() {
     console.log('Start review session');
   };
 
-  // Mock данные для наборов карточек (в реальности будут приходить с бэкенда)
-  const flashcardSets = [
-    { id: 1, title: 'Biology: Cell Basics', icon: BookIcon, cards: 24, accuracy: 82, type: 'BIOLOGY' },
-    { id: 2, title: 'Chemistry: Periodic Trends', icon: AtomIcon, cards: 32, accuracy: 75, type: 'CHEMISTRY' },
-    { id: 3, title: 'Spanish: Common Verbs', icon: LanguageIcon, cards: 18, accuracy: 90, type: 'LANGUAGES' },
-    { id: 4, title: 'Algorithms: Big-O', icon: CodeIcon, cards: 20, accuracy: 68, type: 'COMPUTER_SCIENCE' },
-    { id: 5, title: 'Psych: Memory Models', icon: BrainIcon, cards: 22, accuracy: 79, type: 'PSYCHOLOGY' },
-    { id: 6, title: 'Geography: Capitals', icon: GlobeIcon, cards: 40, accuracy: 71, type: 'GEOGRAPHY' },
-    { id: 7, title: 'Math: Derivatives', icon: HashIcon, cards: 28, accuracy: 64, type: 'MATHEMATICS' },
-    { id: 8, title: 'Design: Color Theory', icon: PenIcon, cards: 16, accuracy: 88, type: 'DESIGN' },
-    { id: 9, title: 'Law: Key Doctrines', icon: ScalesIcon, cards: 26, accuracy: 73, type: 'LAW' },
-    { id: 10, title: 'Microbio: Pathogens', icon: MicroscopeIcon, cards: 30, accuracy: 69, type: 'BIOLOGY' },
-    { id: 11, title: 'Finance: Ratios', icon: CalculatorIcon, cards: 15, accuracy: 77, type: 'FINANCE' },
-    { id: 12, title: 'History: WW2 Dates', icon: DocumentIcon, cards: 35, accuracy: 70, type: 'HISTORY' }
-  ];
+  // Пустой массив - наборы будут загружаться с бэка позже
+  const flashcardSets = [];
 
   const progressPercentage = (stats.todayReviewed / stats.dailyGoal) * 100;
 
@@ -235,6 +241,7 @@ function Dashboard() {
           </div>
 
           {/* Suggested flashcard sets */}
+          {flashcardSets.length > 0 && (
           <div className="sets-section">
             <div className="sets-header">
               <h2 className="sets-title">Suggested flashcard sets</h2>
@@ -260,6 +267,7 @@ function Dashboard() {
               })}
             </div>
           </div>
+          )}
         </main>
       </div>
     </div>

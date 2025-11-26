@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isLoggedIn, clearAuthData, getUsername } from '../utils/auth';
+import usePing from '../hooks/usePing';
 import {
   HomeIcon,
   ProfileIcon,
@@ -27,6 +28,9 @@ function SettingsPage() {
     darkMode: false
   });
   const [notif, setNotif] = useState({ show: false, type: 'success', message: '' });
+
+  // Вызываем ping при загрузке страницы
+  usePing();
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -90,7 +94,7 @@ function SettingsPage() {
   const handleSave = async () => {
     try {
       // Save settings to backend using PUT method
-      await api.put(`/settings/${username}/save`, settings);
+      await api.put(`/settings/update/${username}`, settings);
       showNotification('success', 'Настройки сохранены');
     } catch (err) {
       console.error('Failed to save settings', err);

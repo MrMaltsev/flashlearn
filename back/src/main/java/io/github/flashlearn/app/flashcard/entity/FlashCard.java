@@ -31,6 +31,7 @@ public class FlashCard {
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId
     @JoinColumn(name = "owner_id")
     private User owner;
 

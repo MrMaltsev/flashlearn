@@ -1,4 +1,4 @@
-package io.github.flashlearn.app.auth.token;
+package io.github.flashlearn.app.auth.service;
 
 import io.github.flashlearn.app.auth.entity.VerificationToken;
 import io.github.flashlearn.app.auth.exception.TokenExpiredException;

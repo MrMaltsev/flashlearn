@@ -2,6 +2,7 @@ package io.github.flashlearn.app.user.entity;
 
 import io.github.flashlearn.app.flashcard.entity.FlashCard;
 import io.github.flashlearn.app.settings.entity.UserSettings;
+import io.github.flashlearn.app.user_stats.entity.UserStats;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -46,6 +47,9 @@ public class User implements UserDetails {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private UserSettings userSettings;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private UserStats userStats;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FlashCard> flashCards = new ArrayList<>();

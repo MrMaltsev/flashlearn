@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isLoggedIn, clearAuthData, getUsername } from '../utils/auth';
+import usePing from '../hooks/usePing';
 import {
   HomeIcon,
   ProfileIcon,
@@ -16,6 +17,9 @@ function FAQPage() {
   const navigate = useNavigate();
   const username = getUsername();
   const base = username ? `/${username}` : '';
+
+  // Вызываем ping при загрузке страницы
+  usePing();
 
   useEffect(() => {
     if (!isLoggedIn()) {

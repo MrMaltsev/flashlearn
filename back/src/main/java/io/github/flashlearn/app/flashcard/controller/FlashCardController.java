@@ -73,13 +73,13 @@ public class FlashCardController {
     /**
      * Получение всех флешкарт текущего пользователя. Требуется аутентификация.
      * Пользователь получает только свои карточки.
-     * @param userId идентификатор пользователя (используется для проверки, что пользователь запрашивает свои карточки)
+     * @param username идентификатор пользователя (используется для проверки, что пользователь запрашивает свои карточки)
      */
-    @GetMapping("/getAll/{userId}")
+    @GetMapping("/getAll/{username}")
     @PreAuthorize("isAuthenticated()") // Проверяем, что пользователь аутентифицирован
-    public ResponseEntity<List<FlashCardResponse>> getAllFlashCards(@PathVariable Long userId) {
+    public ResponseEntity<List<FlashCardResponse>> getAllFlashCards(@PathVariable String username) {
         // Сервис проверяет, что userId соответствует текущему аутентифицированному пользователю
-        List<FlashCardResponse> flashCards = flashCardService.getAllFlashCardsByUserId(userId)
+        List<FlashCardResponse> flashCards = flashCardService.getAllFlashCardsByUsername(username)
                 .stream()
                 .map(mapper::toResponse)
                 .toList();

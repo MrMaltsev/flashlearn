@@ -1,4 +1,4 @@
-package io.github.flashlearn.app.user.mapper;
+package io.github.flashlearn.app.auth.mapper;
 
 import io.github.flashlearn.app.auth.dto.UserRegistrationResponse;
 import io.github.flashlearn.app.profile.dto.UserProfileResponse;
@@ -8,14 +8,14 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-20T11:03:09+0300",
+    date = "2025-11-24T18:44:43+0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 24.0.1 (Oracle Corporation)"
 )
 @Component
-public class UserMapperImpl implements UserMapper {
+public class UserAuthMapperImpl implements UserAuthMapper {
 
     @Override
-    public UserRegistrationResponse toUserResponse(User user) {
+    public UserRegistrationResponse toUserRegistrationResponse(User user) {
         if ( user == null ) {
             return null;
         }
