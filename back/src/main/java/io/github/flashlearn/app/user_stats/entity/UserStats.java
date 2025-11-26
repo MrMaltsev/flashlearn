@@ -29,7 +29,7 @@ public class UserStats {
     public UserStats() {
         this.lastLoginDate = LocalDate.now();
         this.streak = 1;
-        this.dailyGoal = 0;
+        this.dailyGoal = 50;
         this.dailyGoalCompleted = false;
     }
 }

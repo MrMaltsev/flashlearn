@@ -124,6 +124,32 @@ function Dashboard() {
 
   const progressPercentage = (stats.todayReviewed / stats.dailyGoal) * 100;
 
+  // State for Set Goal modal
+  const [showGoalModal, setShowGoalModal] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState(stats.dailyGoal);
+
+  const goalOptions = [10, 20, 35, 50, 100];
+
+  const openGoalModal = () => {
+    setSelectedGoal(stats.dailyGoal || 50);
+    setShowGoalModal(true);
+  };
+
+  const closeGoalModal = () => setShowGoalModal(false);
+
+  const handleSaveGoal = async () => {
+    try {
+      // send update to backend
+      await api.put(`/dashboard/update_daily_goal/${username}`, { dailyGoal: selectedGoal });
+      // update local stats and close modal
+      setStats((s) => ({ ...s, dailyGoal: selectedGoal }));
+      setShowGoalModal(false);
+    } catch (err) {
+      console.error('Failed to update daily goal', err);
+      // could show notification to user
+    }
+  };
+
   return (
     <div className="dashboard-container">
       {/* Левая боковая панель */}
@@ -217,6 +243,11 @@ function Dashboard() {
                 <span className="goal-tag">Time spent: {stats.timeSpent}m</span>
                 <span className="goal-tag">Accuracy: {stats.accuracy}%</span>
               </div>
+              <div className="goal-actions" style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+                <button className="new-set-btn" onClick={openGoalModal} style={{ background: '#f97316', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: '6px' }}>
+                  Set a goal
+                </button>
+              </div>
             </div>
 
             {/* Streak карточка */}
@@ -267,6 +298,35 @@ function Dashboard() {
               })}
             </div>
           </div>
+          )}
+          {/* Goal modal */}
+          {showGoalModal && (
+            <div className="modal-backdrop" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }}>
+              <div className="modal" style={{ background: '#fff', borderRadius: 8, padding: 20, width: 360, boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
+                <h3 style={{ marginTop: 0 }}>Set your daily goal</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 10, marginTop: 12 }}>
+                  {goalOptions.map((opt) => (
+                    <button
+                      key={opt}
+                      onClick={() => setSelectedGoal(opt)}
+                      style={{
+                        padding: '10px 12px',
+                        borderRadius: 6,
+                        border: selectedGoal === opt ? '2px solid #f97316' : '1px solid #e5e7eb',
+                        background: selectedGoal === opt ? '#fff7ed' : '#ffffff',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {opt} cards
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
+                  <button onClick={closeGoalModal} style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff' }}>Cancel</button>
+                  <button onClick={handleSaveGoal} style={{ padding: '8px 12px', borderRadius: 6, border: 'none', background: '#f97316', color: '#fff' }}>Save</button>
+                </div>
+              </div>
+            </div>
           )}
         </main>
       </div>

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-26T16:32:37+0300",
+    date = "2025-11-26T16:58:05+0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 24.0.1 (Oracle Corporation)"
 )
 @Component
@@ -21,8 +21,8 @@ public class UserDashboardMapperImpl implements UserDashboardMapper {
             return null;
         }
 
-        Integer streak = null;
-        Integer dailyGoal = null;
+        int streak = 0;
+        int dailyGoal = 0;
 
         streak = userStats.getStreak();
         dailyGoal = userStats.getDailyGoal();

@@ -1,8 +1,10 @@
 package io.github.flashlearn.app.user.controller;
 
+import io.github.flashlearn.app.user.dto.UpdateDailyGoalRequestDto;
 import io.github.flashlearn.app.user.dto.UserDashboardResponseDto;
 import io.github.flashlearn.app.user.mapper.UserDashboardMapper;
 import io.github.flashlearn.app.user.service.UserDashboardService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,5 +23,13 @@ public class UserDashboardController {
         UserDashboardResponseDto userResponse = userDashboardMapper
                 .toUserDashboardResponseDto(userDashboardService.findByUsername(username));
         return ResponseEntity.status(HttpStatus.OK).body(userResponse);
+    }
+
+    @PutMapping("/update_daily_goal/{username}")
+    public ResponseEntity<UserDashboardResponseDto> updateUserDailyGoal(@PathVariable String username,
+                                                                    @RequestBody @Valid UpdateDailyGoalRequestDto request) {
+        UserDashboardResponseDto userResponse = userDashboardMapper
+                .toUserDashboardResponseDto(userDashboardService.updateUserDailyGoal(username, request));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(userResponse);
     }
 }

@@ -5,7 +5,7 @@ import io.github.flashlearn.app.flashcard.entity.FlashCard;
 import java.util.List;
 
 public record UserDashboardResponseDto(
-        Integer streak,
-        Integer dailyGoal,
+        int streak,
+        int dailyGoal,
         List<FlashCard> flashCards
 ) { }
