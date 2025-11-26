@@ -18,8 +18,8 @@ public class UserDashboardController {
 
     @GetMapping("/{username}")
     public ResponseEntity<UserDashboardResponseDto> getUserInfo(@PathVariable String username) {
-        UserDashboardResponseDto userResponse = userDashboardMapper.toUserResponseDto(userDashboardService.findByUsername(username));
+        UserDashboardResponseDto userResponse = userDashboardMapper
+                .toUserDashboardResponseDto(userDashboardService.findByUsername(username));
         return ResponseEntity.status(HttpStatus.OK).body(userResponse);
     }
-
 }
