@@ -120,7 +120,41 @@ function Dashboard() {
   };
 
   // Пустой массив - наборы будут загружаться с бэка позже
-  const flashcardSets = [];
+  // Categories and sample Basic sets (starter content for new users)
+  const flashcardSetsByCategory = {
+    Popular: [],
+    Saved: [],
+    Basic: [
+      {
+        id: 'basic-1',
+        title: 'English Basics: Everyday Words',
+        icon: BookIcon,
+        cards: 12,
+        accuracy: 0,
+        type: 'BASIC',
+        cardsData: [
+          { front: 'Car', back: 'Машина' },
+          { front: 'House', back: 'Дом' },
+          { front: 'Book', back: 'Книга' }
+        ]
+      },
+      {
+        id: 'basic-2',
+        title: 'Spanish Basics: Greetings',
+        icon: GlobeIcon,
+        cards: 8,
+        accuracy: 0,
+        type: 'BASIC',
+        cardsData: [
+          { front: 'Hola', back: 'Привет' },
+          { front: 'Adiós', back: 'До свидания' }
+        ]
+      }
+    ]
+  };
+
+  const [setsTab, setSetsTab] = useState('Popular');
+  const flashcardSets = flashcardSetsByCategory[setsTab] || [];
 
   const progressPercentage = (stats.todayReviewed / stats.dailyGoal) * 100;
 
@@ -140,9 +174,16 @@ function Dashboard() {
   const handleSaveGoal = async () => {
     try {
       // send update to backend
-      await api.put(`/dashboard/update_daily_goal/${username}`, { dailyGoal: selectedGoal });
-      // update local stats and close modal
-      setStats((s) => ({ ...s, dailyGoal: selectedGoal }));
+      const res = await api.put(`/dashboard/update_daily_goal/${username}`, { dailyGoal: selectedGoal });
+      // merge backend-returned stats into local state if present
+      if (res && res.data) {
+        // backend may return { stats: { ... } } or updated object directly
+        const returned = res.data.stats || res.data;
+        setStats((s) => ({ ...s, ...returned, dailyGoal: selectedGoal }));
+      } else {
+        // optimistic fallback
+        setStats((s) => ({ ...s, dailyGoal: selectedGoal }));
+      }
       setShowGoalModal(false);
     } catch (err) {
       console.error('Failed to update daily goal', err);
@@ -275,7 +316,24 @@ function Dashboard() {
           {flashcardSets.length > 0 && (
           <div className="sets-section">
             <div className="sets-header">
-              <h2 className="sets-title">Suggested flashcard sets</h2>
+                <h2 className="sets-title">Suggested flashcard sets</h2>
+                <div className="sets-tabs" style={{ display: 'flex', gap: 8, marginLeft: 12 }}>
+                  {Object.keys(flashcardSetsByCategory).map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setSetsTab(tab)}
+                      style={{
+                        padding: '6px 10px',
+                        borderRadius: 6,
+                        border: setsTab === tab ? '2px solid #f97316' : '1px solid #e5e7eb',
+                        background: setsTab === tab ? '#fff7ed' : '#ffffff',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
               <button className="customize-btn">
                 <FilterIcon /> Customize
               </button>
@@ -284,7 +342,7 @@ function Dashboard() {
               {flashcardSets.map((set) => {
                 const IconComponent = set.icon;
                 return (
-                  <div key={set.id} className="set-card">
+                    <div key={set.id} className="set-card" onClick={() => navigate(`${base}/study/${set.id}`, { state: { set } })} style={{ cursor: 'pointer' }}>
                     <div className="set-icon">
                       <IconComponent />
                     </div>

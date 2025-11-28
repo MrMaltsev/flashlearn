@@ -8,6 +8,7 @@ import EditProfilePage from "./pages/EditProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import SearchPage from "./pages/SearchPage";
 import FAQPage from "./pages/FAQPage";
+import StudyPage from "./pages/StudyPage";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/:username/dashboard" element={<Dashboard />} />
+        <Route path="/:username/study/:setId" element={<StudyPage />} />
         <Route path="/:username/settings" element={<SettingsPage />} />
         <Route path="/:username/search" element={<SearchPage />} />
         <Route path="/:username/faq" element={<FAQPage />} />
