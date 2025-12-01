@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { isLoggedIn, clearAuthData, getUsername } from '../utils/auth';
 import usePing from '../hooks/usePing';
 import api from '../utils/api';
@@ -110,8 +110,8 @@ function Dashboard() {
   };
 
   const handleNewSet = () => {
-    // TODO: Открыть модальное окно для создания нового набора
-    console.log('Create new set');
+    // Navigate to the Create Set page
+    navigate(`${base}/create-set`);
   };
 
   const handleReviewNow = () => {
@@ -119,9 +119,8 @@ function Dashboard() {
     console.log('Start review session');
   };
 
-  // Пустой массив - наборы будут загружаться с бэка позже
   // Categories and sample Basic sets (starter content for new users)
-  const flashcardSetsByCategory = {
+  const flashcardSetsByCategoryInitial = {
     Popular: [],
     Saved: [],
     Basic: [
@@ -153,8 +152,10 @@ function Dashboard() {
     ]
   };
 
+  const [flashcardSetsByCategoryState, setFlashcardSetsByCategoryState] = useState(flashcardSetsByCategoryInitial);
   const [setsTab, setSetsTab] = useState('Popular');
-  const flashcardSets = flashcardSetsByCategory[setsTab] || [];
+  const flashcardSets = flashcardSetsByCategoryState[setsTab] || [];
+  const location = useLocation();
 
   const progressPercentage = (stats.todayReviewed / stats.dailyGoal) * 100;
 
@@ -190,6 +191,31 @@ function Dashboard() {
       // could show notification to user
     }
   };
+
+  // If navigated here with a newly created set, insert it into Saved
+  useEffect(() => {
+    if (location && location.state && location.state.createdSet) {
+      const created = location.state.createdSet;
+      setFlashcardSetsByCategoryState((prev) => {
+        const next = { ...prev };
+        next.Saved = [
+          {
+            id: created.id || `new-${Date.now()}`,
+            title: created.title || 'New set',
+            icon: created.icon || BookIcon,
+            cards: (created.cards && created.cards.length) || (created.cardsData && created.cardsData.length) || 0,
+            accuracy: created.accuracy || 0,
+            type: created.type || 'CUSTOM',
+            cardsData: created.cards || created.cardsData || []
+          },
+          ...next.Saved
+        ];
+        return next;
+      });
+      // clear location state to avoid duplicate insertion on refresh
+      try { window.history.replaceState({}, document.title); } catch (e) {}
+    }
+  }, [location]);
 
   return (
     <div className="dashboard-container">
@@ -318,7 +344,7 @@ function Dashboard() {
             <div className="sets-header">
                 <h2 className="sets-title">Suggested flashcard sets</h2>
                 <div className="sets-tabs" style={{ display: 'flex', gap: 8, marginLeft: 12 }}>
-                  {Object.keys(flashcardSetsByCategory).map((tab) => (
+                  {Object.keys(flashcardSetsByCategoryState).map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setSetsTab(tab)}

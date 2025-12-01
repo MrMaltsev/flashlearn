@@ -7,8 +7,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface FlashCardRepository extends JpaRepository<FlashCard, Long> {
-    boolean existsByQuestionAndAnswer(String question, String answer);
-    // Проверяет существование карточки с указанными вопросом, ответом и владельцем
-    boolean existsByQuestionAndAnswerAndOwner(String question, String answer, User owner);
-    List<FlashCard> findByOwner(User owner);
 }

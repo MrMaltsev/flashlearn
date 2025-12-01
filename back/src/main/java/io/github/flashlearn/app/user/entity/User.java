@@ -1,6 +1,7 @@
 package io.github.flashlearn.app.user.entity;
 
 import io.github.flashlearn.app.flashcard.entity.FlashCard;
+import io.github.flashlearn.app.flashcard.entity.FlashCardSet;
 import io.github.flashlearn.app.settings.entity.UserSettings;
 import io.github.flashlearn.app.user_stats.entity.UserStats;
 import jakarta.persistence.*;
@@ -52,7 +53,7 @@ public class User implements UserDetails {
     private UserStats userStats;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FlashCard> flashCards = new ArrayList<>();
+    private List<FlashCardSet> flashCardSets = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

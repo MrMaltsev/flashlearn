@@ -8,14 +8,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
+@Table(name = "flashcards")
 public class FlashCard {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Enumerated(EnumType.STRING)
-    private Type type;
 
     @Column(nullable = false)
     private String question;
@@ -23,29 +21,9 @@ public class FlashCard {
     @Column(nullable = false)
     private String answer;
 
-    private LocalDateTime creationTime;
-
-    @PrePersist
-    public void onCreate() {
-        this.creationTime = LocalDateTime.now();
-    }
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "owner_id")
-    private User owner;
+    @JoinColumn(name = "set_id")
+    private FlashCardSet set;
 
     public FlashCard(){}
-
-    public FlashCard(String question, String answer, Type type) {
-        this.question = question;
-        this.answer = answer;
-        this.type = type;
-    }
-
-    public FlashCard(String question, String answer) {
-        this.question = question;
-        this.answer = answer;
-        this.type = null;
-    }
 }
