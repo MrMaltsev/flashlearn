@@ -10,6 +10,7 @@ import SettingsPage from "./pages/SettingsPage";
 import SearchPage from "./pages/SearchPage";
 import FAQPage from "./pages/FAQPage";
 import StudyPage from "./pages/StudyPage";
+import StudySessionPage from "./pages/StudySessionPage";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/:username/dashboard" element={<Dashboard />} />
         <Route path="/:username/create-set" element={<CreateSetPage />} />
         <Route path="/:username/study/:setId" element={<StudyPage />} />
+        <Route path="/:username/study-session/:setId" element={<StudySessionPage />} />
         <Route path="/:username/settings" element={<SettingsPage />} />
         <Route path="/:username/search" element={<SearchPage />} />
         <Route path="/:username/faq" element={<FAQPage />} />

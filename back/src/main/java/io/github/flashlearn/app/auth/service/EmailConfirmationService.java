@@ -2,7 +2,6 @@ package io.github.flashlearn.app.auth.service;
 
 import io.github.flashlearn.app.auth.entity.VerificationToken;
 import io.github.flashlearn.app.auth.exception.EmailSendingException;
-import io.github.flashlearn.app.auth.service.ConfirmationTokenService;
 import io.github.flashlearn.app.common.service.EmailService;
 import io.github.flashlearn.app.user.entity.User;
 import io.github.flashlearn.app.user.repository.UserRepository;

@@ -148,9 +148,16 @@ function Dashboard() {
   };
 
   const [flashcardSetsByCategoryState, setFlashcardSetsByCategoryState] = useState(flashcardSetsByCategoryInitial);
-  const [setsTab, setSetsTab] = useState('Popular');
-  const flashcardSets = flashcardSetsByCategoryState[setsTab] || [];
+  const [setsTab, setSetsTab] = useState('My');
+  const [setsDisplayTab, setSetsDisplayTab] = useState('My');
   const location = useLocation();
+
+  // Organize flashCards into category tabs
+  const setSectionsByTab = {
+    My: flashCards || [],
+    Saved: [],
+    Popular: []
+  };
 
   const progressPercentage = (stats.todayReviewed / stats.dailyGoal) * 100;
 
@@ -343,35 +350,63 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Suggested flashcard sets */}
-          {flashCards.length > 0 && (
-            <div className="sets-section" style={{ marginTop: 18 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2 className="sets-title">Your sets</h2>
-                <button className="customize-btn">
-                  <FilterIcon /> Customize
+          {/* Flashcard sets by section */}
+          <div className="sets-section" style={{ marginTop: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h2 className="sets-title">Flashcard sets</h2>
+              <button className="customize-btn">
+                <FilterIcon /> Customize
+              </button>
+            </div>
+
+            {/* Tabs for sections */}
+            <div className="sets-tabs" style={{ display: 'flex', gap: 8, marginBottom: 16, borderBottom: '1px solid #e5e7eb', paddingBottom: 8 }}>
+              {['My', 'Saved', 'Popular'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setSetsDisplayTab(tab)}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: 6,
+                    border: setsDisplayTab === tab ? '2px solid #f97316' : '1px solid #e5e7eb',
+                    background: setsDisplayTab === tab ? '#fff7ed' : '#ffffff',
+                    cursor: 'pointer',
+                    fontWeight: setsDisplayTab === tab ? 600 : 500,
+                    transition: 'all 0.2s',
+                    fontSize: 14
+                  }}
+                >
+                  {tab}
                 </button>
-              </div>
-              <div className="sets-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 220px))', gap: 16, marginTop: 12, alignItems: 'start' }}>
-                {flashCards.map((set) => {
+              ))}
+            </div>
+
+            {/* Display sets for selected tab */}
+            {setSectionsByTab[setsDisplayTab] && setSectionsByTab[setsDisplayTab].length > 0 ? (
+              <div className="sets-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 220px))', gap: 16, alignItems: 'start' }}>
+                {setSectionsByTab[setsDisplayTab].map((set) => {
                   const id = set.id || set._id || `${set.title}-${Math.random().toString(36).slice(2,8)}`;
                   const title = set.title || set.name || 'Untitled set';
                   const description = set.description || set.desc || set.summary || '';
                   return (
-                    <div key={id} className="set-card" onClick={() => navigate(`${base}/study/${id}`, { state: { set } })} style={{ cursor: 'pointer', padding: 14, borderRadius: 8, background: '#fff', border: '1px solid #e5e7eb', height: 140, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 4px rgba(16,24,40,0.04)' }}>
+                    <div key={id} className="set-card" onClick={() => navigate(`${base}/study-session/${id}`, { state: { set } })} style={{ cursor: 'pointer', padding: 14, borderRadius: 8, background: '#fff', border: '1px solid #e5e7eb', height: 140, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 4px rgba(16,24,40,0.04)', transition: 'all 0.2s', hover: { transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' } }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                         <h4 className="set-title" style={{ margin: 0, fontSize: 16, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</h4>
-                        <p className="set-desc" style={{ margin: 0, color: '#6b7280', fontSize: 13, lineHeight: '1.2', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{description || ''}</p>
+                        <p className="set-desc" style={{ margin: 0, color: '#6b7280', fontSize: 13, lineHeight: '1.2', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{description || 'No description'}</p>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        <span style={{ fontSize: 12, color: '#9ca3af' }}>{(set.flashCards && set.flashCards.length) || (set.cards && set.cards) || ''} cards</span>
+                        <span style={{ fontSize: 12, color: '#9ca3af' }}>{(set.flashCards && set.flashCards.length) || (set.cards && set.cards) || 0} cards</span>
                       </div>
                     </div>
                   );
                 })}
               </div>
-            </div>
-          )}
+            ) : (
+              <div style={{ textAlign: 'center', padding: '40px 20px', color: '#9ca3af' }}>
+                <p style={{ fontSize: 14 }}>No sets in this section yet.</p>
+              </div>
+            )}
+          </div>
           {/* Goal modal */}
           {showGoalModal && (
             <div className="modal-backdrop" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }}>

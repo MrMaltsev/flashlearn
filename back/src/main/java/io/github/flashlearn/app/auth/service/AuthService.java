@@ -43,20 +43,6 @@ public class AuthService {
         return tokenProvider.generateToken(user.getUsername());
     }
 
-    public void verifyToken(String token) {
-        VerificationToken t = verificationTokenRepository.findById(token)
-                .orElseThrow(() -> new TokenNotFoundException("Token not found: " + token));
-
-        if(t.getExpiresAt().isBefore(LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant()))
-            throw new TokenExpiredException("Token expired: " + token);
-
-        User user = userRepository.findById(t.getUser().getId()).get();
-        user.setEmailVerified(true);
-        userRepository.save(user);
-
-        verificationTokenRepository.delete(t);
-    }
-
     public User findUserByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User not found " + username));
