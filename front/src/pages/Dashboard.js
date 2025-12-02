@@ -68,14 +68,9 @@ function Dashboard() {
           streak: dashboardData.streak || 0
         });
         
-        // Если есть флешкарты в ответе, загружаем их
-        if (dashboardData.flashcards) {
-          setFlashCards(dashboardData.flashcards);
-        } else {
-          // Если нет, загружаем отдельно через flashcards контроллер
-          const cardsResponse = await api.get(`/flashcards/getAll/${username}`);
-          setFlashCards(cardsResponse.data || []);
-        }
+        // Используем флешкарты, если бэк вернул их в dashboard response
+        // backend may return `flashCards` or `flashcards` — accept both
+        setFlashCards(dashboardData.flashCards || dashboardData.flashcards || []);
       } catch (err) {
         console.error('Ошибка загрузки данных:', err);
         setFlashCards([]);
@@ -192,7 +187,7 @@ function Dashboard() {
     }
   };
 
-  // If navigated here with a newly created set, insert it into Saved
+  // If navigated here with a newly created set, insert it into Saved and flashCards list
   useEffect(() => {
     if (location && location.state && location.state.createdSet) {
       const created = location.state.createdSet;
@@ -211,6 +206,16 @@ function Dashboard() {
           ...next.Saved
         ];
         return next;
+      });
+      // also prepend to backend flashCards list for immediate display
+      setFlashCards((prev) => {
+        const norm = {
+          id: created.id || `new-${Date.now()}`,
+          title: created.title || 'New set',
+          description: created.description || created.desc || '',
+          flashCards: created.flashCards || created.cards || created.cardsData || [],
+        };
+        return [norm, ...prev];
       });
       // clear location state to avoid duplicate insertion on refresh
       try { window.history.replaceState({}, document.title); } catch (e) {}
@@ -339,49 +344,33 @@ function Dashboard() {
           </div>
 
           {/* Suggested flashcard sets */}
-          {flashcardSets.length > 0 && (
-          <div className="sets-section">
-            <div className="sets-header">
-                <h2 className="sets-title">Suggested flashcard sets</h2>
-                <div className="sets-tabs" style={{ display: 'flex', gap: 8, marginLeft: 12 }}>
-                  {Object.keys(flashcardSetsByCategoryState).map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setSetsTab(tab)}
-                      style={{
-                        padding: '6px 10px',
-                        borderRadius: 6,
-                        border: setsTab === tab ? '2px solid #f97316' : '1px solid #e5e7eb',
-                        background: setsTab === tab ? '#fff7ed' : '#ffffff',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {tab}
-                    </button>
-                  ))}
-                </div>
-              <button className="customize-btn">
-                <FilterIcon /> Customize
-              </button>
-            </div>
-            <div className="sets-grid">
-              {flashcardSets.map((set) => {
-                const IconComponent = set.icon;
-                return (
-                    <div key={set.id} className="set-card" onClick={() => navigate(`${base}/study/${set.id}`, { state: { set } })} style={{ cursor: 'pointer' }}>
-                    <div className="set-icon">
-                      <IconComponent />
+          {flashCards.length > 0 && (
+            <div className="sets-section" style={{ marginTop: 18 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2 className="sets-title">Your sets</h2>
+                <button className="customize-btn">
+                  <FilterIcon /> Customize
+                </button>
+              </div>
+              <div className="sets-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 220px))', gap: 16, marginTop: 12, alignItems: 'start' }}>
+                {flashCards.map((set) => {
+                  const id = set.id || set._id || `${set.title}-${Math.random().toString(36).slice(2,8)}`;
+                  const title = set.title || set.name || 'Untitled set';
+                  const description = set.description || set.desc || set.summary || '';
+                  return (
+                    <div key={id} className="set-card" onClick={() => navigate(`${base}/study/${id}`, { state: { set } })} style={{ cursor: 'pointer', padding: 14, borderRadius: 8, background: '#fff', border: '1px solid #e5e7eb', height: 140, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 4px rgba(16,24,40,0.04)' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <h4 className="set-title" style={{ margin: 0, fontSize: 16, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</h4>
+                        <p className="set-desc" style={{ margin: 0, color: '#6b7280', fontSize: 13, lineHeight: '1.2', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{description || ''}</p>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <span style={{ fontSize: 12, color: '#9ca3af' }}>{(set.flashCards && set.flashCards.length) || (set.cards && set.cards) || ''} cards</span>
+                      </div>
                     </div>
-                    <h4 className="set-title">{set.title}</h4>
-                    <div className="set-info">
-                      <span className="set-cards">{set.cards} cards</span>
-                      <span className="set-accuracy">Avg {set.accuracy}%</span>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
           )}
           {/* Goal modal */}
           {showGoalModal && (

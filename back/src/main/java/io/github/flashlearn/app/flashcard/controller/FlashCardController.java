@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/flashcards")
@@ -31,20 +33,20 @@ public class FlashCardController {
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toFlashCardSetResponse(createdSet));
     }
 
-//    /**
-//     * Получение всех флешкарт текущего пользователя. Требуется аутентификация.
-//     * Пользователь получает только свои карточки.
-//     * @param username идентификатор пользователя (используется для проверки, что пользователь запрашивает свои карточки)
-//     */
-//    @GetMapping("/getAll/{username}")
-//    @PreAuthorize("isAuthenticated()") // Проверяем, что пользователь аутентифицирован
-//    public ResponseEntity<List<FlashCardResponse>> getAllFlashCards(@PathVariable String username) {
-//        // Сервис проверяет, что userId соответствует текущему аутентифицированному пользователю
-//        List<FlashCardResponse> flashCards = flashCardService.getAllFlashCardsByUsername(username)
-//                .stream()
-//                .map(mapper::toResponse)
-//                .toList();
-//
-//        return ResponseEntity.ok(flashCards);
-//    }
+    /**
+     * Получение всех флешкарт текущего пользователя. Требуется аутентификация.
+     * Пользователь получает только свои карточки.
+     * @param username идентификатор пользователя (используется для проверки, что пользователь запрашивает свои карточки)
+     */
+    @GetMapping("/{username}")
+    @PreAuthorize("isAuthenticated()") // Проверяем, что пользователь аутентифицирован
+    public ResponseEntity<List<FlashCardSetResponse>> getAllFlashCards(@PathVariable String username) {
+        // Сервис проверяет, что userId соответствует текущему аутентифицированному пользователю
+        List<FlashCardSetResponse> flashCards = flashCardService.getAllFlashCardSets(username)
+                .stream()
+                .map(mapper::toFlashCardSetResponse)
+                .toList();
+
+        return ResponseEntity.ok(flashCards);
+    }
 }

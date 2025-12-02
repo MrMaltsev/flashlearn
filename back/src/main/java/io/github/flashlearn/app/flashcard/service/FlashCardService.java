@@ -5,6 +5,7 @@ import io.github.flashlearn.app.flashcard.dto.CreateFlashCardSetRequest;
 import io.github.flashlearn.app.flashcard.dto.FlashCardResponse;
 import io.github.flashlearn.app.flashcard.entity.FlashCard;
 import io.github.flashlearn.app.flashcard.entity.FlashCardSet;
+import io.github.flashlearn.app.flashcard.exception.FlashCardSetNotFoundException;
 import io.github.flashlearn.app.flashcard.repository.FlashCardSetRepository;
 import io.github.flashlearn.app.user.entity.User;
 import io.github.flashlearn.app.flashcard.exception.UnauthorizedAccessException;
@@ -20,7 +21,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FlashCardService {
 
-    private final FlashCardRepository flashCardRepository;
     private final FlashCardSetRepository flashCardSetRepository;
     private final SecurityUtils securityUtils;
 
@@ -56,22 +56,22 @@ public class FlashCardService {
         return flashCardSetRepository.save(flashCardSet);
     }
 
-//    /**
-//     * Получает все флешкарты пользователя. Пользователь может получить только свои карточки.
-//     * @param username идентификатор пользователя
-//     * @return список флешкарт пользователя
-//     * @throws UnauthorizedAccessException если пользователь пытается получить карточки другого пользователя
-//     */
-//    public List<FlashCard> getAllFlashCardsByUsername(String username) {
-//        // Получаем текущего аутентифицированного пользователя
-//        User currentUser = securityUtils.getCurrentUser();
-//
-//        // Проверяем, что пользователь запрашивает свои собственные карточки
-//        if (!currentUser.getUsername().equals(username)) {
-//            throw new UnauthorizedAccessException("У вас нет прав для просмотра карточек другого пользователя");
-//        }
-//
-//        return flashCardRepository.findByOwner(currentUser);
-//    }
+    /**
+     * Получает все флешкарты пользователя. Пользователь может получить только свои карточки.
+     * @param username идентификатор пользователя
+     * @return список флешкарт пользователя
+     * @throws UnauthorizedAccessException если пользователь пытается получить карточки другого пользователя
+     */
+    public List<FlashCardSet> getAllFlashCardSets(String username) {
+        // Получаем текущего аутентифицированного пользователя
+        User currentUser = securityUtils.getCurrentUser();
+
+        // Проверяем, что пользователь запрашивает свои собственные карточки
+        if (!currentUser.getUsername().equals(username)) {
+            throw new UnauthorizedAccessException("У вас нет прав для просмотра карточек другого пользователя");
+        }
+
+        return flashCardSetRepository.findAllByOwner(currentUser);
+    }
 
 }

@@ -11,6 +11,7 @@ function CreateSetPage() {
   const [title, setTitle] = useState('');
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
+  const [description, setDescription] = useState('');
   const [cards, setCards] = useState([]);
   const [saving, setSaving] = useState(false);
 
@@ -35,10 +36,11 @@ function CreateSetPage() {
       const payload = {
         username,
         title: title.trim(),
+          description: description.trim(),
         flashCards: cards
       };
       const res = await api.post('/flashcards/create', payload);
-      const created = res && res.data ? res.data : { id: `new-${Date.now()}`, title, cards };
+      const created = res && res.data ? res.data : { id: `new-${Date.now()}`, title, description, cards };
       // navigate back to dashboard and pass created set so it appears instantly
       navigate(`/${username}/dashboard`, { state: { createdSet: created } });
     } catch (err) {
@@ -66,6 +68,9 @@ function CreateSetPage() {
           <div style={{ maxWidth: 800, margin: '0 auto', background: '#fff', padding: 20, borderRadius: 8 }}>
             <label style={{ display: 'block', marginBottom: 8 }}>Title</label>
             <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter set title" style={{ width: '100%', padding: 10, borderRadius: 6, border: '1px solid #e5e7eb', marginBottom: 12 }} />
+
+            <label style={{ display: 'block', marginBottom: 8 }}>Description</label>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short description (optional)" rows={3} style={{ width: '100%', padding: 10, borderRadius: 6, border: '1px solid #e5e7eb', marginBottom: 12 }} />
 
             <label style={{ display: 'block', marginBottom: 8 }}>Add cards</label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>

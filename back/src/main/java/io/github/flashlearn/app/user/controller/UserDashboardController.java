@@ -1,9 +1,11 @@
 package io.github.flashlearn.app.user.controller;
 
+import io.github.flashlearn.app.flashcard.mapper.FlashCardSetMapper;
 import io.github.flashlearn.app.user.dto.UpdateDailyGoalRequestDto;
 import io.github.flashlearn.app.user.dto.UserDashboardResponseDto;
 import io.github.flashlearn.app.user.mapper.UserDashboardMapper;
 import io.github.flashlearn.app.user.service.UserDashboardService;
+import io.github.flashlearn.app.user_stats.entity.UserStats;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,11 +19,18 @@ public class UserDashboardController {
 
     private final UserDashboardService userDashboardService;
     private final UserDashboardMapper userDashboardMapper;
+    private final FlashCardSetMapper flashCardSetMapper;
 
     @GetMapping("/{username}")
     public ResponseEntity<UserDashboardResponseDto> getUserInfo(@PathVariable String username) {
-        UserDashboardResponseDto userResponse = userDashboardMapper
-                .toUserDashboardResponseDto(userDashboardService.findByUsername(username));
+        UserStats userInfo = userDashboardService.findByUsername(username);
+        UserDashboardResponseDto userResponse = new UserDashboardResponseDto(
+                userInfo.getStreak(),
+                userInfo.getDailyGoal(),
+                userDashboardService.getOwnerSets(username).stream()
+                        .map(flashCardSetMapper::toFlashCardSetResponse)
+                        .toList());
+
         return ResponseEntity.status(HttpStatus.OK).body(userResponse);
     }
 
