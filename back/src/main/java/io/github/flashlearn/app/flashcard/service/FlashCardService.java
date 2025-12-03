@@ -1,24 +1,27 @@
 package io.github.flashlearn.app.flashcard.service;
 
 import io.github.flashlearn.app.auth.security.SecurityUtils;
-import io.github.flashlearn.app.flashcard.dto.CreateFlashCardRequest;
+import io.github.flashlearn.app.flashcard.dto.CreateFlashCardSetRequest;
+import io.github.flashlearn.app.flashcard.dto.FlashCardResponse;
 import io.github.flashlearn.app.flashcard.entity.FlashCard;
-import io.github.flashlearn.app.flashcard.entity.Type;
+import io.github.flashlearn.app.flashcard.entity.FlashCardSet;
+import io.github.flashlearn.app.flashcard.exception.FlashCardSetNotFoundException;
+import io.github.flashlearn.app.flashcard.repository.FlashCardSetRepository;
 import io.github.flashlearn.app.user.entity.User;
-import io.github.flashlearn.app.flashcard.exception.FlashCardAlreadyExistsException;
-import io.github.flashlearn.app.flashcard.exception.FlashCardNotFoundException;
 import io.github.flashlearn.app.flashcard.exception.UnauthorizedAccessException;
 import io.github.flashlearn.app.flashcard.repository.FlashCardRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class FlashCardService {
 
-    private final FlashCardRepository flashCardRepository;
+    private final FlashCardSetRepository flashCardSetRepository;
     private final SecurityUtils securityUtils;
 
     /**
@@ -26,91 +29,31 @@ public class FlashCardService {
      * @param request данные для создания карточки
      * @return созданная флешкарта
      */
-    public FlashCard createFlashCard(CreateFlashCardRequest request) {
+    @Transactional
+    public FlashCardSet createFlashCardSet(CreateFlashCardSetRequest request) {
         // Получаем текущего аутентифицированного пользователя
         User currentUser = securityUtils.getCurrentUser();
+        FlashCardSet flashCardSet = new FlashCardSet();
         
-        String question = request.getQuestion();
-        String answer = request.getAnswer();
-        Type type = request.getType();
+        flashCardSet.setTitle(request.title());
+        flashCardSet.setDescription(request.description());
+        flashCardSet.setOwner(currentUser);
+        flashCardSet.setCreatedAt(LocalDateTime.now());
+        flashCardSet.setUpdatedAt(LocalDateTime.now());
 
-        // Проверяем, не существует ли уже карточка с такими же вопросом и ответом у этого пользователя
-        if(flashCardRepository.existsByQuestionAndAnswerAndOwner(question, answer, currentUser)) {
-            throw new FlashCardAlreadyExistsException("This flash card already exists");
-        }
+        List<FlashCard> cards = request.flashCards().stream()
+                .map(dto -> {
+                    FlashCard card = new FlashCard();
+                    card.setQuestion(dto.question());
+                    card.setAnswer(dto.answer());
+                    card.setSet(flashCardSet);
+                    return card;
+                })
+                .toList();
 
-        // Создаем новую карточку и устанавливаем владельца
-        FlashCard newCard = new FlashCard(question, answer, type);
-        newCard.setOwner(currentUser);
+        flashCardSet.setFlashCards(cards);
 
-        return flashCardRepository.save(newCard);
-    }
-
-    /**
-     * Редактирует флешкарту. Пользователь может редактировать только свои карточки.
-     * @param id идентификатор карточки
-     * @param request новые данные для карточки
-     * @return отредактированная флешкарта
-     * @throws UnauthorizedAccessException если пользователь пытается редактировать чужую карточку
-     */
-    public FlashCard editFlashCard(Long id, CreateFlashCardRequest request) {
-        FlashCard flashCard = flashCardRepository.findById(id)
-                .orElseThrow(() -> new FlashCardNotFoundException("FlashCard not found with id" + id));
-
-        // Получаем текущего аутентифицированного пользователя
-        User currentUser = securityUtils.getCurrentUser();
-        
-        // Проверяем, что текущий пользователь является владельцем карточки
-        if (!flashCard.getOwner().getId().equals(currentUser.getId())) {
-            throw new UnauthorizedAccessException("У вас нет прав для редактирования этой карточки");
-        }
-
-        flashCard.setQuestion(request.getQuestion());
-        flashCard.setAnswer(request.getAnswer());
-        flashCard.setType(request.getType());
-
-        return flashCardRepository.save(flashCard);
-    }
-
-    /**
-     * Удаляет флешкарту. Пользователь может удалять только свои карточки.
-     * @param id идентификатор карточки
-     * @throws UnauthorizedAccessException если пользователь пытается удалить чужую карточку
-     */
-    public void deleteFlashCard(Long id) {
-        FlashCard flashCard = flashCardRepository.findById(id)
-                .orElseThrow(() -> new FlashCardNotFoundException("Flashcard with id not found, id: " + id));
-
-        // Получаем текущего аутентифицированного пользователя
-        User currentUser = securityUtils.getCurrentUser();
-        
-        // Проверяем, что текущий пользователь является владельцем карточки
-        if (!flashCard.getOwner().getId().equals(currentUser.getId())) {
-            throw new UnauthorizedAccessException("У вас нет прав для удаления этой карточки");
-        }
-
-        flashCardRepository.deleteById(id);
-    }
-
-    /**
-     * Находит флешкарту по идентификатору. Пользователь может просматривать только свои карточки.
-     * @param id идентификатор карточки
-     * @return найденная флешкарта
-     * @throws UnauthorizedAccessException если пользователь пытается просмотреть чужую карточку
-     */
-    public FlashCard findFlashCard(Long id) {
-        FlashCard flashCard = flashCardRepository.findById(id)
-                .orElseThrow(() -> new FlashCardNotFoundException("FlashCard with id not found" + id));
-
-        // Получаем текущего аутентифицированного пользователя
-        User currentUser = securityUtils.getCurrentUser();
-        
-        // Проверяем, что текущий пользователь является владельцем карточки
-        if (!flashCard.getOwner().getId().equals(currentUser.getId())) {
-            throw new UnauthorizedAccessException("У вас нет прав для просмотра этой карточки");
-        }
-
-        return flashCard;
+        return flashCardSetRepository.save(flashCardSet);
     }
 
     /**
@@ -119,16 +62,16 @@ public class FlashCardService {
      * @return список флешкарт пользователя
      * @throws UnauthorizedAccessException если пользователь пытается получить карточки другого пользователя
      */
-    public List<FlashCard> getAllFlashCardsByUsername(String username) {
+    public List<FlashCardSet> getAllFlashCardSets(String username) {
         // Получаем текущего аутентифицированного пользователя
         User currentUser = securityUtils.getCurrentUser();
-        
+
         // Проверяем, что пользователь запрашивает свои собственные карточки
         if (!currentUser.getUsername().equals(username)) {
             throw new UnauthorizedAccessException("У вас нет прав для просмотра карточек другого пользователя");
         }
 
-        return flashCardRepository.findByOwner(currentUser);
+        return flashCardSetRepository.findAllByOwner(currentUser);
     }
 
 }

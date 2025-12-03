@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { isLoggedIn, clearAuthData, getUsername } from '../utils/auth';
 import usePing from '../hooks/usePing';
 import api from '../utils/api';
@@ -68,14 +68,9 @@ function Dashboard() {
           streak: dashboardData.streak || 0
         });
         
-        // Если есть флешкарты в ответе, загружаем их
-        if (dashboardData.flashcards) {
-          setFlashCards(dashboardData.flashcards);
-        } else {
-          // Если нет, загружаем отдельно через flashcards контроллер
-          const cardsResponse = await api.get(`/flashcards/getAll/${username}`);
-          setFlashCards(cardsResponse.data || []);
-        }
+        // Используем флешкарты, если бэк вернул их в dashboard response
+        // backend may return `flashCards` or `flashcards` — accept both
+        setFlashCards(dashboardData.flashCards || dashboardData.flashcards || []);
       } catch (err) {
         console.error('Ошибка загрузки данных:', err);
         setFlashCards([]);
@@ -110,8 +105,8 @@ function Dashboard() {
   };
 
   const handleNewSet = () => {
-    // TODO: Открыть модальное окно для создания нового набора
-    console.log('Create new set');
+    // Navigate to the Create Set page
+    navigate(`${base}/create-set`);
   };
 
   const handleReviewNow = () => {
@@ -119,8 +114,50 @@ function Dashboard() {
     console.log('Start review session');
   };
 
-  // Пустой массив - наборы будут загружаться с бэка позже
-  const flashcardSets = [];
+  // Categories and sample Basic sets (starter content for new users)
+  const flashcardSetsByCategoryInitial = {
+    Popular: [],
+    Saved: [],
+    Basic: [
+      {
+        id: 'basic-1',
+        title: 'English Basics: Everyday Words',
+        icon: BookIcon,
+        cards: 12,
+        accuracy: 0,
+        type: 'BASIC',
+        cardsData: [
+          { front: 'Car', back: 'Машина' },
+          { front: 'House', back: 'Дом' },
+          { front: 'Book', back: 'Книга' }
+        ]
+      },
+      {
+        id: 'basic-2',
+        title: 'Spanish Basics: Greetings',
+        icon: GlobeIcon,
+        cards: 8,
+        accuracy: 0,
+        type: 'BASIC',
+        cardsData: [
+          { front: 'Hola', back: 'Привет' },
+          { front: 'Adiós', back: 'До свидания' }
+        ]
+      }
+    ]
+  };
+
+  const [flashcardSetsByCategoryState, setFlashcardSetsByCategoryState] = useState(flashcardSetsByCategoryInitial);
+  const [setsTab, setSetsTab] = useState('My');
+  const [setsDisplayTab, setSetsDisplayTab] = useState('My');
+  const location = useLocation();
+
+  // Organize flashCards into category tabs
+  const setSectionsByTab = {
+    My: flashCards || [],
+    Saved: [],
+    Popular: []
+  };
 
   const progressPercentage = (stats.todayReviewed / stats.dailyGoal) * 100;
 
@@ -140,15 +177,57 @@ function Dashboard() {
   const handleSaveGoal = async () => {
     try {
       // send update to backend
-      await api.put(`/dashboard/update_daily_goal/${username}`, { dailyGoal: selectedGoal });
-      // update local stats and close modal
-      setStats((s) => ({ ...s, dailyGoal: selectedGoal }));
+      const res = await api.put(`/dashboard/update_daily_goal/${username}`, { dailyGoal: selectedGoal });
+      // merge backend-returned stats into local state if present
+      if (res && res.data) {
+        // backend may return { stats: { ... } } or updated object directly
+        const returned = res.data.stats || res.data;
+        setStats((s) => ({ ...s, ...returned, dailyGoal: selectedGoal }));
+      } else {
+        // optimistic fallback
+        setStats((s) => ({ ...s, dailyGoal: selectedGoal }));
+      }
       setShowGoalModal(false);
     } catch (err) {
       console.error('Failed to update daily goal', err);
       // could show notification to user
     }
   };
+
+  // If navigated here with a newly created set, insert it into Saved and flashCards list
+  useEffect(() => {
+    if (location && location.state && location.state.createdSet) {
+      const created = location.state.createdSet;
+      setFlashcardSetsByCategoryState((prev) => {
+        const next = { ...prev };
+        next.Saved = [
+          {
+            id: created.id || `new-${Date.now()}`,
+            title: created.title || 'New set',
+            icon: created.icon || BookIcon,
+            cards: (created.cards && created.cards.length) || (created.cardsData && created.cardsData.length) || 0,
+            accuracy: created.accuracy || 0,
+            type: created.type || 'CUSTOM',
+            cardsData: created.cards || created.cardsData || []
+          },
+          ...next.Saved
+        ];
+        return next;
+      });
+      // also prepend to backend flashCards list for immediate display
+      setFlashCards((prev) => {
+        const norm = {
+          id: created.id || `new-${Date.now()}`,
+          title: created.title || 'New set',
+          description: created.description || created.desc || '',
+          flashCards: created.flashCards || created.cards || created.cardsData || [],
+        };
+        return [norm, ...prev];
+      });
+      // clear location state to avoid duplicate insertion on refresh
+      try { window.history.replaceState({}, document.title); } catch (e) {}
+    }
+  }, [location]);
 
   return (
     <div className="dashboard-container">
@@ -271,34 +350,63 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Suggested flashcard sets */}
-          {flashcardSets.length > 0 && (
-          <div className="sets-section">
-            <div className="sets-header">
-              <h2 className="sets-title">Suggested flashcard sets</h2>
+          {/* Flashcard sets by section */}
+          <div className="sets-section" style={{ marginTop: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h2 className="sets-title">Flashcard sets</h2>
               <button className="customize-btn">
                 <FilterIcon /> Customize
               </button>
             </div>
-            <div className="sets-grid">
-              {flashcardSets.map((set) => {
-                const IconComponent = set.icon;
-                return (
-                  <div key={set.id} className="set-card">
-                    <div className="set-icon">
-                      <IconComponent />
-                    </div>
-                    <h4 className="set-title">{set.title}</h4>
-                    <div className="set-info">
-                      <span className="set-cards">{set.cards} cards</span>
-                      <span className="set-accuracy">Avg {set.accuracy}%</span>
-                    </div>
-                  </div>
-                );
-              })}
+
+            {/* Tabs for sections */}
+            <div className="sets-tabs" style={{ display: 'flex', gap: 8, marginBottom: 16, borderBottom: '1px solid #e5e7eb', paddingBottom: 8 }}>
+              {['My', 'Saved', 'Popular'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setSetsDisplayTab(tab)}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: 6,
+                    border: setsDisplayTab === tab ? '2px solid #f97316' : '1px solid #e5e7eb',
+                    background: setsDisplayTab === tab ? '#fff7ed' : '#ffffff',
+                    cursor: 'pointer',
+                    fontWeight: setsDisplayTab === tab ? 600 : 500,
+                    transition: 'all 0.2s',
+                    fontSize: 14
+                  }}
+                >
+                  {tab}
+                </button>
+              ))}
             </div>
+
+            {/* Display sets for selected tab */}
+            {setSectionsByTab[setsDisplayTab] && setSectionsByTab[setsDisplayTab].length > 0 ? (
+              <div className="sets-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 220px))', gap: 16, alignItems: 'start' }}>
+                {setSectionsByTab[setsDisplayTab].map((set) => {
+                  const id = set.id || set._id || `${set.title}-${Math.random().toString(36).slice(2,8)}`;
+                  const title = set.title || set.name || 'Untitled set';
+                  const description = set.description || set.desc || set.summary || '';
+                  return (
+                    <div key={id} className="set-card" onClick={() => navigate(`${base}/study-session/${id}`, { state: { set } })} style={{ cursor: 'pointer', padding: 14, borderRadius: 8, background: '#fff', border: '1px solid #e5e7eb', height: 140, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 4px rgba(16,24,40,0.04)', transition: 'all 0.2s', hover: { transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' } }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <h4 className="set-title" style={{ margin: 0, fontSize: 16, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</h4>
+                        <p className="set-desc" style={{ margin: 0, color: '#6b7280', fontSize: 13, lineHeight: '1.2', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{description || 'No description'}</p>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <span style={{ fontSize: 12, color: '#9ca3af' }}>{(set.flashCards && set.flashCards.length) || (set.cards && set.cards) || 0} cards</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '40px 20px', color: '#9ca3af' }}>
+                <p style={{ fontSize: 14 }}>No sets in this section yet.</p>
+              </div>
+            )}
           </div>
-          )}
           {/* Goal modal */}
           {showGoalModal && (
             <div className="modal-backdrop" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }}>

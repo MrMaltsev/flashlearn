@@ -23,10 +23,4 @@ public class AuthController {
 
         return ResponseEntity.ok(new AuthResponse(token, user.getUsername(), user.getRole().name()));
     }
-
-    @GetMapping("/verify")
-    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
-        authService.verifyToken(token);
-        return ResponseEntity.ok("Email verified!");
-    }
 }

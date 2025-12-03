@@ -7,6 +7,7 @@ import io.github.flashlearn.app.auth.exception.TokenNotFoundException;
 import io.github.flashlearn.app.common.dto.ApiError;
 import io.github.flashlearn.app.flashcard.exception.FlashCardAlreadyExistsException;
 import io.github.flashlearn.app.flashcard.exception.FlashCardNotFoundException;
+import io.github.flashlearn.app.flashcard.exception.FlashCardSetNotFoundException;
 import io.github.flashlearn.app.flashcard.exception.UnauthorizedAccessException;
 import io.github.flashlearn.app.settings.exception.UserSettingsNotFoundException;
 import io.github.flashlearn.app.user.exception.UserAlreadyExistsException;
@@ -193,6 +194,21 @@ public class GlobalExceptionHandler{
         log.error("Can not find user settings: {}", ex.getMessage(), ex);
 
         ApiError body = new ApiError(HttpStatus.NOT_FOUND.value(), "USER_SETTINGS_NOT_FOUND", ex.getMessage(),
+                Instant.now(), request.getRequestURI(), traceId);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    //Flashcard set not found
+    @ExceptionHandler(FlashCardSetNotFoundException.class)
+    public ResponseEntity<ApiError> FlashCardSetNotFoundExceptionHandler(FlashCardSetNotFoundException ex,
+                                                                         HttpServletRequest request) {
+        String traceId = tracer.currentSpan() != null
+                ? tracer.currentSpan().context().traceId()
+                : "N/A";
+
+        log.error("Can not find flashcard set: {}", ex.getMessage(), ex);
+
+        ApiError body = new ApiError(HttpStatus.NOT_FOUND.value(), "FLASHCARD_SET_NOT_FOUND", ex.getMessage(),
                 Instant.now(), request.getRequestURI(), traceId);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
