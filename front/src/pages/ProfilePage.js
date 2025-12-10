@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import api from '../utils/api';
 import usePing from '../hooks/usePing';
 import { isLoggedIn, clearAuthData, getUsername } from '../utils/auth';
+import NotificationBell from '../components/NotificationBell';
 import {
   HomeIcon,
   ProfileIcon,
@@ -23,12 +24,12 @@ function ProfilePage() {
   const [error, setError] = useState('');
   const [friends, setFriends] = useState([]);
   const [searchFriendQuery, setSearchFriendQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [friendActionStatus, setFriendActionStatus] = useState(null);
+  const [friendActionLoading, setFriendActionLoading] = useState(false);
   const [activeProfileTab, setActiveProfileTab] = useState('about');
 
-  // notifications
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications, setNotifications] = useState([]); // placeholder, load from backend later
-  const notifRef = useRef(null);
+  const debouncedSearch = useRef(null);
 
   // Вызываем ping при загрузке страницы
   usePing();
@@ -45,10 +46,9 @@ function ProfilePage() {
         // Получаем информацию о профиле с контроллера profile
         const response = await api.get(`/profile/${username}`);
         setProfile(response.data);
-        // TODO: fetch friends list from backend when endpoint is ready
-        setFriends([]); // placeholder
-        // TODO: fetch user notifications when endpoint ready
-        setNotifications([]); // placeholder
+        // Загружаем друзей
+        const friendsRes = await api.get('/friendship/friends');
+        setFriends(friendsRes.data || []);
         setLoading(false);
       } catch (err) {
         // Обрабатываем различные типы ошибок
@@ -74,19 +74,6 @@ function ProfilePage() {
     fetchProfile();
   }, [username, navigate]);
 
-  // Закрытие окна уведомлений при клике вне его
-  useEffect(() => {
-    const handleOutsideClick = (e) => {
-      if (notifRef.current && !notifRef.current.contains(e.target)) {
-        setShowNotifications(false);
-      }
-    };
-    if (showNotifications) {
-      document.addEventListener('mousedown', handleOutsideClick);
-    }
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, [showNotifications]);
-
   const handleLogout = () => {
     // Очищаем данные аутентификации
     clearAuthData();
@@ -108,6 +95,52 @@ function ProfilePage() {
     const altProfilePath = `/${currentUsername}`;
     if (location.pathname === profilePath || location.pathname === altProfilePath) return;
     navigate(profilePath);
+  };
+
+  const searchUsers = (value) => {
+    const q = value.trim();
+    if (!q) {
+      setSearchResults([]);
+      return;
+    }
+    api.get(`/friendship/search?query=${encodeURIComponent(q)}`)
+      .then((res) => setSearchResults(res.data || []))
+      .catch(() => setSearchResults([]));
+  };
+
+  const handleSearchChange = (e) => {
+    const val = e.target.value;
+    setSearchFriendQuery(val);
+    if (debouncedSearch.current) clearTimeout(debouncedSearch.current);
+    debouncedSearch.current = setTimeout(() => searchUsers(val), 250);
+  };
+
+  const handleSendFriendRequest = async (candidate) => {
+    const usernameToAdd = (candidate || searchFriendQuery).trim();
+    if (!usernameToAdd) {
+      setFriendActionStatus({ type: 'error', message: 'Введите username друга' });
+      return;
+    }
+    try {
+      setFriendActionLoading(true);
+      setFriendActionStatus(null);
+      await api.post('/friendship/send', { receiver: usernameToAdd });
+      setFriendActionStatus({ type: 'success', message: 'Заявка отправлена' });
+      setSearchFriendQuery('');
+      setSearchResults([]);
+      // Обновляем список друзей после успешного действия
+      try {
+        const friendsRes = await api.get('/friendship/friends');
+        setFriends(friendsRes.data || []);
+      } catch (_) {
+        // ignore
+      }
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Не удалось отправить заявку';
+      setFriendActionStatus({ type: 'error', message: msg });
+    } finally {
+      setFriendActionLoading(false);
+    }
   };
 
   // Generate friend code removed — search will use username directly
@@ -266,63 +299,7 @@ function ProfilePage() {
             <span className="header-logo">Flashlearn</span>
           </div>
           <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            {/* Notifications bell */}
-            <div style={{ position: 'relative' }} ref={notifRef}>
-              <button
-                onClick={() => setShowNotifications((s) => !s)}
-                aria-label="Notifications"
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: 10,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '1px solid #e5e7eb',
-                  background: '#ffffff',
-                  cursor: 'pointer'
-                }}
-              >
-                {/* bell icon */}
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M15 17H9" stroke="#6b7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M12 22c1.104 0 2-.672 2-1.5h-4c0 .828.896 1.5 2 1.5z" stroke="#6b7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M18 8a6 6 0 10-12 0c0 7-3 8-3 8h18s-3-1-3-8" stroke="#6b7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-
-              {showNotifications && (
-                <div style={{
-                  position: 'absolute',
-                  right: 0,
-                  top: 44,
-                  width: 300,
-                  background: '#fff',
-                  borderRadius: 8,
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.12)',
-                  padding: 12,
-                  zIndex: 120,
-                  transition: 'opacity .18s ease, transform .18s ease',
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <strong style={{ fontSize: 14 }}>Уведомления</strong>
-                    <button onClick={() => setShowNotifications(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#9ca3af' }}>✕</button>
-                  </div>
-                  <div style={{ maxHeight: 260, overflowY: 'auto' }}>
-                    {notifications.length === 0 ? (
-                      <p style={{ color: '#9ca3af', textAlign: 'center', padding: '28px 6px', margin: 0 }}>Уведомлений пока нет</p>
-                    ) : (
-                      notifications.map((n, idx) => (
-                        <div key={idx} style={{ padding: 10, borderRadius: 6, background: '#f8fafc', marginBottom: 8 }}>
-                          <div style={{ fontSize: 13, color: '#111827' }}>{n.title}</div>
-                          <div style={{ fontSize: 12, color: '#6b7280' }}>{n.body}</div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+            <NotificationBell />
 
             <div
               className="user-avatar"
@@ -424,7 +401,7 @@ function ProfilePage() {
                 type="text"
                 placeholder="Search friends by username..."
                 value={searchFriendQuery}
-                onChange={(e) => setSearchFriendQuery(e.target.value)}
+                onChange={handleSearchChange}
                 style={{
                   width: '100%',
                   padding: '8px 12px',
@@ -438,7 +415,25 @@ function ProfilePage() {
 
               {/* Friends list */}
               <div style={{ maxHeight: 400, overflowY: 'auto' }}>
-                {friends.length === 0 ? (
+                {searchFriendQuery && searchResults.length > 0 ? (
+                  searchResults.map((user) => (
+                    <div key={user.username} style={{ padding: 10, borderRadius: 6, background: '#f9fafb', marginBottom: 8, border: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ width: 36, height: 36, borderRadius: 6, background: '#0ea5e9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 600, fontSize: 14 }}>
+                          {user.username.charAt(0).toUpperCase()}
+                        </div>
+                        <span style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>{user.username}</span>
+                      </div>
+                      <button
+                        onClick={() => handleSendFriendRequest(user.username)}
+                        disabled={friendActionLoading}
+                        style={{ padding: '6px 10px', borderRadius: 6, border: 'none', background: '#10b981', color: '#fff', fontSize: 12, cursor: friendActionLoading ? 'not-allowed' : 'pointer' }}
+                      >
+                        Add
+                      </button>
+                    </div>
+                  ))
+                ) : friends.length === 0 ? (
                   <p style={{ fontSize: 13, color: '#9ca3af', textAlign: 'center', padding: '20px 0' }}>
                     No friends yet
                   </p>
@@ -456,10 +451,15 @@ function ProfilePage() {
                 )}
               </div>
 
-              {/* Add friend button */}
-              <button style={{ width: '100%', padding: '8px 12px', marginTop: 12, borderRadius: 6, background: '#10b981', color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
-                Add friend
-              </button>
+              {friendActionStatus && (
+                <p style={{
+                  margin: '8px 0 0 0',
+                  fontSize: 12,
+                  color: friendActionStatus.type === 'success' ? '#16a34a' : '#dc2626'
+                }}>
+                  {friendActionStatus.message}
+                </p>
+              )}
             </div>
           </div>
         </main>

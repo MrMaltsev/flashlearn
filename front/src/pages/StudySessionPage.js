@@ -1,7 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { getUsername } from '../utils/auth';
 import api from '../utils/api';
+import NotificationBell from '../components/NotificationBell';
+import {
+  HomeIcon,
+  ProfileIcon,
+  SettingsIcon,
+  SearchIcon,
+  FAQIcon,
+  LogoutIcon,
+  LightningIcon
+} from '../components/Icons';
 import '../styles/StudySession.css';
 
 function StudySessionPage() {
@@ -22,6 +32,8 @@ function StudySessionPage() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [responses, setResponses] = useState([]); // array of { cardIdx, response: 'correct'|'forgot'|'skip' }
   const [sessionFinished, setSessionFinished] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [sendingProgress, setSendingProgress] = useState(false);
 
   // Load set and cards
   useEffect(() => {
@@ -54,10 +66,11 @@ function StudySessionPage() {
     setIsFlipped(false);
     setResponses([]);
     setSessionFinished(false);
+    setShowExitConfirm(false);
   };
 
   const handleResponse = (response) => {
-    // Record response
+    // Record response locally
     setResponses((prev) => [...prev, { cardIdx: currentIndex, response }]);
 
     // Move to next card or finish
@@ -75,146 +88,305 @@ function StudySessionPage() {
   };
 
   const goBack = () => {
+    if (sessionStarted && !sessionFinished) {
+      setShowExitConfirm(true);
+    } else {
+      navigate(`/${username}/dashboard`);
+    }
+  };
+
+  const confirmExit = () => {
+    setShowExitConfirm(false);
+    setSessionStarted(false);
+    setSessionFinished(false);
+    setResponses([]);
     navigate(`/${username}/dashboard`);
   };
+
+  const cancelExit = () => setShowExitConfirm(false);
+
+  const sendProgress = async (reviewed) => {
+    if (!reviewed) return;
+    try {
+      setSendingProgress(true);
+      await api.post('/user-stats/progress', { reviewed });
+    } catch (e) {
+      // ignore errors, don't block UI
+    } finally {
+      setSendingProgress(false);
+    }
+  };
+
+  useEffect(() => {
+    if (sessionFinished) {
+      // send total reviewed once on completion
+      const totalReviewed = responses.length;
+      if (totalReviewed > 0) {
+        sendProgress(totalReviewed);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionFinished]);
 
   // Compute stats
   const correct = responses.filter((r) => r.response === 'correct').length;
   const forgot = responses.filter((r) => r.response === 'forgot').length;
   const skipped = responses.filter((r) => r.response === 'skip').length;
+  const reviewed = responses.length;
+  const remaining = Math.max(cards.length - reviewed, 0);
 
   if (loading) return <div style={{ padding: 20 }}>Loading...</div>;
   if (!set) return <div style={{ padding: 20 }}>Set not found.</div>;
   if (!cards || cards.length === 0) return <div style={{ padding: 20 }}>No cards in this set.</div>;
 
+  const headerLayout = (
+    <header className="study-header dashboard-header">
+      <div className="header-left">
+        <LightningIcon />
+        <span className="header-logo">Flashlearn</span>
+      </div>
+      <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <NotificationBell />
+        <div className="user-avatar">
+          {username ? username.charAt(0).toUpperCase() : 'U'}
+        </div>
+      </div>
+    </header>
+  );
+
+  const sidebarLayout = (
+    <aside className="dashboard-sidebar">
+      <div className="sidebar-icon-group">
+        <button className="sidebar-icon-btn" onClick={() => navigate(`/${username}/dashboard`)} title="Главная страница">
+          <HomeIcon />
+        </button>
+        <button className="sidebar-icon-btn" onClick={() => navigate(`/${username}`)} title="Профиль">
+          <ProfileIcon />
+        </button>
+        <button className="sidebar-icon-btn" onClick={() => navigate(`/${username}/settings`)} title="Настройки">
+          <SettingsIcon />
+        </button>
+        <button className="sidebar-icon-btn" onClick={() => navigate(`/${username}/search`)} title="Поиск">
+          <SearchIcon />
+        </button>
+      </div>
+      <div className="sidebar-icon-group-bottom">
+        <button className="sidebar-icon-btn" onClick={() => navigate(`/${username}/faq`)} title="FAQ">
+          <FAQIcon />
+        </button>
+        <button className="sidebar-icon-btn" onClick={() => { localStorage.clear(); navigate('/login'); }} title="Выход">
+          <LogoutIcon />
+        </button>
+      </div>
+    </aside>
+  );
+
   if (!sessionStarted) {
     return (
-      <div className="study-session-container">
-        <header className="study-header">
-          <button className="study-back-btn" onClick={goBack}>← Back</button>
-          <div />
-        </header>
-        <main className="study-main">
-          <div className="study-intro">
-            <h1>{set.title}</h1>
-            <p className="study-intro-desc">{set.description || 'Start learning!'}</p>
-            <div className="study-intro-stats">
-              <div className="stat-item">
-                <span className="stat-label">Cards</span>
-                <span className="stat-value">{cards.length}</span>
+      <div className="dashboard-container study-layout">
+        {sidebarLayout}
+        <div className="dashboard-main">
+          {headerLayout}
+          <main className="dashboard-content study-main-content">
+            <div className="study-intro-card">
+              <div>
+                <p className="study-label">Набор карточек</p>
+                <h1 className="study-title">{set.title}</h1>
+                <p className="study-intro-desc">{set.description || 'Начните изучение прямо сейчас!'}</p>
+                <div className="study-intro-stats">
+                  <div className="stat-item">
+                    <span className="stat-label">Cards</span>
+                    <span className="stat-value">{cards.length}</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">Reviewed</span>
+                    <span className="stat-value">{reviewed}</span>
+                  </div>
+                </div>
               </div>
+              <button className="study-start-btn" onClick={startSession}>
+                Start learning
+              </button>
             </div>
-            <button className="study-start-btn" onClick={startSession}>
-              Start learning
-            </button>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     );
   }
 
   if (sessionFinished) {
     return (
-      <div className="study-session-container">
-        <header className="study-header">
-          <button className="study-back-btn" onClick={goBack}>← Back</button>
-          <div />
-        </header>
-        <main className="study-main">
-          <div className="study-results">
-            <h1>Session Complete!</h1>
-            <div className="results-grid">
-              <div className="result-card correct-bg">
-                <div className="result-icon">✓</div>
-                <div className="result-label">Remembered</div>
-                <div className="result-count">{correct}</div>
+      <div className="dashboard-container study-layout">
+        {sidebarLayout}
+        <div className="dashboard-main">
+          {headerLayout}
+          <main className="dashboard-content study-main-content">
+            <div className="study-results-card">
+              <div className="results-head">
+                <div>
+                  <p className="study-label">Сессия завершена</p>
+                  <h1>Great job!</h1>
+                </div>
+                <button className="study-back-btn subtle" onClick={() => navigate(`/${username}/dashboard`)}>← Back</button>
               </div>
-              <div className="result-card forgot-bg">
-                <div className="result-icon">✗</div>
-                <div className="result-label">Forgot</div>
-                <div className="result-count">{forgot}</div>
+              <div className="results-grid">
+                <div className="result-card correct-bg">
+                  <div className="result-icon">✓</div>
+                  <div className="result-label">Remembered</div>
+                  <div className="result-count">{correct}</div>
+                </div>
+                <div className="result-card forgot-bg">
+                  <div className="result-icon">✗</div>
+                  <div className="result-label">Forgot</div>
+                  <div className="result-count">{forgot}</div>
+                </div>
+                <div className="result-card skip-bg">
+                  <div className="result-icon">⊘</div>
+                  <div className="result-label">Skipped</div>
+                  <div className="result-count">{skipped}</div>
+                </div>
               </div>
-              <div className="result-card skip-bg">
-                <div className="result-icon">⊘</div>
-                <div className="result-label">Skipped</div>
-                <div className="result-count">{skipped}</div>
-              </div>
-            </div>
-            <div className="results-summary">
-              <p>You reviewed {correct + forgot + skipped} out of {cards.length} cards</p>
-              {correct > 0 && <p className="results-accuracy">Accuracy: {Math.round((correct / (correct + forgot)) * 100)}%</p>}
-            </div>
-            <div className="results-actions">
-              <button className="study-restart-btn" onClick={restartSession}>
-                Start again
+              <div className="results-summary">
+                <p>You reviewed {reviewed} of {cards.length} cards</p>
+                {reviewed > 0 && (
+                  <p className="results-accuracy">
+              <button
+                className="back-button"
+                onClick={() => {
+                  // simple back behavior: navigate to user's dashboard
+                  navigate(`/${username}/dashboard`);
+                }}
+              >
+                Назад
               </button>
-              <button className="study-close-btn" onClick={goBack}>
-                Exit
-              </button>
+                    Accuracy: {correct + forgot > 0 ? Math.round((correct / (correct + forgot)) * 100) : 0}%
+                  </p>
+                )}
+              </div>
+              <div className="results-actions">
+                <button className="study-restart-btn" onClick={restartSession}>
+                  Restart session
+                </button>
+                <button className="study-close-btn" onClick={() => navigate(`/${username}/dashboard`)}>
+                  Exit
+                </button>
+              </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     );
   }
 
   const currentCard = cards[currentIndex];
   const progress = ((currentIndex + 1) / cards.length) * 100;
+  const overallProgress = (reviewed / cards.length) * 100;
 
   return (
-    <div className="study-session-container">
-      <header className="study-header">
-        <button className="study-back-btn" onClick={goBack}>← Back</button>
-        <div className="study-progress">
-          <span className="progress-text">{currentIndex + 1} / {cards.length}</span>
-          <div className="progress-bar-container">
-            <div className="progress-bar" style={{ width: `${progress}%` }} />
-          </div>
-        </div>
-      </header>
+    <div className="dashboard-container study-layout">
+      {sidebarLayout}
+      <div className="dashboard-main">
+        {headerLayout}
+        <main className="dashboard-content study-main-content two-col">
+          <div className="study-left">
+            <div className="study-top-bar">
+              <button className="study-back-btn subtle" onClick={goBack}>← Exit</button>
+              <div className="study-progress">
+                <span className="progress-text">{currentIndex + 1} / {cards.length}</span>
+                <div className="progress-bar-container thin">
+                  <div className="progress-bar" style={{ width: `${progress}%` }} />
+                </div>
+              </div>
+            </div>
 
-      <main className="study-main">
-        <div className="study-content">
-          <div
-            className={`study-card ${isFlipped ? 'flipped' : ''}`}
-            onClick={() => setIsFlipped((f) => !f)}
-          >
-            <div className="study-card-inner">
-              <div className="study-card-front">
-                <div className="study-card-label">Question</div>
-                <div className="study-card-text">{currentCard.question || currentCard.front || '—'}</div>
+            <div
+              className={`study-card ${isFlipped ? 'flipped' : ''}`}
+              onClick={() => setIsFlipped((f) => !f)}
+            >
+              <div className="study-card-inner">
+                <div className="study-card-front">
+                  <div className="study-card-label">Question</div>
+                  <div className="study-card-text">{currentCard.question || currentCard.front || '—'}</div>
+                </div>
+                <div className="study-card-back">
+                  <div className="study-card-label">Answer</div>
+                  <div className="study-card-text">{currentCard.answer || currentCard.back || '—'}</div>
+                </div>
               </div>
-              <div className="study-card-back">
-                <div className="study-card-label">Answer</div>
-                <div className="study-card-text">{currentCard.answer || currentCard.back || '—'}</div>
-              </div>
+            </div>
+
+            <div className="study-hint">Click card to reveal answer</div>
+
+            <div className="study-actions">
+              <button
+                className="study-action-btn correct-btn"
+                onClick={() => handleResponse('correct')}
+              >
+                ✓ Remembered
+              </button>
+              <button
+                className="study-action-btn forgot-btn"
+                onClick={() => handleResponse('forgot')}
+              >
+                ✗ Forgot
+              </button>
+              <button
+                className="study-action-btn skip-btn"
+                onClick={() => handleResponse('skip')}
+              >
+                ⊘ Skip
+              </button>
             </div>
           </div>
 
-          <div className="study-hint">Click card to reveal answer</div>
+          <aside className="study-side">
+            <div className="side-card">
+              <div className="side-header">
+                <span>Progress</span>
+                <span className="side-count">{reviewed}/{cards.length}</span>
+              </div>
+              <div className="progress-bar-container">
+                <div className="progress-bar" style={{ width: `${overallProgress}%` }} />
+              </div>
+              <div className="side-stats-grid">
+                <div className="side-stat">
+                  <p className="side-stat-label">Correct</p>
+                  <p className="side-stat-value">{correct}</p>
+                </div>
+                <div className="side-stat">
+                  <p className="side-stat-label">Forgot</p>
+                  <p className="side-stat-value">{forgot}</p>
+                </div>
+                <div className="side-stat">
+                  <p className="side-stat-label">Skipped</p>
+                  <p className="side-stat-value">{skipped}</p>
+                </div>
+                <div className="side-stat">
+                  <p className="side-stat-label">Remaining</p>
+                  <p className="side-stat-value">{remaining}</p>
+                </div>
+              </div>
+            </div>
+            <div className="side-card tips">
+              <h4>Tip</h4>
+              <p>Try to recall before flipping. Use "Skip" when unsure to revisit later.</p>
+            </div>
+          </aside>
+        </main>
+      </div>
 
-          <div className="study-actions">
-            <button
-              className="study-action-btn correct-btn"
-              onClick={() => handleResponse('correct')}
-            >
-              ✓ Remembered
-            </button>
-            <button
-              className="study-action-btn forgot-btn"
-              onClick={() => handleResponse('forgot')}
-            >
-              ✗ Forgot
-            </button>
-            <button
-              className="study-action-btn skip-btn"
-              onClick={() => handleResponse('skip')}
-            >
-              ⊘ Skip
-            </button>
+      {showExitConfirm && (
+        <div className="modal-backdrop">
+          <div className="modal">
+            <h3>Выйти из сессии?</h3>
+            <p>Прогресс этой сессии не будет сохранён, если выйти сейчас.</p>
+            <div className="modal-actions">
+              <button className="edit-btn secondary" onClick={cancelExit}>Отмена</button>
+              <button className="edit-btn primary" onClick={confirmExit}>Выйти</button>
+            </div>
           </div>
         </div>
-      </main>
+      )}
     </div>
   );
 }

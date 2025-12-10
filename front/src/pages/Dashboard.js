@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { isLoggedIn, clearAuthData, getUsername } from '../utils/auth';
 import usePing from '../hooks/usePing';
 import api from '../utils/api';
+import NotificationBell from '../components/NotificationBell';
 import {
   HomeIcon,
   ProfileIcon,
@@ -38,7 +39,8 @@ function Dashboard() {
     dailyGoal: 50,
     timeSpent: 0,
     accuracy: 0,
-    streak: 0
+    streak: 0,
+    dailyGoalCompleted: false
   });
 
   // Вызываем ping при загрузке страницы
@@ -61,11 +63,12 @@ function Dashboard() {
         
         // Обновляем статистику из полученных данных
         setStats({
-          todayReviewed: dashboardData.todayReviewed || 0,
+          todayReviewed: dashboardData.reviewedToday ?? dashboardData.todayReviewed ?? 0,
           dailyGoal: dashboardData.dailyGoal || 50,
           timeSpent: dashboardData.timeSpent || 0,
           accuracy: dashboardData.accuracy   || 0,
-          streak: dashboardData.streak || 0
+          streak: dashboardData.streak || 0,
+          dailyGoalCompleted: dashboardData.dailyGoalCompleted || false
         });
         
         // Используем флешкарты, если бэк вернул их в dashboard response
@@ -159,7 +162,7 @@ function Dashboard() {
     Popular: []
   };
 
-  const progressPercentage = (stats.todayReviewed / stats.dailyGoal) * 100;
+  const progressPercentage = Math.min(100, (stats.todayReviewed / stats.dailyGoal) * 100);
 
   // State for Set Goal modal
   const [showGoalModal, setShowGoalModal] = useState(false);
@@ -290,6 +293,7 @@ function Dashboard() {
             <span className="header-logo">Flashlearn</span>
           </div>
           <div className="header-right">
+            <NotificationBell />
             <button className="new-set-btn" onClick={handleNewSet}>
               + New set
             </button>

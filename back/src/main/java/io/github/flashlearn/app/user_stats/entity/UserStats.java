@@ -2,7 +2,6 @@ package io.github.flashlearn.app.user_stats.entity;
 
 import io.github.flashlearn.app.user.entity.User;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Null;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -25,11 +24,15 @@ public class UserStats {
     private int streak;
     private int dailyGoal;
     private boolean dailyGoalCompleted;
+    private int reviewedToday;
+    private LocalDate reviewedDate;
 
     public UserStats() {
         this.lastLoginDate = LocalDate.now();
         this.streak = 1;
         this.dailyGoal = 50;
         this.dailyGoalCompleted = false;
+        this.reviewedToday = 0;
+        this.reviewedDate = LocalDate.now();
     }
 }

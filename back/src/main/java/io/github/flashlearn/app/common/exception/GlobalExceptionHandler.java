@@ -5,6 +5,9 @@ import io.github.flashlearn.app.auth.exception.InvalidCredentialsException;
 import io.github.flashlearn.app.auth.exception.TokenExpiredException;
 import io.github.flashlearn.app.auth.exception.TokenNotFoundException;
 import io.github.flashlearn.app.common.dto.ApiError;
+import io.github.flashlearn.app.friendship.exception.FiendshipRequestNotFoundException;
+import io.github.flashlearn.app.friendship.exception.Forbidden;
+import io.github.flashlearn.app.friendship.exception.FriendshipAlreadyExistsException;
 import io.github.flashlearn.app.flashcard.exception.FlashCardAlreadyExistsException;
 import io.github.flashlearn.app.flashcard.exception.FlashCardNotFoundException;
 import io.github.flashlearn.app.flashcard.exception.FlashCardSetNotFoundException;
@@ -132,6 +135,48 @@ public class GlobalExceptionHandler{
         log.warn("Access denied: {}", ex.getMessage());
 
         ApiError body = new ApiError(HttpStatus.FORBIDDEN.value(), "ACCESS_DENIED", ex.getMessage(),
+                Instant.now(), request.getRequestURI(), traceId);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+    }
+
+    @ExceptionHandler(FriendshipAlreadyExistsException.class)
+    public ResponseEntity<ApiError> friendshipAlreadyExistsExceptionHandler(FriendshipAlreadyExistsException ex,
+                                                                           HttpServletRequest request) {
+        String traceId = tracer.currentSpan() != null
+                ? tracer.currentSpan().context().traceId()
+                : "N/A";
+
+        log.warn("Friendship constraint: {}", ex.getMessage());
+
+        ApiError body = new ApiError(HttpStatus.CONFLICT.value(), "FRIENDSHIP_ALREADY_EXISTS", ex.getMessage(),
+                Instant.now(), request.getRequestURI(), traceId);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(FiendshipRequestNotFoundException.class)
+    public ResponseEntity<ApiError> friendshipNotFoundExceptionHandler(FiendshipRequestNotFoundException ex,
+                                                                        HttpServletRequest request) {
+        String traceId = tracer.currentSpan() != null
+                ? tracer.currentSpan().context().traceId()
+                : "N/A";
+
+        log.warn("Friendship request not found: {}", ex.getMessage());
+
+        ApiError body = new ApiError(HttpStatus.NOT_FOUND.value(), "FRIENDSHIP_REQUEST_NOT_FOUND", ex.getMessage(),
+                Instant.now(), request.getRequestURI(), traceId);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(Forbidden.class)
+    public ResponseEntity<ApiError> friendshipForbiddenExceptionHandler(Forbidden ex,
+                                                                        HttpServletRequest request) {
+        String traceId = tracer.currentSpan() != null
+                ? tracer.currentSpan().context().traceId()
+                : "N/A";
+
+        log.warn("Friendship forbidden: {}", ex.getMessage());
+
+        ApiError body = new ApiError(HttpStatus.FORBIDDEN.value(), "FRIENDSHIP_FORBIDDEN", ex.getMessage(),
                 Instant.now(), request.getRequestURI(), traceId);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }

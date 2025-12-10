@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import api from '../utils/api';
 import usePing from '../hooks/usePing';
 import { isLoggedIn, getUsername, clearAuthData } from '../utils/auth';
+import NotificationBell from '../components/NotificationBell';
 import {
   HomeIcon,
   ProfileIcon,
@@ -14,6 +15,7 @@ import {
 } from '../components/Icons';
 import '../styles/ProfilePage.css';
 import '../styles/Dashboard.css';
+import '../styles/EditProfile.css';
 
 function EditProfilePage() {
   const { username } = useParams();
@@ -219,46 +221,67 @@ function EditProfilePage() {
             <LightningIcon />
             <span className="header-logo">Flashlearn</span>
           </div>
-          <div className="header-right">
+          <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <NotificationBell />
             <div className="user-avatar">
               {currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U'}
             </div>
           </div>
         </header>
-        <main className="dashboard-content">
-          <div className="profile-container">
-            <div className="profile-card">
-              <h2 className="profile-edit-title">Редактирование профиля</h2>
-              {error && <p className="profile-error">{error}</p>}
-              <form onSubmit={handleSubmit} className="profile-edit-form">
-                <div className="profile-edit-field">
-                  <label className="profile-edit-label">Имя пользователя:</label>
+        <main className="dashboard-content edit-profile-content">
+          <div className="edit-profile-grid">
+            <div className="edit-card">
+              <div className="edit-card-header">
+                <div className="edit-avatar">
+                  {formData.username ? formData.username.charAt(0).toUpperCase() : 'U'}
+                </div>
+                <div>
+                  <p className="edit-label-muted">Редактирование профиля</p>
+                  <h2 className="edit-title">{formData.username || 'Ваше имя'}</h2>
+                </div>
+              </div>
+              {error && <p className="profile-error" style={{ marginTop: 8 }}>{error}</p>}
+              <form onSubmit={handleSubmit} className="edit-form">
+                <div className="edit-field">
+                  <label className="edit-label">Имя пользователя</label>
                   <input
                     type="text"
                     value={formData.username}
                     onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    className="profile-edit-input"
+                    className="edit-input"
                     required
+                    placeholder="Введите новое имя"
                   />
                 </div>
-                <div className="profile-edit-field">
-                  <label className="profile-edit-label">О себе:</label>
+                <div className="edit-field">
+                  <label className="edit-label">О себе</label>
                   <textarea
                     value={formData.aboutMe}
                     onChange={(e) => setFormData({ ...formData, aboutMe: e.target.value })}
-                    className="profile-edit-textarea"
+                    className="edit-textarea"
                     rows="5"
+                    placeholder="Коротко о себе, интересы, цели..."
                   />
+                  <p className="edit-hint">Расскажите о себе — это увидят ваши друзья.</p>
                 </div>
-                <div className="profile-edit-buttons">
-                  <button type="submit" className="profile-edit-btn profile-edit-btn-primary" disabled={saving}>
-                    {saving ? 'Сохранение...' : 'Сохранить'}
+                <div className="edit-actions">
+                  <button type="submit" className="edit-btn primary" disabled={saving}>
+                    {saving ? 'Сохранение...' : 'Сохранить изменения'}
                   </button>
-                  <button type="button" className="profile-edit-btn profile-edit-btn-secondary" onClick={handleCancel}>
+                  <button type="button" className="edit-btn secondary" onClick={handleCancel}>
                     Отмена
                   </button>
                 </div>
               </form>
+            </div>
+
+            <div className="edit-sidecard">
+              <h3>Советы по профилю</h3>
+              <ul>
+                <li>Сделайте имя узнаваемым для друзей.</li>
+                <li>Добавьте пару предложений о своих целях или интересах.</li>
+                <li>Обновляйте информацию, когда меняются планы.</li>
+              </ul>
             </div>
           </div>
         </main>

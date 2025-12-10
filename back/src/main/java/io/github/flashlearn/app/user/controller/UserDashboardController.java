@@ -29,6 +29,8 @@ public class UserDashboardController {
         UserDashboardResponseDto userResponse = new UserDashboardResponseDto(
                 userInfo.getStreak(),
                 userInfo.getDailyGoal(),
+                userInfo.getReviewedToday(),
+                userInfo.isDailyGoalCompleted(),
                 userDashboardService.getOwnerSets(username).stream()
                         .map(flashCardSetMapper::toFlashCardSetResponse)
                         .toList());

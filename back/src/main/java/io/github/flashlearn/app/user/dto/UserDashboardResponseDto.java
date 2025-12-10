@@ -7,5 +7,7 @@ import java.util.List;
 public record UserDashboardResponseDto(
         int streak,
         int dailyGoal,
+        int reviewedToday,
+        boolean dailyGoalCompleted,
         List<FlashCardSetResponse> flashCards
 ) { }
