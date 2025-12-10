@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -118,6 +119,20 @@ public class GlobalExceptionHandler{
 
         ApiError body = new ApiError(HttpStatus.FORBIDDEN.value(), "UNAUTHORIZED_ACCESS", ex.getMessage(),
                                     Instant.now(), request.getRequestURI(), traceId);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiError> accessDeniedExceptionHandler(AccessDeniedException ex,
+                                                                  HttpServletRequest request) {
+        String traceId = tracer.currentSpan() != null
+                ? tracer.currentSpan().context().traceId()
+                : "N/A";
+
+        log.warn("Access denied: {}", ex.getMessage());
+
+        ApiError body = new ApiError(HttpStatus.FORBIDDEN.value(), "ACCESS_DENIED", ex.getMessage(),
+                Instant.now(), request.getRequestURI(), traceId);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 

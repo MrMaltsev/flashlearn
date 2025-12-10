@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import api from '../utils/api';
 import usePing from '../hooks/usePing';
 import { isLoggedIn, clearAuthData, getUsername } from '../utils/auth';
@@ -25,6 +25,11 @@ function ProfilePage() {
   const [searchFriendQuery, setSearchFriendQuery] = useState('');
   const [activeProfileTab, setActiveProfileTab] = useState('about');
 
+  // notifications
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]); // placeholder, load from backend later
+  const notifRef = useRef(null);
+
   // Вызываем ping при загрузке страницы
   usePing();
 
@@ -42,6 +47,8 @@ function ProfilePage() {
         setProfile(response.data);
         // TODO: fetch friends list from backend when endpoint is ready
         setFriends([]); // placeholder
+        // TODO: fetch user notifications when endpoint ready
+        setNotifications([]); // placeholder
         setLoading(false);
       } catch (err) {
         // Обрабатываем различные типы ошибок
@@ -67,6 +74,19 @@ function ProfilePage() {
     fetchProfile();
   }, [username, navigate]);
 
+  // Закрытие окна уведомлений при клике вне его
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setShowNotifications(false);
+      }
+    };
+    if (showNotifications) {
+      document.addEventListener('mousedown', handleOutsideClick);
+    }
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [showNotifications]);
+
   const handleLogout = () => {
     // Очищаем данные аутентификации
     clearAuthData();
@@ -80,17 +100,17 @@ function ProfilePage() {
   const goSettings = () => navigate(`${base}/settings`);
   const goSearch = () => navigate(`${base}/search`);
   const isOwnProfile = currentUsername === username;
+  const location = useLocation();
 
-  // Generate friend code from username (example: hash-based)
-  const generateFriendCode = (usr) => {
-    if (!usr) return '';
-    const hash = usr.split('').reduce((acc, char) => {
-      return ((acc << 5) - acc) + char.charCodeAt(0);
-    }, 0);
-    return '#' + Math.abs(hash % 1000000).toString().padStart(6, '0');
+  const handleAvatarClick = () => {
+    if (!currentUsername) return;
+    const profilePath = `/${currentUsername}/profile`;
+    const altProfilePath = `/${currentUsername}`;
+    if (location.pathname === profilePath || location.pathname === altProfilePath) return;
+    navigate(profilePath);
   };
 
-  const friendCode = profile ? generateFriendCode(profile.username) : '';
+  // Generate friend code removed — search will use username directly
 
   if (loading) {
     return (
@@ -125,8 +145,20 @@ function ProfilePage() {
               <LightningIcon />
               <span className="header-logo">Flashlearn</span>
             </div>
-            <div className="header-right">
-              <div className="user-avatar">
+            <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {/* Notifications bell placeholder in loading state */}
+              <button className="icon-btn" aria-label="Notifications" style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 17H9" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+              <div
+                className="user-avatar"
+                title={currentUsername ? currentUsername : 'User'}
+                onClick={handleAvatarClick}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleAvatarClick(); }}
+                style={{ cursor: 'pointer' }}
+              >
                 {currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U'}
               </div>
             </div>
@@ -174,8 +206,19 @@ function ProfilePage() {
               <LightningIcon />
               <span className="header-logo">Flashlearn</span>
             </div>
-            <div className="header-right">
-              <div className="user-avatar">
+            <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <button className="icon-btn" aria-label="Notifications" style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 17H9" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+              <div
+                className="user-avatar"
+                title={currentUsername ? currentUsername : 'User'}
+                onClick={handleAvatarClick}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleAvatarClick(); }}
+                style={{ cursor: 'pointer' }}
+              >
                 {currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U'}
               </div>
             </div>
@@ -222,8 +265,74 @@ function ProfilePage() {
             <LightningIcon />
             <span className="header-logo">Flashlearn</span>
           </div>
-          <div className="header-right">
-            <div className="user-avatar">
+          <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {/* Notifications bell */}
+            <div style={{ position: 'relative' }} ref={notifRef}>
+              <button
+                onClick={() => setShowNotifications((s) => !s)}
+                aria-label="Notifications"
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid #e5e7eb',
+                  background: '#ffffff',
+                  cursor: 'pointer'
+                }}
+              >
+                {/* bell icon */}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 17H9" stroke="#6b7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 22c1.104 0 2-.672 2-1.5h-4c0 .828.896 1.5 2 1.5z" stroke="#6b7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M18 8a6 6 0 10-12 0c0 7-3 8-3 8h18s-3-1-3-8" stroke="#6b7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+
+              {showNotifications && (
+                <div style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: 44,
+                  width: 300,
+                  background: '#fff',
+                  borderRadius: 8,
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.12)',
+                  padding: 12,
+                  zIndex: 120,
+                  transition: 'opacity .18s ease, transform .18s ease',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <strong style={{ fontSize: 14 }}>Уведомления</strong>
+                    <button onClick={() => setShowNotifications(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#9ca3af' }}>✕</button>
+                  </div>
+                  <div style={{ maxHeight: 260, overflowY: 'auto' }}>
+                    {notifications.length === 0 ? (
+                      <p style={{ color: '#9ca3af', textAlign: 'center', padding: '28px 6px', margin: 0 }}>Уведомлений пока нет</p>
+                    ) : (
+                      notifications.map((n, idx) => (
+                        <div key={idx} style={{ padding: 10, borderRadius: 6, background: '#f8fafc', marginBottom: 8 }}>
+                          <div style={{ fontSize: 13, color: '#111827' }}>{n.title}</div>
+                          <div style={{ fontSize: 12, color: '#6b7280' }}>{n.body}</div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div
+              className="user-avatar"
+              title={currentUsername ? currentUsername : 'User'}
+              onClick={handleAvatarClick}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleAvatarClick(); }}
+              style={{ cursor: 'pointer' }}
+            >
               {currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U'}
             </div>
           </div>
@@ -239,9 +348,8 @@ function ProfilePage() {
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 4 }}>
                   <h1 style={{ margin: 0, fontSize: 28, fontWeight: 700, color: '#111827' }}>{profile.username}</h1>
-                  <span style={{ fontSize: 14, color: '#9ca3af', fontWeight: 500 }}>{friendCode}</span>
                 </div>
-                <p style={{ margin: 0, fontSize: 13, color: '#6b7280' }}>Friend code — share to add you as a friend</p>
+                <p style={{ margin: 0, fontSize: 13, color: '#6b7280' }}>{profile.aboutMe || 'No description provided yet.'}</p>
                 {isOwnProfile && (
                   <button className="profile-edit-btn" onClick={goToEdit} style={{ marginTop: 12, padding: '8px 16px', borderRadius: 6, background: '#f97316', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
                     Edit profile
@@ -281,12 +389,7 @@ function ProfilePage() {
                     {profile.aboutMe || 'No description provided yet.'}
                   </p>
                 </div>
-                <div style={{ marginBottom: 20 }}>
-                  <h3 style={{ margin: '0 0 8px 0', fontSize: 14, fontWeight: 700, color: '#111827' }}>User ID</h3>
-                  <p style={{ margin: 0, fontSize: 14, color: '#6b7280', fontFamily: 'monospace' }}>
-                    {profile.id || 'N/A'}
-                  </p>
-                </div>
+                {/* User ID removed - not needed */}
               </div>
             )}
 
@@ -316,10 +419,10 @@ function ProfilePage() {
             <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.05)', position: 'sticky', top: 20 }}>
               <h3 style={{ margin: '0 0 12px 0', fontSize: 16, fontWeight: 700, color: '#111827' }}>Friends</h3>
               
-              {/* Search bar */}
+              {/* Search bar (search by username) */}
               <input
                 type="text"
-                placeholder="Search friends..."
+                placeholder="Search friends by username..."
                 value={searchFriendQuery}
                 onChange={(e) => setSearchFriendQuery(e.target.value)}
                 style={{

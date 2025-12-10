@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/api/dashboard")
@@ -22,6 +23,7 @@ public class UserDashboardController {
     private final FlashCardSetMapper flashCardSetMapper;
 
     @GetMapping("/{username}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserDashboardResponseDto> getUserInfo(@PathVariable String username) {
         UserStats userInfo = userDashboardService.findByUsername(username);
         UserDashboardResponseDto userResponse = new UserDashboardResponseDto(
@@ -35,6 +37,7 @@ public class UserDashboardController {
     }
 
     @PutMapping("/update_daily_goal/{username}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserDashboardResponseDto> updateUserDailyGoal(@PathVariable String username,
                                                                     @RequestBody @Valid UpdateDailyGoalRequestDto request) {
         UserDashboardResponseDto userResponse = userDashboardMapper
