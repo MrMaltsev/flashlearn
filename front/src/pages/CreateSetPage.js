@@ -12,6 +12,7 @@ function CreateSetPage() {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
   const [description, setDescription] = useState('');
+  const [visibility, setVisibility] = useState('PRIVATE');
   const [cards, setCards] = useState([]);
   const [saving, setSaving] = useState(false);
 
@@ -38,6 +39,7 @@ function CreateSetPage() {
         username,
         title: title.trim(),
         description: description.trim(),
+        visibility,
         flashCards: cards
       };
       const res = await api.post('/flashcards/create', payload);
@@ -72,6 +74,13 @@ function CreateSetPage() {
 
             <label style={{ display: 'block', marginBottom: 8 }}>Description</label>
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short description (optional)" rows={3} style={{ width: '100%', padding: 10, borderRadius: 6, border: '1px solid #e5e7eb', marginBottom: 12 }} />
+
+            <label style={{ display: 'block', marginBottom: 8 }}>Visibility</label>
+            <select value={visibility} onChange={(e) => setVisibility(e.target.value)} style={{ width: '100%', padding: 10, borderRadius: 6, border: '1px solid #e5e7eb', marginBottom: 12 }}>
+              <option value="PRIVATE">Private</option>
+              <option value="PUBLIC">Public</option>
+              <option value="FRIENDS">Friends</option>
+            </select>
 
             <label style={{ display: 'block', marginBottom: 8 }}>Add cards</label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>

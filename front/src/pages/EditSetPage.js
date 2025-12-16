@@ -11,6 +11,7 @@ function EditSetPage() {
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [visibility, setVisibility] = useState('PRIVATE');
   const [cards, setCards] = useState([]);
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
@@ -26,6 +27,7 @@ function EditSetPage() {
         const data = res.data;
         setTitle(data.title || '');
         setDescription(data.description || '');
+        setVisibility(data.visibility || 'PRIVATE');
         const existing = data.flashCards || data.cards || [];
         setCards(existing.map((c) => ({ question: c.question || c.front || '', answer: c.answer || c.back || '' })));
       } catch (err) {
@@ -54,7 +56,7 @@ function EditSetPage() {
     }
     setSaving(true);
     try {
-      const payload = { username, title: title.trim(), description: description.trim(), flashCards: cards };
+      const payload = { username, title: title.trim(), description: description.trim(), visibility, flashCards: cards };
       await api.put(`/flashcards/edit/${setId}`, payload);
       navigate(`/${username}/dashboard`);
     } catch (err) {
@@ -86,6 +88,13 @@ function EditSetPage() {
 
             <label style={{ display: 'block', marginBottom: 8 }}>Description</label>
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short description (optional)" rows={3} style={{ width: '100%', padding: 10, borderRadius: 6, border: '1px solid #e5e7eb', marginBottom: 12 }} />
+
+            <label style={{ display: 'block', marginBottom: 8 }}>Visibility</label>
+            <select value={visibility} onChange={(e) => setVisibility(e.target.value)} style={{ width: '100%', padding: 10, borderRadius: 6, border: '1px solid #e5e7eb', marginBottom: 12 }}>
+              <option value="PRIVATE">Private</option>
+              <option value="PUBLIC">Public</option>
+              <option value="FRIENDS">Friends</option>
+            </select>
 
             <label style={{ display: 'block', marginBottom: 8 }}>Add cards</label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
