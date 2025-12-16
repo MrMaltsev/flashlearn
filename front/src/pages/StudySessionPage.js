@@ -33,6 +33,8 @@ function StudySessionPage() {
   const [responses, setResponses] = useState([]); // array of { cardIdx, response: 'correct'|'forgot'|'skip' }
   const [sessionFinished, setSessionFinished] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [sendingProgress, setSendingProgress] = useState(false);
 
   // Load set and cards
@@ -44,7 +46,7 @@ function StudySessionPage() {
           setSet(passedSet);
           setCards(passedSet.flashCards || passedSet.cards || []);
         } else {
-          const res = await api.get(`/flashcards/get/${setId}`);
+          const res = await api.get(`/flashcards/getSet/${setId}`);
           const data = res.data;
           setSet(data);
           setCards((data && (data.flashCards || data.cards)) || []);
@@ -104,6 +106,25 @@ function StudySessionPage() {
   };
 
   const cancelExit = () => setShowExitConfirm(false);
+
+  const cancelDelete = () => setShowDeleteConfirm(false);
+
+  const deleteSet = async () => {
+    // close modal immediately to avoid UI race with navigation
+    setShowDeleteConfirm(false);
+    setDeleting(true);
+    try {
+      const res = await api.delete(`/flashcards/delete/${setId}`);
+      console.log('delete response', res);
+      alert('Набор удалён');
+      navigate(`/${username}/dashboard`);
+    } catch (err) {
+      console.error('Failed to delete set', err);
+      alert(err?.response?.data?.message || 'Не удалось удалить набор');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const sendProgress = async (reviewed) => {
     if (!reviewed) return;
@@ -204,12 +225,30 @@ function StudySessionPage() {
                   </div>
                 </div>
               </div>
-              <button className="study-start-btn" onClick={startSession}>
-                Start learning
-              </button>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                <button className="study-start-btn" onClick={startSession}>
+                  Start learning
+                </button>
+                <button className="edit-btn" onClick={() => navigate(`/${username}/edit-set/${setId}`)}>Редактировать</button>
+                <button className="delete-btn" onClick={() => setShowDeleteConfirm(true)} disabled={deleting}>{deleting ? 'Удаление...' : 'Удалить'}</button>
+              </div>
             </div>
           </main>
         </div>
+
+        {/* delete confirmation modal (accessible from intro before session starts) */}
+        {showDeleteConfirm && (
+          <div className="modal-backdrop">
+            <div className="modal">
+              <h3>Удалить набор?</h3>
+              <p>Это действие необратимо. Вы уверены, что хотите удалить этот набор?</p>
+              <div className="modal-actions">
+                <button className="edit-btn secondary" onClick={() => setShowDeleteConfirm(false)} disabled={deleting}>Отмена</button>
+                <button className="edit-btn primary" onClick={deleteSet} disabled={deleting}>{deleting ? 'Удаление...' : 'Удалить'}</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -383,6 +422,18 @@ function StudySessionPage() {
             <div className="modal-actions">
               <button className="edit-btn secondary" onClick={cancelExit}>Отмена</button>
               <button className="edit-btn primary" onClick={confirmExit}>Выйти</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showDeleteConfirm && (
+        <div className="modal-backdrop">
+          <div className="modal">
+            <h3>Удалить набор?</h3>
+            <p>Это действие необратимо. Вы уверены, что хотите удалить этот набор?</p>
+            <div className="modal-actions">
+              <button className="edit-btn secondary" onClick={cancelDelete} disabled={deleting}>Отмена</button>
+              <button className="edit-btn primary" onClick={deleteSet} disabled={deleting}>{deleting ? 'Удаление...' : 'Удалить'}</button>
             </div>
           </div>
         </div>

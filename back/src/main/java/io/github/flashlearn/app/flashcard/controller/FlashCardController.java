@@ -1,6 +1,7 @@
 package io.github.flashlearn.app.flashcard.controller;
 
 import io.github.flashlearn.app.flashcard.dto.CreateFlashCardSetRequest;
+import io.github.flashlearn.app.flashcard.dto.EditFlashCardSetRequest;
 import io.github.flashlearn.app.flashcard.dto.FlashCardSetResponse;
 import io.github.flashlearn.app.flashcard.entity.FlashCardSet;
 import io.github.flashlearn.app.flashcard.mapper.FlashCardSetMapper;
@@ -48,5 +49,27 @@ public class FlashCardController {
                 .toList();
 
         return ResponseEntity.ok(flashCards);
+    }
+
+    @GetMapping("/getSet/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<FlashCardSetResponse> getFlashCardSet(@PathVariable Long id) {
+        FlashCardSetResponse flashCardSetResponse = mapper.toFlashCardSetResponse(flashCardService.getFlashCardSet(id));
+        return ResponseEntity.status(HttpStatus.OK).body(flashCardSetResponse);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> deleteFlashCardSet(@PathVariable Long id) {
+        flashCardService.deleteFlashCardSet(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/edit/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<FlashCardSetResponse> editFlashCardSet(@RequestBody @Valid EditFlashCardSetRequest request,
+                                                                     @PathVariable Long id) {
+        FlashCardSet flashCardSet = flashCardService.editFlashCardSet(mapper.toFlashCardSet(request), id);
+        return ResponseEntity.status(HttpStatus.OK).body(mapper.toFlashCardSetResponse(flashCardSet));
     }
 }

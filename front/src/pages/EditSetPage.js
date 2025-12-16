@@ -1,20 +1,42 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getUsername } from '../utils/auth';
 import api from '../utils/api';
 import '../styles/Dashboard.css';
 
-function CreateSetPage() {
+function EditSetPage() {
   const navigate = useNavigate();
   const username = getUsername();
+  const { setId } = useParams();
 
   const [title, setTitle] = useState('');
-  const [question, setQuestion] = useState('');
-  const [answer, setAnswer] = useState('');
   const [description, setDescription] = useState('');
   const [cards, setCards] = useState([]);
+  const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState('');
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get(`/flashcards/getSet/${setId}`);
+        const data = res.data;
+        setTitle(data.title || '');
+        setDescription(data.description || '');
+        const existing = data.flashCards || data.cards || [];
+        setCards(existing.map((c) => ({ question: c.question || c.front || '', answer: c.answer || c.back || '' })));
+      } catch (err) {
+        console.error('Failed to load set', err);
+        alert('Не удалось загрузить набор');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [setId]);
 
   const addCard = () => {
     if (!question.trim() && !answer.trim()) return;
@@ -23,46 +45,38 @@ function CreateSetPage() {
     setAnswer('');
   };
 
-  const removeCard = (idx) => {
-    setCards((c) => c.filter((_, i) => i !== idx));
-  };
+  const removeCard = (idx) => setCards((c) => c.filter((_, i) => i !== idx));
 
-  const handleCreate = async () => {
+  const handleSave = async () => {
     if (!title.trim() || cards.length === 0) {
       alert('Please provide a title and at least one card');
       return;
     }
     setSaving(true);
     try {
-      const payload = {
-        username,
-        title: title.trim(),
-        description: description.trim(),
-        flashCards: cards
-      };
-      const res = await api.post('/flashcards/create', payload);
-      const created = res && res.data ? res.data : { id: `new-${Date.now()}`, title, description, cards };
-      // navigate back to dashboard and pass created set so it appears instantly
-      navigate(`/${username}/dashboard`, { state: { createdSet: created } });
+      const payload = { username, title: title.trim(), description: description.trim(), flashCards: cards };
+      await api.put(`/flashcards/edit/${setId}`, payload);
+      navigate(`/${username}/dashboard`);
     } catch (err) {
       console.error('Failed to save set', err);
-      alert('Failed to create set');
+      alert('Не удалось сохранить изменения');
     } finally {
       setSaving(false);
     }
   };
 
+  if (loading) return <div style={{ padding: 20 }}>Loading...</div>;
+
   return (
     <div className="dashboard-container">
       <aside className="dashboard-sidebar">
         <div style={{ padding: 16 }}>
-          <button onClick={() => navigate(`/${username}/dashboard`)} style={{ padding: '8px 10px', borderRadius: 6 }}>Back</button>
+          <button onClick={() => navigate(`/${username}/study-session/${setId}`)} style={{ padding: '8px 10px', borderRadius: 6 }}>Back</button>
         </div>
       </aside>
       <div className="dashboard-main">
         <header className="dashboard-header">
-          <div className="header-left">Create new set</div>
-          <div className="header-right" />
+          <div className="header-left">Edit set</div>
         </header>
 
         <main className="dashboard-content" style={{ padding: 24 }}>
@@ -102,9 +116,13 @@ function CreateSetPage() {
               </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-              <button onClick={() => navigate(`/${username}/dashboard`)} style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff' }}>Cancel</button>
-              <button onClick={handleCreate} disabled={saving} style={{ padding: '8px 12px', borderRadius: 6, background: '#f97316', color: '#fff', border: 'none' }}>{saving ? 'Creating...' : 'Create'}</button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+              <div>
+                <button onClick={() => navigate(`/${username}/study-session/${setId}`)} style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff' }}>Cancel</button>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={handleSave} disabled={saving} style={{ padding: '8px 12px', borderRadius: 6, background: '#f97316', color: '#fff', border: 'none' }}>{saving ? 'Saving...' : 'Save changes'}</button>
+              </div>
             </div>
           </div>
         </main>
@@ -113,4 +131,4 @@ function CreateSetPage() {
   );
 }
 
-export default CreateSetPage;
+export default EditSetPage;

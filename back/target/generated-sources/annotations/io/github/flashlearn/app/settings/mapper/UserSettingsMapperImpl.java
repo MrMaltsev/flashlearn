@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-12-08T13:10:43+0300",
-    comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.44.0.v20251118-1623, environment: Java 21.0.9 (Eclipse Adoptium)"
+    date = "2025-12-11T13:10:03+0300",
+    comments = "version: 1.6.3, compiler: javac, environment: Java 24.0.1 (Oracle Corporation)"
 )
 @Component
 public class UserSettingsMapperImpl implements UserSettingsMapper {
@@ -44,8 +44,8 @@ public class UserSettingsMapperImpl implements UserSettingsMapper {
         UserSettings userSettings = new UserSettings();
 
         userSettings.setLanguage( mapLanguage( userSettingsResponse.language() ) );
-        userSettings.setAutoPlay( userSettingsResponse.autoPlay() );
         userSettings.setDarkMode( userSettingsResponse.darkMode() );
+        userSettings.setAutoPlay( userSettingsResponse.autoPlay() );
         userSettings.setShowHints( userSettingsResponse.showHints() );
 
         return userSettings;
@@ -60,8 +60,8 @@ public class UserSettingsMapperImpl implements UserSettingsMapper {
         UserSettings userSettings = new UserSettings();
 
         userSettings.setLanguage( mapLanguage( userSettingsUpdateRequest.language() ) );
-        userSettings.setAutoPlay( userSettingsUpdateRequest.autoPlay() );
         userSettings.setDarkMode( userSettingsUpdateRequest.darkMode() );
+        userSettings.setAutoPlay( userSettingsUpdateRequest.autoPlay() );
         userSettings.setShowHints( userSettingsUpdateRequest.showHints() );
 
         return userSettings;

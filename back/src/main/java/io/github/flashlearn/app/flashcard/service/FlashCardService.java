@@ -12,6 +12,7 @@ import io.github.flashlearn.app.flashcard.exception.UnauthorizedAccessException;
 import io.github.flashlearn.app.flashcard.repository.FlashCardRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.embedded.netty.NettyWebServer;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -72,6 +73,40 @@ public class FlashCardService {
         }
 
         return flashCardSetRepository.findAllByOwner(currentUser);
+    }
+
+    @Transactional
+    public void deleteFlashCardSet(Long id) {
+        flashCardSetRepository.delete(flashCardSetRepository.findById(id)
+                .orElseThrow(() -> new FlashCardSetNotFoundException("Flashcard set not found")));
+    }
+
+    @Transactional
+    public FlashCardSet editFlashCardSet(FlashCardSet newFlashCardSet, Long id) {
+        FlashCardSet flashCardSet = flashCardSetRepository.findById(id)
+                .orElseThrow(() -> new FlashCardSetNotFoundException("Flashcard set not found"));
+
+        flashCardSet.setTitle(newFlashCardSet.getTitle());
+        flashCardSet.setDescription(newFlashCardSet.getDescription());
+        flashCardSet.setUpdatedAt(LocalDateTime.now());
+
+        flashCardSet.getFlashCards().clear();
+
+        for (FlashCard incomingCard : newFlashCardSet.getFlashCards()) {
+            FlashCard flashCard = new FlashCard();
+            flashCard.setQuestion(incomingCard.getQuestion());
+            flashCard.setAnswer(incomingCard.getAnswer());
+            flashCard.setSet(flashCardSet);
+
+            flashCardSet.getFlashCards().add(flashCard);
+        }
+
+        return flashCardSetRepository.save(flashCardSet);
+    }
+
+    public FlashCardSet getFlashCardSet(Long id) {
+        return flashCardSetRepository.findById(id)
+                .orElseThrow(() -> new FlashCardSetNotFoundException("Flash card set not found"));
     }
 
 }

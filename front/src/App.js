@@ -4,12 +4,12 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import Dashboard from "./pages/Dashboard";
 import CreateSetPage from "./pages/CreateSetPage";
+import EditSetPage from "./pages/EditSetPage";
 import ProfilePage from "./pages/ProfilePage";
 import EditProfilePage from "./pages/EditProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import SearchPage from "./pages/SearchPage";
 import FAQPage from "./pages/FAQPage";
-import StudyPage from "./pages/StudyPage";
 import StudySessionPage from "./pages/StudySessionPage";
 
 function App() {
@@ -21,7 +21,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/:username/dashboard" element={<Dashboard />} />
         <Route path="/:username/create-set" element={<CreateSetPage />} />
-        <Route path="/:username/study/:setId" element={<StudyPage />} />
+        <Route path="/:username/edit-set/:setId" element={<EditSetPage />} />
         <Route path="/:username/study-session/:setId" element={<StudySessionPage />} />
         <Route path="/:username/settings" element={<SettingsPage />} />
         <Route path="/:username/search" element={<SearchPage />} />

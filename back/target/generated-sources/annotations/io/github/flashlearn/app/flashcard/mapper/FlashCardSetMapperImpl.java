@@ -1,5 +1,6 @@
 package io.github.flashlearn.app.flashcard.mapper;
 
+import io.github.flashlearn.app.flashcard.dto.EditFlashCardSetRequest;
 import io.github.flashlearn.app.flashcard.dto.FlashCardResponse;
 import io.github.flashlearn.app.flashcard.dto.FlashCardSetResponse;
 import io.github.flashlearn.app.flashcard.entity.FlashCard;
@@ -11,8 +12,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-12-08T13:10:43+0300",
-    comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.44.0.v20251118-1623, environment: Java 21.0.9 (Eclipse Adoptium)"
+    date = "2025-12-12T15:26:11+0300",
+    comments = "version: 1.6.3, compiler: javac, environment: Java 24.0.1 (Oracle Corporation)"
 )
 @Component
 public class FlashCardSetMapperImpl implements FlashCardSetMapper {
@@ -36,6 +37,24 @@ public class FlashCardSetMapperImpl implements FlashCardSetMapper {
         FlashCardSetResponse flashCardSetResponse = new FlashCardSetResponse( id, title, description, flashCards );
 
         return flashCardSetResponse;
+    }
+
+    @Override
+    public FlashCardSet toFlashCardSet(EditFlashCardSetRequest flashCardSetResponse) {
+        if ( flashCardSetResponse == null ) {
+            return null;
+        }
+
+        FlashCardSet flashCardSet = new FlashCardSet();
+
+        if ( flashCardSetResponse.id() != null ) {
+            flashCardSet.setId( flashCardSetResponse.id() );
+        }
+        flashCardSet.setTitle( flashCardSetResponse.title() );
+        flashCardSet.setDescription( flashCardSetResponse.description() );
+        flashCardSet.setFlashCards( flashCardResponseListToFlashCardList( flashCardSetResponse.flashCards() ) );
+
+        return flashCardSet;
     }
 
     protected FlashCardResponse flashCardToFlashCardResponse(FlashCard flashCard) {
@@ -64,6 +83,33 @@ public class FlashCardSetMapperImpl implements FlashCardSetMapper {
         List<FlashCardResponse> list1 = new ArrayList<FlashCardResponse>( list.size() );
         for ( FlashCard flashCard : list ) {
             list1.add( flashCardToFlashCardResponse( flashCard ) );
+        }
+
+        return list1;
+    }
+
+    protected FlashCard flashCardResponseToFlashCard(FlashCardResponse flashCardResponse) {
+        if ( flashCardResponse == null ) {
+            return null;
+        }
+
+        FlashCard flashCard = new FlashCard();
+
+        flashCard.setId( flashCardResponse.id() );
+        flashCard.setQuestion( flashCardResponse.question() );
+        flashCard.setAnswer( flashCardResponse.answer() );
+
+        return flashCard;
+    }
+
+    protected List<FlashCard> flashCardResponseListToFlashCardList(List<FlashCardResponse> list) {
+        if ( list == null ) {
+            return null;
+        }
+
+        List<FlashCard> list1 = new ArrayList<FlashCard>( list.size() );
+        for ( FlashCardResponse flashCardResponse : list ) {
+            list1.add( flashCardResponseToFlashCard( flashCardResponse ) );
         }
 
         return list1;
