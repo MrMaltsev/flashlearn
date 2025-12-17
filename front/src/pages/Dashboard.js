@@ -158,8 +158,30 @@ function Dashboard() {
   // Organize flashCards into category tabs
   const setSectionsByTab = {
     My: flashCards || [],
-    Saved: [],
+    Saved: (flashCards || []).filter((s) => !!(s.isSaved)),
     Popular: []
+  };
+
+  // Toggle saved (favorite) status for a set (uses `isSaved` field)
+  const toggleSaved = async (e, setObj) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    const id = setObj.id || setObj._id;
+
+    // optimistic UI update
+    setFlashCards((prev) => prev.map((s) => {
+      const sid = s.id || s._id;
+      if (sid === id) return { ...s, isSaved: !s.isSaved };
+      return s;
+    }));
+
+    // attempt to persist to backend if endpoint exists
+    try {
+      // Try a POST that backend might implement; ignore errors
+      await api.post(`/flashcards/save/${id}`, { isSaved: !setObj.isSaved });
+    } catch (err) {
+      // not critical; log for debugging
+      // console.warn('Persisting saved state failed', err);
+    }
   };
 
   // Search state and derived filtered sets
@@ -481,7 +503,19 @@ function Dashboard() {
                   const title = set.title || set.name || 'Untitled set';
                   const description = set.description || set.desc || set.summary || '';
                   return (
-                    <div key={id} className="set-card" onClick={() => navigate(`${base}/study-session/${id}`, { state: { set } })} style={{ cursor: 'pointer', padding: 14, borderRadius: 8, background: '#fff', border: '1px solid #e5e7eb', height: 140, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 4px rgba(16,24,40,0.04)', transition: 'all 0.2s', hover: { transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' } }}>
+                    <div key={id} className="set-card" onClick={() => navigate(`${base}/study-session/${id}`, { state: { set } })} style={{ cursor: 'pointer', padding: 14, borderRadius: 8, background: '#fff', border: '1px solid #e5e7eb', height: 140, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 1px 4px rgba(16,24,40,0.04)', transition: 'all 0.2s' }}>
+                      {/* Save star */}
+                      <button
+                        className={"save-star" + (set.isSaved ? ' active' : '')}
+                        onClick={(e) => toggleSaved(e, set)}
+                        aria-label={set.isSaved ? 'Unsave set' : 'Save set'}
+                        title={set.isSaved ? 'Убрать из избранного' : 'Добавить в избранное'}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                      </button>
+
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                         <h4 className="set-title" style={{ margin: 0, fontSize: 16, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</h4>
                         <p className="set-desc" style={{ margin: 0, color: '#6b7280', fontSize: 13, lineHeight: '1.2', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{description || 'No description'}</p>

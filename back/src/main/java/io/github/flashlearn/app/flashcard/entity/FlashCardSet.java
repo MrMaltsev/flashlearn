@@ -27,6 +27,9 @@ public class FlashCardSet {
 
     private List<String> tags;
 
+    @Column(name = "is_saved", columnDefinition = "TINYINT(1)")
+    private boolean isSaved;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private User owner;

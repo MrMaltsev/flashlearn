@@ -1,8 +1,6 @@
 package io.github.flashlearn.app.flashcard.controller;
 
-import io.github.flashlearn.app.flashcard.dto.CreateFlashCardSetRequest;
-import io.github.flashlearn.app.flashcard.dto.EditFlashCardSetRequest;
-import io.github.flashlearn.app.flashcard.dto.FlashCardSetResponse;
+import io.github.flashlearn.app.flashcard.dto.*;
 import io.github.flashlearn.app.flashcard.entity.FlashCardSet;
 import io.github.flashlearn.app.flashcard.mapper.FlashCardSetMapper;
 import io.github.flashlearn.app.flashcard.service.FlashCardService;
@@ -71,5 +69,13 @@ public class FlashCardController {
                                                                      @PathVariable Long id) {
         FlashCardSet flashCardSet = flashCardService.editFlashCardSet(mapper.toFlashCardSet(request), id);
         return ResponseEntity.status(HttpStatus.OK).body(mapper.toFlashCardSetResponse(flashCardSet));
+    }
+
+    @PostMapping("/save/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<SaveFlashCardSetResponse> saveFlashCardSet(@PathVariable Long id,
+                                                                     @RequestBody SaveFlashCardSetRequest request) {
+        SaveFlashCardSetResponse response = mapper.toSaveFlashCardSetResponse(flashCardService.saveFlashCardSet(id, request));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 }

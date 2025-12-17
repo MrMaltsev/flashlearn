@@ -10,5 +10,6 @@ public record FlashCardSetResponse(
         String description,
         Visibility visibility,
         List<String> tags,
+        boolean isSaved,
         List<FlashCardResponse> flashCards
 ) { }

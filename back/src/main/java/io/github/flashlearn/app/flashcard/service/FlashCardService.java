@@ -3,6 +3,7 @@ package io.github.flashlearn.app.flashcard.service;
 import io.github.flashlearn.app.auth.security.SecurityUtils;
 import io.github.flashlearn.app.flashcard.dto.CreateFlashCardSetRequest;
 import io.github.flashlearn.app.flashcard.dto.FlashCardResponse;
+import io.github.flashlearn.app.flashcard.dto.SaveFlashCardSetRequest;
 import io.github.flashlearn.app.flashcard.entity.FlashCard;
 import io.github.flashlearn.app.flashcard.entity.FlashCardSet;
 import io.github.flashlearn.app.flashcard.exception.FlashCardSetNotFoundException;
@@ -41,6 +42,7 @@ public class FlashCardService {
         flashCardSet.setVisibility(request.visibility());
         flashCardSet.setTags(request.tags());
         flashCardSet.setOwner(currentUser);
+        flashCardSet.setSaved(false);
         flashCardSet.setCreatedAt(LocalDateTime.now());
         flashCardSet.setUpdatedAt(LocalDateTime.now());
 
@@ -113,4 +115,33 @@ public class FlashCardService {
                 .orElseThrow(() -> new FlashCardSetNotFoundException("Flash card set not found"));
     }
 
+//    @Transactional
+//    public FlashCardSet saveFlashCardSet(Long id, SaveFlashCardSetRequest request) {
+//        FlashCardSet flashCardSet = flashCardSetRepository.findById(id)
+//                .orElseThrow(() -> new FlashCardSetNotFoundException("Set not found: " + id));
+//
+//        flashCardSet.setSaved(request.isSaved());
+//        return flashCardSetRepository.save(flashCardSet);
+//    }
+
+    @Transactional
+    public FlashCardSet saveFlashCardSet(Long id, SaveFlashCardSetRequest request) {
+        FlashCardSet flashCardSet = flashCardSetRepository.findById(id)
+                .orElseThrow(() -> new FlashCardSetNotFoundException("Set not found: " + id));
+
+        System.out.println("BEFORE SET: " + flashCardSet.isSaved());
+
+        flashCardSet.setSaved(request.isSaved());
+
+        System.out.println("AFTER SET: " + flashCardSet.isSaved());
+
+        flashCardSet = flashCardSetRepository.save(flashCardSet);
+
+        flashCardSetRepository.flush(); // Принудительно синхронизируем с БД
+
+        System.out.println("AFTER SAVE: " + flashCardSet.isSaved());
+
+        // Перезагружаем из БД, чтобы избежать кэширования
+        return flashCardSetRepository.findById(id).orElse(flashCardSet);
+    }
 }
