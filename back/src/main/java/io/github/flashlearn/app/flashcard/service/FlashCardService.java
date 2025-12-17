@@ -39,6 +39,7 @@ public class FlashCardService {
         flashCardSet.setTitle(request.title());
         flashCardSet.setDescription(request.description());
         flashCardSet.setVisibility(request.visibility());
+        flashCardSet.setTags(request.tags());
         flashCardSet.setOwner(currentUser);
         flashCardSet.setCreatedAt(LocalDateTime.now());
         flashCardSet.setUpdatedAt(LocalDateTime.now());
@@ -89,8 +90,9 @@ public class FlashCardService {
 
         flashCardSet.setTitle(newFlashCardSet.getTitle());
         flashCardSet.setDescription(newFlashCardSet.getDescription());
-        flashCardSet.setUpdatedAt(LocalDateTime.now());
         flashCardSet.setVisibility(newFlashCardSet.getVisibility());
+        flashCardSet.setTags(newFlashCardSet.getTags());
+        flashCardSet.setUpdatedAt(LocalDateTime.now());
 
         flashCardSet.getFlashCards().clear();
 

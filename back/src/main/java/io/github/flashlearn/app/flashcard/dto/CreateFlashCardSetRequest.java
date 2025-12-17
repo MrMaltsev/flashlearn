@@ -8,5 +8,6 @@ public record CreateFlashCardSetRequest(
         String title,
         String description,
         Visibility visibility,
+        List<String> tags,
         List<CreateFlashCardRequest> flashCards
 ) { }

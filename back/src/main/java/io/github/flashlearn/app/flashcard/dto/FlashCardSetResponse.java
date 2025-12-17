@@ -9,5 +9,6 @@ public record FlashCardSetResponse(
         String title,
         String description,
         Visibility visibility,
+        List<String> tags,
         List<FlashCardResponse> flashCards
 ) { }

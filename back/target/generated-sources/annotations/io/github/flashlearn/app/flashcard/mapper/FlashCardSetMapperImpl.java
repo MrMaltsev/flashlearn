@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-12-16T17:36:13+0300",
+    date = "2025-12-17T11:30:39+0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 24.0.1 (Oracle Corporation)"
 )
 @Component
@@ -29,15 +29,20 @@ public class FlashCardSetMapperImpl implements FlashCardSetMapper {
         String title = null;
         String description = null;
         Visibility visibility = null;
+        List<String> tags = null;
         List<FlashCardResponse> flashCards = null;
 
         id = flashCardSet.getId();
         title = flashCardSet.getTitle();
         description = flashCardSet.getDescription();
         visibility = flashCardSet.getVisibility();
+        List<String> list = flashCardSet.getTags();
+        if ( list != null ) {
+            tags = new ArrayList<String>( list );
+        }
         flashCards = flashCardListToFlashCardResponseList( flashCardSet.getFlashCards() );
 
-        FlashCardSetResponse flashCardSetResponse = new FlashCardSetResponse( id, title, description, visibility, flashCards );
+        FlashCardSetResponse flashCardSetResponse = new FlashCardSetResponse( id, title, description, visibility, tags, flashCards );
 
         return flashCardSetResponse;
     }
@@ -56,6 +61,10 @@ public class FlashCardSetMapperImpl implements FlashCardSetMapper {
         flashCardSet.setTitle( flashCardSetResponse.title() );
         flashCardSet.setDescription( flashCardSetResponse.description() );
         flashCardSet.setVisibility( flashCardSetResponse.visibility() );
+        List<String> list = flashCardSetResponse.tags();
+        if ( list != null ) {
+            flashCardSet.setTags( new ArrayList<String>( list ) );
+        }
         flashCardSet.setFlashCards( flashCardResponseListToFlashCardList( flashCardSetResponse.flashCards() ) );
 
         return flashCardSet;

@@ -13,6 +13,8 @@ function CreateSetPage() {
   const [answer, setAnswer] = useState('');
   const [description, setDescription] = useState('');
   const [visibility, setVisibility] = useState('PRIVATE');
+  const [tags, setTags] = useState([]);
+  const [tagInput, setTagInput] = useState('');
   const [cards, setCards] = useState([]);
   const [saving, setSaving] = useState(false);
 
@@ -40,6 +42,7 @@ function CreateSetPage() {
         title: title.trim(),
         description: description.trim(),
         visibility,
+        tags,
         flashCards: cards
       };
       const res = await api.post('/flashcards/create', payload);
@@ -81,6 +84,37 @@ function CreateSetPage() {
               <option value="PUBLIC">Public</option>
               <option value="FRIENDS">Friends</option>
             </select>
+
+            <label style={{ display: 'block', marginBottom: 8 }}>Tags</label>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+              <input
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); const val = tagInput.trim(); if (val && !tags.includes(val)) { setTags((t) => [...t, val]); setTagInput(''); } } }}
+                placeholder="Type tag and press Enter"
+                style={{ flex: 1, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }}
+              />
+              <button
+                onClick={() => {
+                  const val = tagInput.trim();
+                  if (!val) return;
+                  if (!tags.includes(val)) setTags((t) => [...t, val]);
+                  setTagInput('');
+                }}
+                style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff' }}
+              >Добавить тег</button>
+            </div>
+
+            {tags.length > 0 && (
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                {tags.map((t, idx) => (
+                  <div key={idx} className="tag-pill">
+                    <span>{t}</span>
+                    <button className="remove" onClick={() => setTags((old) => old.filter((_, i) => i !== idx))}>✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <label style={{ display: 'block', marginBottom: 8 }}>Add cards</label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>

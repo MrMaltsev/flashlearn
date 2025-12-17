@@ -12,6 +12,8 @@ function EditSetPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [visibility, setVisibility] = useState('PRIVATE');
+  const [tags, setTags] = useState([]);
+  const [tagInput, setTagInput] = useState('');
   const [cards, setCards] = useState([]);
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
@@ -28,6 +30,7 @@ function EditSetPage() {
         setTitle(data.title || '');
         setDescription(data.description || '');
         setVisibility(data.visibility || 'PRIVATE');
+        setTags(data.tags || data.tagsList || []);
         const existing = data.flashCards || data.cards || [];
         setCards(existing.map((c) => ({ question: c.question || c.front || '', answer: c.answer || c.back || '' })));
       } catch (err) {
@@ -56,7 +59,7 @@ function EditSetPage() {
     }
     setSaving(true);
     try {
-      const payload = { username, title: title.trim(), description: description.trim(), visibility, flashCards: cards };
+      const payload = { username, title: title.trim(), description: description.trim(), visibility, tags, flashCards: cards };
       await api.put(`/flashcards/edit/${setId}`, payload);
       navigate(`/${username}/dashboard`);
     } catch (err) {
@@ -88,6 +91,37 @@ function EditSetPage() {
 
             <label style={{ display: 'block', marginBottom: 8 }}>Description</label>
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short description (optional)" rows={3} style={{ width: '100%', padding: 10, borderRadius: 6, border: '1px solid #e5e7eb', marginBottom: 12 }} />
+
+            <label style={{ display: 'block', marginBottom: 8 }}>Tags</label>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+              <input
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); const val = tagInput.trim(); if (val && !tags.includes(val)) { setTags((t) => [...t, val]); setTagInput(''); } } }}
+                placeholder="Type tag and press Enter"
+                style={{ flex: 1, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }}
+              />
+              <button
+                onClick={() => {
+                  const val = tagInput.trim();
+                  if (!val) return;
+                  if (!tags.includes(val)) setTags((t) => [...t, val]);
+                  setTagInput('');
+                }}
+                style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #e5e7eb', background: '#fff' }}
+              >Добавить тег</button>
+            </div>
+
+            {tags.length > 0 && (
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                {tags.map((t, idx) => (
+                  <div key={idx} className="tag-pill">
+                    <span>{t}</span>
+                    <button className="remove" onClick={() => setTags((old) => old.filter((_, i) => i !== idx))}>✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <label style={{ display: 'block', marginBottom: 8 }}>Visibility</label>
             <select value={visibility} onChange={(e) => setVisibility(e.target.value)} style={{ width: '100%', padding: 10, borderRadius: 6, border: '1px solid #e5e7eb', marginBottom: 12 }}>

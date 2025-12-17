@@ -25,6 +25,8 @@ public class FlashCardSet {
     @Column(nullable = false)
     private Visibility visibility;
 
+    private List<String> tags;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private User owner;

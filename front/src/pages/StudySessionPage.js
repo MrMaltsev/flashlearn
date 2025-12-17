@@ -214,14 +214,17 @@ function StudySessionPage() {
                 <p className="study-label">Набор карточек</p>
                 <h1 className="study-title">{set.title}</h1>
                 <p className="study-intro-desc">{set.description || 'Начните изучение прямо сейчас!'}</p>
+                { (set && (set.tags || set.tagsList) && (set.tags || set.tagsList).length > 0) && (
+                  <div className="tag-list">
+                    {(set.tags || set.tagsList || []).map((t, i) => (
+                      <div key={i} className="tag-pill">{t}</div>
+                    ))}
+                  </div>
+                )}
                 <div className="study-intro-stats">
                   <div className="stat-item">
                     <span className="stat-label">Cards</span>
                     <span className="stat-value">{cards.length}</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">Reviewed</span>
-                    <span className="stat-value">{reviewed}</span>
                   </div>
                 </div>
               </div>
