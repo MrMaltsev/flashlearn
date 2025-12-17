@@ -164,12 +164,78 @@ function Dashboard() {
 
   // Search state and derived filtered sets
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Filters state
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterTags, setFilterTags] = useState([]);
+  const [tagInput, setTagInput] = useState('');
+  const [minCards, setMinCards] = useState('');
+  const [maxCards, setMaxCards] = useState('');
+  const [dateOrder, setDateOrder] = useState(''); // 'newest' | 'oldest' | ''
+
+  // available tags from all sets
+  const availableTags = useMemo(() => {
+    const s = new Set();
+    (flashCards || []).forEach((st) => {
+      const tags = st.tags || st.tagsList || st.tags || [];
+      if (!tags) return;
+      if (typeof tags === 'string') {
+        tags.split(',').map((t) => t.trim()).filter(Boolean).forEach((t) => s.add(t));
+      } else if (Array.isArray(tags)) {
+        tags.forEach((t) => t && s.add(t));
+      }
+    });
+    return Array.from(s).sort();
+  }, [flashCards]);
+
+  const tagSuggestions = useMemo(() => {
+    const q = (tagInput || '').trim().toLowerCase();
+    if (!q) return availableTags.filter(a => !filterTags.includes(a)).slice(0, 6);
+    return availableTags.filter(a => !filterTags.includes(a) && a.toLowerCase().includes(q)).slice(0, 6);
+  }, [availableTags, tagInput, filterTags]);
+
   const filteredSets = useMemo(() => {
-    const list = setSectionsByTab[setsDisplayTab] || [];
+    let list = setSectionsByTab[setsDisplayTab] || [];
     const q = (searchQuery || '').trim().toLowerCase();
-    if (!q) return list;
-    return list.filter((s) => ((s.title || s.name || '') + '').toLowerCase().includes(q));
-  }, [setSectionsByTab, setsDisplayTab, searchQuery]);
+    if (q) {
+      list = list.filter((s) => ((s.title || s.name || '') + '').toLowerCase().includes(q));
+    }
+
+    // filter by tags (include set if it contains ALL selected tags)
+    if (filterTags && filterTags.length > 0) {
+      list = list.filter((s) => {
+        const tagsRaw = s.tags || s.tagsList || s.tags || [];
+        let tags = [];
+        if (typeof tagsRaw === 'string') tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+        else if (Array.isArray(tagsRaw)) tags = tagsRaw.map(t => (t || '').toString());
+        const lowTags = tags.map(t => t.toLowerCase());
+        return filterTags.every(ft => lowTags.includes(ft.toLowerCase()));
+      });
+    }
+
+    // filter by card count
+    const parseCount = (s) => (s.flashCards && s.flashCards.length) || (s.cards && s.cards) || 0;
+    const min = parseInt(minCards || '', 10);
+    const max = parseInt(maxCards || '', 10);
+    if (!isNaN(min)) {
+      list = list.filter((s) => parseCount(s) >= min);
+    }
+    if (!isNaN(max)) {
+      list = list.filter((s) => parseCount(s) <= max);
+    }
+
+    // sort by date if requested
+    if (dateOrder === 'newest' || dateOrder === 'oldest') {
+      list = list.slice().sort((a, b) => {
+        const ad = new Date(a.createdAt || a.created || 0).getTime() || 0;
+        const bd = new Date(b.createdAt || b.created || 0).getTime() || 0;
+        return ad - bd;
+      });
+      if (dateOrder === 'newest') list = list.reverse();
+    }
+
+    return list;
+  }, [setSectionsByTab, setsDisplayTab, searchQuery, filterTags, minCards, maxCards, dateOrder]);
 
   const progressPercentage = Math.min(100, (stats.todayReviewed / stats.dailyGoal) * 100);
 
@@ -367,8 +433,8 @@ function Dashboard() {
           <div className="sets-section" style={{ marginTop: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <h2 className="sets-title">Flashcard sets</h2>
-              <button className="customize-btn">
-                <FilterIcon /> Customize
+              <button className="customize-btn" onClick={() => setShowFilters(true)}>
+                <FilterIcon /> Фильтры
               </button>
             </div>
 
@@ -433,6 +499,79 @@ function Dashboard() {
               </div>
             )}
           </div>
+          {/* Filters modal */}
+          {showFilters && (
+            <div className="filters-modal-backdrop">
+              <div className="filters-modal">
+                <h3 style={{ marginTop: 0 }}>Фильтры</h3>
+
+                <div style={{ marginTop: 8 }}>
+                  <label style={{ display: 'block', fontSize: 13, color: '#444', marginBottom: 6 }}>Теги</label>
+                  <div className="filter-tags-input">
+                    {filterTags.map((t) => (
+                      <span key={t} className="filter-tag">
+                        {t}
+                        <button className="filter-tag-remove" onClick={() => setFilterTags((prev) => prev.filter(x => x !== t))}>✕</button>
+                      </span>
+                    ))}
+                    <input
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          const val = (tagInput || '').trim();
+                          if (val && !filterTags.includes(val)) {
+                            setFilterTags((prev) => [...prev, val]);
+                          }
+                          setTagInput('');
+                        }
+                      }}
+                      placeholder="Добавьте тег и нажмите Enter"
+                      className="filter-tag-input"
+                    />
+                  </div>
+                  {tagSuggestions && tagSuggestions.length > 0 && (
+                    <div className="filter-suggestions">
+                      {tagSuggestions.map((sugg) => (
+                        <button key={sugg} className="filter-sugg-btn" onClick={() => { setFilterTags((prev) => [...prev, sugg]); setTagInput(''); }}>
+                          {sugg}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ marginTop: 14 }}>
+                  <label style={{ display: 'block', fontSize: 13, color: '#444', marginBottom: 6 }}>Количество карточек</label>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <input type="number" min="0" placeholder="От (min)" value={minCards} onChange={(e) => setMinCards(e.target.value)} style={{ padding: '8px 10px', borderRadius: 6, border: '1px solid #e6e6e6', width: 120 }} />
+                    <input type="number" min="0" placeholder="До (max)" value={maxCards} onChange={(e) => setMaxCards(e.target.value)} style={{ padding: '8px 10px', borderRadius: 6, border: '1px solid #e6e6e6', width: 120 }} />
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 14 }}>
+                  <label style={{ display: 'block', fontSize: 13, color: '#444', marginBottom: 6 }}>Дата добавления</label>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <select value={dateOrder} onChange={(e) => setDateOrder(e.target.value)} style={{ padding: '8px 10px', borderRadius: 6, border: '1px solid #e6e6e6' }}>
+                      <option value="">По умолчанию</option>
+                      <option value="newest">Сначала новые</option>
+                      <option value="oldest">Сначала старые</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
+                  <button className="customize-btn" onClick={() => { setFilterTags([]); setTagInput(''); setMinCards(''); setMaxCards(''); setDateOrder(''); }}>
+                    Сбросить
+                  </button>
+                  <button className="new-set-btn" onClick={() => setShowFilters(false)}>
+                    Применить
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Goal modal */}
           {showGoalModal && (
             <div className="modal-backdrop" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }}>
