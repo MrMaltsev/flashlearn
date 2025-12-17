@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { isLoggedIn, clearAuthData, getUsername } from '../utils/auth';
 import usePing from '../hooks/usePing';
@@ -161,6 +161,15 @@ function Dashboard() {
     Saved: [],
     Popular: []
   };
+
+  // Search state and derived filtered sets
+  const [searchQuery, setSearchQuery] = useState('');
+  const filteredSets = useMemo(() => {
+    const list = setSectionsByTab[setsDisplayTab] || [];
+    const q = (searchQuery || '').trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((s) => ((s.title || s.name || '') + '').toLowerCase().includes(q));
+  }, [setSectionsByTab, setsDisplayTab, searchQuery]);
 
   const progressPercentage = Math.min(100, (stats.todayReviewed / stats.dailyGoal) * 100);
 
@@ -363,32 +372,45 @@ function Dashboard() {
               </button>
             </div>
 
-            {/* Tabs for sections */}
-            <div className="sets-tabs" style={{ display: 'flex', gap: 8, marginBottom: 16, borderBottom: '1px solid #e5e7eb', paddingBottom: 8 }}>
-              {['My', 'Saved', 'Popular'].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setSetsDisplayTab(tab)}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: 6,
-                    border: setsDisplayTab === tab ? '2px solid #f97316' : '1px solid #e5e7eb',
-                    background: setsDisplayTab === tab ? '#fff7ed' : '#ffffff',
-                    cursor: 'pointer',
-                    fontWeight: setsDisplayTab === tab ? 600 : 500,
-                    transition: 'all 0.2s',
-                    fontSize: 14
-                  }}
-                >
-                  {tab}
-                </button>
-              ))}
+            {/* Tabs + search */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, borderBottom: '1px solid #e5e7eb', paddingBottom: 8 }}>
+              <div className="sets-tabs" style={{ display: 'flex', gap: 8 }}>
+                {['My', 'Saved', 'Popular'].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setSetsDisplayTab(tab)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: 6,
+                      border: setsDisplayTab === tab ? '2px solid #f97316' : '1px solid #e5e7eb',
+                      background: setsDisplayTab === tab ? '#fff7ed' : '#ffffff',
+                      cursor: 'pointer',
+                      fontWeight: setsDisplayTab === tab ? 600 : 500,
+                      transition: 'all 0.2s',
+                      fontSize: 14
+                    }}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              <div className="sets-search" style={{ marginLeft: 12 }}>
+                <input
+                  type="text"
+                  aria-label="Search sets by title"
+                  placeholder="Search by title..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #e5e7eb', width: 220, outline: 'none' }}
+                />
+              </div>
             </div>
 
-            {/* Display sets for selected tab */}
-            {setSectionsByTab[setsDisplayTab] && setSectionsByTab[setsDisplayTab].length > 0 ? (
+            {/* Display sets for selected tab (filtered by search) */}
+            {filteredSets && filteredSets.length > 0 ? (
               <div className="sets-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 220px))', gap: 16, alignItems: 'start' }}>
-                {setSectionsByTab[setsDisplayTab].map((set) => {
+                {filteredSets.map((set) => {
                   const id = set.id || set._id || `${set.title}-${Math.random().toString(36).slice(2,8)}`;
                   const title = set.title || set.name || 'Untitled set';
                   const description = set.description || set.desc || set.summary || '';
@@ -407,7 +429,7 @@ function Dashboard() {
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '40px 20px', color: '#9ca3af' }}>
-                <p style={{ fontSize: 14 }}>No sets in this section yet.</p>
+                <p style={{ fontSize: 14 }}>{searchQuery ? 'No sets match your search.' : 'No sets in this section yet.'}</p>
               </div>
             )}
           </div>
