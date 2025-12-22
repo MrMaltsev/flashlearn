@@ -1,14 +1,20 @@
 package io.github.flashlearn.app.profile.controller;
 
 import io.github.flashlearn.app.profile.dto.UpdateUserProfileRequest;
+import io.github.flashlearn.app.profile.dto.UpdateUserProfileResponse;
 import io.github.flashlearn.app.profile.dto.UserProfileResponse;
 import io.github.flashlearn.app.auth.mapper.UserAuthMapper;
+import io.github.flashlearn.app.profile.service.AvatarUrlService;
 import io.github.flashlearn.app.profile.service.UserProfileService;
+import io.github.flashlearn.app.storage.service.AvatarStorageService;
+import jakarta.mail.Multipart;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequestMapping("/api/profile")
 @RestController
@@ -16,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 public class UserProfileController {
 
     private final UserProfileService userProfileService;
+    private final AvatarStorageService avatarStorageService;
+    private final AvatarUrlService avatarUrlService;
     private final UserAuthMapper mapper;
 
     /**
@@ -25,7 +33,9 @@ public class UserProfileController {
     @GetMapping("/{username}")
     @PreAuthorize("isAuthenticated()") // Проверяем, что пользователь аутентифицирован
     public ResponseEntity<UserProfileResponse> getProfileInfo(@PathVariable String username) {
-        UserProfileResponse userProfileResponse = mapper.toUserProfileResponse(userProfileService.findByUsername(username));
+        UserProfileResponse userProfileResponse = mapper.toUserProfileResponse(
+                userProfileService.findByUsername(username),
+                avatarUrlService);
         return ResponseEntity.status(HttpStatus.OK).body(userProfileResponse);
     }
 
@@ -34,13 +44,24 @@ public class UserProfileController {
      * Пользователь может обновлять только свой собственный профиль (проверка в сервисе).
      */
     @PutMapping("/update/{username}")
-    @PreAuthorize("isAuthenticated()") // Проверяем, что пользователь аутентифицирован
-    public ResponseEntity<UserProfileResponse> updateProfile(@PathVariable String username,
-                                                             @RequestBody UpdateUserProfileRequest updatedUser) {
-        UserProfileResponse userProfileResponse =
-                mapper.toUserProfileResponse(userProfileService.updateProfile(username, updatedUser));
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UpdateUserProfileResponse> updateProfile(@PathVariable String username,
+                                                                   @RequestBody UpdateUserProfileRequest updatedUser) {
+        UpdateUserProfileResponse updateUserProfileResponse =
+                mapper.toUpdateUserProfileResponse(userProfileService.updateProfile(username, updatedUser));
 
-        return ResponseEntity.status(HttpStatus.OK).body(userProfileResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(updateUserProfileResponse);
     }
 
+    @PostMapping("/avatar")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> uploadAvatar(Authentication authentication,
+                                          @RequestParam("file") MultipartFile file) {
+        String username = authentication.getName();
+
+        String avatarKey = avatarStorageService.uploadAvatar(username, file);
+        userProfileService.uploadAvatar(username, avatarKey);
+
+        return ResponseEntity.ok().body(avatarKey);
+    }
 }

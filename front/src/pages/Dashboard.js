@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { isLoggedIn, clearAuthData, getUsername } from '../utils/auth';
+import { isLoggedIn, clearAuthData, getUsername, getAvatar } from '../utils/auth';
 import usePing from '../hooks/usePing';
 import api from '../utils/api';
 import NotificationBell from '../components/NotificationBell';
@@ -395,7 +395,11 @@ function Dashboard() {
               + New set
             </button>
             <div className="user-avatar">
-              {username ? username.charAt(0).toUpperCase() : 'U'}
+              { getAvatar() ? (
+                <img src={getAvatar()} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                (username ? username.charAt(0).toUpperCase() : 'U')
+              ) }
             </div>
           </div>
         </header>

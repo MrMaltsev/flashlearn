@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { getUsername } from '../utils/auth';
+import { getUsername, getAvatar } from '../utils/auth';
 import api from '../utils/api';
 import NotificationBell from '../components/NotificationBell';
 import {
@@ -169,7 +169,11 @@ function StudySessionPage() {
       <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <NotificationBell />
         <div className="user-avatar">
-          {username ? username.charAt(0).toUpperCase() : 'U'}
+          { getAvatar() ? (
+            <img src={getAvatar()} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
+          ) : (
+            (username ? username.charAt(0).toUpperCase() : 'U')
+          ) }
         </div>
       </div>
     </header>

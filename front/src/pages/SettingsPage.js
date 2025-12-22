@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { isLoggedIn, clearAuthData, getUsername } from '../utils/auth';
+import { isLoggedIn, clearAuthData, getUsername, getAvatar } from '../utils/auth';
 import usePing from '../hooks/usePing';
 import {
   HomeIcon,
@@ -161,7 +161,11 @@ function SettingsPage() {
           </div>
           <div className="header-right">
             <div className="user-avatar">
-              {username ? username.charAt(0).toUpperCase() : 'U'}
+              { getAvatar() ? (
+                <img src={getAvatar()} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                (username ? username.charAt(0).toUpperCase() : 'U')
+              ) }
             </div>
           </div>
         </header>

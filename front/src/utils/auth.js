@@ -25,11 +25,29 @@ export function getUsername() {
 }
 
 /**
+ * Сохраняет URL аватарки в localStorage
+ * @param {string} url
+ */
+export function setAvatar(url) {
+  if (url) localStorage.setItem('avatarUrl', url);
+  else localStorage.removeItem('avatarUrl');
+}
+
+/**
+ * Возвращает URL аватарки из localStorage
+ * @returns {string|null}
+ */
+export function getAvatar() {
+  return localStorage.getItem('avatarUrl');
+}
+
+/**
  * Очищает данные аутентификации из localStorage
  */
 export function clearAuthData() {
   localStorage.removeItem("token");
   localStorage.removeItem("username");
+  localStorage.removeItem('avatarUrl');
 }
 
 /**

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import api from '../utils/api';
 import usePing from '../hooks/usePing';
-import { isLoggedIn, clearAuthData, getUsername } from '../utils/auth';
+import { isLoggedIn, clearAuthData, getUsername, getAvatar, setAvatar } from '../utils/auth';
 import NotificationBell from '../components/NotificationBell';
 import {
   HomeIcon,
@@ -15,6 +15,7 @@ import {
 } from '../components/Icons';
 import '../styles/ProfilePage.css';
 import '../styles/Dashboard.css';
+import AvatarUploader from '../components/AvatarUploader';
 
 function ProfilePage() {
   const { username } = useParams();
@@ -89,8 +90,15 @@ function ProfilePage() {
   const isOwnProfile = currentUsername === username;
   const location = useLocation();
 
+  const [showAvatarUploader, setShowAvatarUploader] = useState(false);
+
   const handleAvatarClick = () => {
     if (!currentUsername) return;
+    // If viewing your own profile, open uploader to change avatar
+    if (isOwnProfile) {
+      setShowAvatarUploader(true);
+      return;
+    }
     const profilePath = `/${currentUsername}/profile`;
     const altProfilePath = `/${currentUsername}`;
     if (location.pathname === profilePath || location.pathname === altProfilePath) return;
@@ -106,6 +114,16 @@ function ProfilePage() {
     api.get(`/friendship/search?query=${encodeURIComponent(q)}`)
       .then((res) => setSearchResults(res.data || []))
       .catch(() => setSearchResults([]));
+  };
+  const handleAvatarUploaded = async (avatarUrl) => {
+    // Refresh profile to reflect new avatar from backend
+    try {
+      const res = await api.get(`/profile/${username}`);
+      setProfile(res.data);
+    } catch (err) {
+      // ignore failures here
+    }
+    setShowAvatarUploader(false);
   };
 
   const handleSearchChange = (e) => {
@@ -192,7 +210,11 @@ function ProfilePage() {
                 onKeyDown={(e) => { if (e.key === 'Enter') handleAvatarClick(); }}
                 style={{ cursor: 'pointer' }}
               >
-                {currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U'}
+                { (profile && profile.avatarUrl) || getAvatar() ? (
+                  <img src={(profile && profile.avatarUrl) || getAvatar()} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
+                ) : (
+                  (currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U')
+                ) }
               </div>
             </div>
           </header>
@@ -252,7 +274,11 @@ function ProfilePage() {
                 onKeyDown={(e) => { if (e.key === 'Enter') handleAvatarClick(); }}
                 style={{ cursor: 'pointer' }}
               >
-                {currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U'}
+                { (profile && profile.avatarUrl) || getAvatar() ? (
+                  <img src={(profile && profile.avatarUrl) || getAvatar()} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
+                ) : (
+                  (currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U')
+                ) }
               </div>
             </div>
           </header>
@@ -310,7 +336,11 @@ function ProfilePage() {
               onKeyDown={(e) => { if (e.key === 'Enter') handleAvatarClick(); }}
               style={{ cursor: 'pointer' }}
             >
-              {currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U'}
+              { (profile && profile.avatarUrl) || getAvatar() ? (
+                <img src={(profile && profile.avatarUrl) || getAvatar()} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                (currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U')
+              ) }
             </div>
           </div>
         </header>
@@ -319,8 +349,12 @@ function ProfilePage() {
           <div style={{ flex: 1 }}>
             {/* Profile header with avatar and username */}
             <div className="profile-header" style={{ background: '#fff', borderRadius: 12, padding: 24, marginBottom: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'flex-start', gap: 20 }}>
-              <div className="profile-avatar-large" style={{ width: 100, height: 100, borderRadius: 12, background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
-                {profile.username ? profile.username.charAt(0).toUpperCase() : 'U'}
+              <div className="profile-avatar-large" style={{ width: 100, height: 100, borderRadius: '50%', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40, fontWeight: 700, color: '#fff', flexShrink: 0, overflow: 'hidden' }}>
+                {profile.avatarUrl ? (
+                  <img src={profile.avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                ) : (
+                  (profile.username ? profile.username.charAt(0).toUpperCase() : 'U')
+                )}
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 4 }}>
@@ -464,6 +498,13 @@ function ProfilePage() {
           </div>
         </main>
       </div>
+      {showAvatarUploader && (
+        <AvatarUploader
+          initialImage={profile?.avatarUrl || null}
+          onClose={() => setShowAvatarUploader(false)}
+          onUploaded={handleAvatarUploaded}
+        />
+      )}
     </div>
   );
 }

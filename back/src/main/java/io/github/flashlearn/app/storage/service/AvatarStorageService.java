@@ -1,0 +1,43 @@
+package io.github.flashlearn.app.storage.service;
+
+import io.github.flashlearn.app.profile.exception.AvatarUploadException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+
+import java.io.IOException;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class AvatarStorageService {
+
+    private final S3Client s3Client;
+
+    @Value("${supabase.s3.bucket}")
+    private String bucket;
+
+    public String uploadAvatar(String username, MultipartFile file) {
+        String key = "avatars/" + username + "/" + UUID.randomUUID() + ".jpg";
+
+        try {
+            s3Client.putObject(
+                    PutObjectRequest.builder()
+                            .bucket(bucket)
+                            .key(key)
+                            .contentType(file.getContentType())
+                            .build(),
+                    RequestBody.fromBytes(file.getBytes())
+            );
+        } catch (IOException e) {
+            throw new AvatarUploadException("Failed to upload avatar for user: " + username);
+        }
+
+        return key;
+    }
+
+}

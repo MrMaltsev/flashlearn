@@ -28,7 +28,8 @@ public class User implements UserDetails {
 
     private String aboutMe;
 
-    // private Avatar avatarUrl;
+    @Column(name = "avatar_key")
+    private String avatarKey;
 
     @Column(nullable = false)
     private String password;

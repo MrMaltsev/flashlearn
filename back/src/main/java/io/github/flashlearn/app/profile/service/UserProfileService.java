@@ -53,4 +53,11 @@ public class UserProfileService {
         return userRepository.save(user);
     }
 
+    public void uploadAvatar(String username, String avatarKey) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User with username not found: " + username));
+
+        user.setAvatarKey(avatarKey);
+        userRepository.save(user);
+    }
 }

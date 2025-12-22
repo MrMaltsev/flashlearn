@@ -115,33 +115,12 @@ public class FlashCardService {
                 .orElseThrow(() -> new FlashCardSetNotFoundException("Flash card set not found"));
     }
 
-//    @Transactional
-//    public FlashCardSet saveFlashCardSet(Long id, SaveFlashCardSetRequest request) {
-//        FlashCardSet flashCardSet = flashCardSetRepository.findById(id)
-//                .orElseThrow(() -> new FlashCardSetNotFoundException("Set not found: " + id));
-//
-//        flashCardSet.setSaved(request.isSaved());
-//        return flashCardSetRepository.save(flashCardSet);
-//    }
-
     @Transactional
     public FlashCardSet saveFlashCardSet(Long id, SaveFlashCardSetRequest request) {
         FlashCardSet flashCardSet = flashCardSetRepository.findById(id)
                 .orElseThrow(() -> new FlashCardSetNotFoundException("Set not found: " + id));
 
-        System.out.println("BEFORE SET: " + flashCardSet.isSaved());
-
         flashCardSet.setSaved(request.isSaved());
-
-        System.out.println("AFTER SET: " + flashCardSet.isSaved());
-
-        flashCardSet = flashCardSetRepository.save(flashCardSet);
-
-        flashCardSetRepository.flush(); // Принудительно синхронизируем с БД
-
-        System.out.println("AFTER SAVE: " + flashCardSet.isSaved());
-
-        // Перезагружаем из БД, чтобы избежать кэширования
-        return flashCardSetRepository.findById(id).orElse(flashCardSet);
+        return flashCardSetRepository.save(flashCardSet);
     }
 }

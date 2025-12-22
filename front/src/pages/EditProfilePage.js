@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../utils/api';
 import usePing from '../hooks/usePing';
-import { isLoggedIn, getUsername, clearAuthData } from '../utils/auth';
+import { isLoggedIn, getUsername, clearAuthData, getAvatar } from '../utils/auth';
 import NotificationBell from '../components/NotificationBell';
 import {
   HomeIcon,
@@ -175,7 +175,11 @@ function EditProfilePage() {
             </div>
             <div className="header-right">
               <div className="user-avatar">
-                {currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U'}
+                { getAvatar() ? (
+                  <img src={getAvatar()} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
+                ) : (
+                  (currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U')
+                ) }
               </div>
             </div>
           </header>
@@ -224,7 +228,11 @@ function EditProfilePage() {
           <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <NotificationBell />
             <div className="user-avatar">
-              {currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U'}
+              { getAvatar() ? (
+                <img src={getAvatar()} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                (currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U')
+              ) }
             </div>
           </div>
         </header>

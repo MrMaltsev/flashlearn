@@ -12,6 +12,7 @@ import io.github.flashlearn.app.flashcard.exception.FlashCardAlreadyExistsExcept
 import io.github.flashlearn.app.flashcard.exception.FlashCardNotFoundException;
 import io.github.flashlearn.app.flashcard.exception.FlashCardSetNotFoundException;
 import io.github.flashlearn.app.flashcard.exception.UnauthorizedAccessException;
+import io.github.flashlearn.app.profile.exception.AvatarUploadException;
 import io.github.flashlearn.app.settings.exception.UserSettingsNotFoundException;
 import io.github.flashlearn.app.user.exception.UserAlreadyExistsException;
 import io.github.flashlearn.app.user.exception.UserNotFoundException;
@@ -271,6 +272,20 @@ public class GlobalExceptionHandler{
         ApiError body = new ApiError(HttpStatus.NOT_FOUND.value(), "FLASHCARD_SET_NOT_FOUND", ex.getMessage(),
                 Instant.now(), request.getRequestURI(), traceId);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(AvatarUploadException.class)
+    public ResponseEntity<ApiError> AvatarUploadExceptionHandler(AvatarUploadException ex,
+                                                                 HttpServletRequest request) {
+        String traceId = tracer.currentSpan() != null
+                ? tracer.currentSpan().context().traceId()
+                : "N/A";
+
+        log.error("Can not upload avatar: {}", ex.getMessage(), ex);
+
+        ApiError body = new ApiError(HttpStatus.FORBIDDEN.value(), "AVATAR_NOT_UPLOADED", ex.getMessage(),
+                Instant.now(), request.getRequestURI(), traceId);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 
     // Unexpected exception
