@@ -1,18 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { isLoggedIn, clearAuthData, getUsername, getAvatar } from '../utils/auth';
+import { isLoggedIn, clearAuthData, getUsername, getAvatar, setAvatar } from '../utils/auth';
 import usePing from '../hooks/usePing';
 import {
   HomeIcon,
   ProfileIcon,
   SettingsIcon,
-  SearchIcon,
-  FAQIcon,
   LogoutIcon,
   LightningIcon
 } from '../components/Icons';
 import '../styles/Dashboard.css';
 import '../styles/SettingsPage.css';
+import TopBar from '../components/TopBar';
 import api from '../utils/api';
 
 function SettingsPage() {
@@ -35,8 +34,22 @@ function SettingsPage() {
   useEffect(() => {
     if (!isLoggedIn()) {
       navigate('/login');
+      return;
     }
-  }, [navigate]);
+
+    // Ensure TopBar has the latest avatar (in case user came directly to Settings)
+    (async () => {
+      try {
+        if (!username) return;
+        const resp = await api.get(`/profile/${username}`);
+        if (resp && resp.data && resp.data.avatarUrl) {
+          try { setAvatar(resp.data.avatarUrl); } catch (e) { /* ignore */ }
+        }
+      } catch (e) {
+        // ignore fetch errors
+      }
+    })();
+  }, [navigate, username]);
 
   useEffect(() => {
     // Load existing settings from backend for the user
@@ -76,7 +89,6 @@ function SettingsPage() {
       navigate(`${base}`);
     }
   };
-  const goSearch = () => navigate(`${base}/search`);
 
   const handleToggle = (key) => {
     setSettings((s) => ({ ...s, [key]: !s[key] }));
@@ -127,22 +139,8 @@ function SettingsPage() {
           >
             <SettingsIcon active={true} />
           </button>
-          <button 
-            className="sidebar-icon-btn" 
-            onClick={goSearch}
-            title="Поиск"
-          >
-            <SearchIcon />
-          </button>
         </div>
         <div className="sidebar-icon-group-bottom">
-          <button 
-            className="sidebar-icon-btn" 
-            onClick={() => navigate(`${base}/faq`)}
-            title="FAQ"
-          >
-            <FAQIcon />
-          </button>
           <button 
             className="sidebar-icon-btn" 
             onClick={handleLogout}
@@ -154,21 +152,7 @@ function SettingsPage() {
       </aside>
 
       <div className="dashboard-main">
-        <header className="dashboard-header">
-          <div className="header-left">
-            <LightningIcon />
-            <span className="header-logo">Flashlearn</span>
-          </div>
-          <div className="header-right">
-            <div className="user-avatar">
-              { getAvatar() ? (
-                <img src={getAvatar()} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
-              ) : (
-                (username ? username.charAt(0).toUpperCase() : 'U')
-              ) }
-            </div>
-          </div>
-        </header>
+        <TopBar />
 
         <main className="dashboard-content settings-content">
           {/* Notification banner */}

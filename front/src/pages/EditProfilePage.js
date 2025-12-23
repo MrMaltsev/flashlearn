@@ -8,13 +8,12 @@ import {
   HomeIcon,
   ProfileIcon,
   SettingsIcon,
-  SearchIcon,
-  FAQIcon,
   LogoutIcon,
   LightningIcon
 } from '../components/Icons';
 import '../styles/ProfilePage.css';
 import '../styles/Dashboard.css';
+import TopBar from '../components/TopBar';
 import '../styles/EditProfile.css';
 
 function EditProfilePage() {
@@ -138,7 +137,6 @@ function EditProfilePage() {
     }
   };
   const goSettings = () => navigate(`${base}/settings`);
-  const goSearch = () => navigate(`${base}/search`);
 
   if (loading) {
     return (
@@ -154,14 +152,8 @@ function EditProfilePage() {
             <button className="sidebar-icon-btn" onClick={goSettings} title="Настройки">
               <SettingsIcon />
             </button>
-            <button className="sidebar-icon-btn" onClick={goSearch} title="Поиск">
-              <SearchIcon />
-            </button>
           </div>
           <div className="sidebar-icon-group-bottom">
-              <button className="sidebar-icon-btn" onClick={() => navigate(`${base}/faq`)} title="FAQ">
-              <FAQIcon />
-            </button>
             <button className="sidebar-icon-btn" onClick={handleLogout} title="Выход">
               <LogoutIcon />
             </button>
@@ -206,36 +198,15 @@ function EditProfilePage() {
           <button className="sidebar-icon-btn" onClick={goSettings} title="Настройки">
             <SettingsIcon />
           </button>
-          <button className="sidebar-icon-btn" onClick={goSearch} title="Поиск">
-            <SearchIcon />
-          </button>
         </div>
         <div className="sidebar-icon-group-bottom">
-            <button className="sidebar-icon-btn" onClick={() => navigate(`${base}/faq`)} title="FAQ">
-            <FAQIcon />
-          </button>
           <button className="sidebar-icon-btn" onClick={handleLogout} title="Выход">
             <LogoutIcon />
           </button>
         </div>
       </aside>
       <div className="dashboard-main">
-        <header className="dashboard-header">
-          <div className="header-left">
-            <LightningIcon />
-            <span className="header-logo">Flashlearn</span>
-          </div>
-          <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <NotificationBell />
-            <div className="user-avatar">
-              { getAvatar() ? (
-                <img src={getAvatar()} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
-              ) : (
-                (currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U')
-              ) }
-            </div>
-          </div>
-        </header>
+        <TopBar />
         <main className="dashboard-content edit-profile-content">
           <div className="edit-profile-grid">
             <div className="edit-card">

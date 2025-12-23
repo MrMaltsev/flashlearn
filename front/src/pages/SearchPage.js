@@ -6,12 +6,11 @@ import {
   HomeIcon,
   ProfileIcon,
   SettingsIcon,
-  SearchIcon,
-  FAQIcon,
   LogoutIcon,
   LightningIcon
 } from '../components/Icons';
 import '../styles/Dashboard.css';
+import TopBar from '../components/TopBar';
 
 function SearchPage() {
   const navigate = useNavigate();
@@ -65,22 +64,8 @@ function SearchPage() {
           >
             <SettingsIcon />
           </button>
-          <button 
-            className="sidebar-icon-btn active" 
-            onClick={() => {}}
-            title="Поиск"
-          >
-            <SearchIcon active={true} />
-          </button>
         </div>
         <div className="sidebar-icon-group-bottom">
-          <button 
-            className="sidebar-icon-btn" 
-            onClick={() => navigate(`${base}/faq`)}
-            title="FAQ"
-          >
-            <FAQIcon />
-          </button>
           <button 
             className="sidebar-icon-btn" 
             onClick={handleLogout}
@@ -92,21 +77,7 @@ function SearchPage() {
       </aside>
 
       <div className="dashboard-main">
-        <header className="dashboard-header">
-          <div className="header-left">
-            <LightningIcon />
-            <span className="header-logo">Flashlearn</span>
-          </div>
-          <div className="header-right">
-            <div className="user-avatar">
-              { getAvatar() ? (
-                <img src={getAvatar()} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
-              ) : (
-                (username ? username.charAt(0).toUpperCase() : 'U')
-              ) }
-            </div>
-          </div>
-        </header>
+        <TopBar />
 
         <main className="dashboard-content">
           <div className="stats-card">

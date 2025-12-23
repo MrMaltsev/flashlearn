@@ -3,12 +3,11 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { getUsername, getAvatar } from '../utils/auth';
 import api from '../utils/api';
 import NotificationBell from '../components/NotificationBell';
+import TopBar from '../components/TopBar';
 import {
   HomeIcon,
   ProfileIcon,
   SettingsIcon,
-  SearchIcon,
-  FAQIcon,
   LogoutIcon,
   LightningIcon
 } from '../components/Icons';
@@ -160,24 +159,9 @@ function StudySessionPage() {
   if (!set) return <div style={{ padding: 20 }}>Set not found.</div>;
   if (!cards || cards.length === 0) return <div style={{ padding: 20 }}>No cards in this set.</div>;
 
-  const headerLayout = (
-    <header className="study-header dashboard-header">
-      <div className="header-left">
-        <LightningIcon />
-        <span className="header-logo">Flashlearn</span>
-      </div>
-      <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <NotificationBell />
-        <div className="user-avatar">
-          { getAvatar() ? (
-            <img src={getAvatar()} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
-          ) : (
-            (username ? username.charAt(0).toUpperCase() : 'U')
-          ) }
-        </div>
-      </div>
-    </header>
-  );
+  // Use shared TopBar instead of inline header for consistency
+  // headerLayout is kept for places that need it; prefer <TopBar /> in the returned layout
+  const headerLayout = <TopBar />;
 
   const sidebarLayout = (
     <aside className="dashboard-sidebar">
@@ -191,14 +175,8 @@ function StudySessionPage() {
         <button className="sidebar-icon-btn" onClick={() => navigate(`/${username}/settings`)} title="Настройки">
           <SettingsIcon />
         </button>
-        <button className="sidebar-icon-btn" onClick={() => navigate(`/${username}/search`)} title="Поиск">
-          <SearchIcon />
-        </button>
       </div>
       <div className="sidebar-icon-group-bottom">
-        <button className="sidebar-icon-btn" onClick={() => navigate(`/${username}/faq`)} title="FAQ">
-          <FAQIcon />
-        </button>
         <button className="sidebar-icon-btn" onClick={() => { localStorage.clear(); navigate('/login'); }} title="Выход">
           <LogoutIcon />
         </button>

@@ -8,14 +8,13 @@ import {
   HomeIcon,
   ProfileIcon,
   SettingsIcon,
-  SearchIcon,
-  FAQIcon,
   LogoutIcon,
   LightningIcon
 } from '../components/Icons';
 import '../styles/ProfilePage.css';
 import '../styles/Dashboard.css';
 import AvatarUploader from '../components/AvatarUploader';
+import TopBar from '../components/TopBar';
 
 function ProfilePage() {
   const { username } = useParams();
@@ -47,6 +46,10 @@ function ProfilePage() {
         // Получаем информацию о профиле с контроллера profile
         const response = await api.get(`/profile/${username}`);
         setProfile(response.data);
+        // persist avatar for TopBar across pages
+        if (response.data && response.data.avatarUrl) {
+          try { setAvatar(response.data.avatarUrl); } catch (e) { /* ignore */ }
+        }
         // Загружаем друзей
         const friendsRes = await api.get('/friendship/friends');
         setFriends(friendsRes.data || []);
@@ -86,10 +89,8 @@ function ProfilePage() {
   const goHome = () => navigate(`${base}/dashboard`);
   const goToEdit = () => navigate(`/${username}/edit`);
   const goSettings = () => navigate(`${base}/settings`);
-  const goSearch = () => navigate(`${base}/search`);
   const isOwnProfile = currentUsername === username;
   const location = useLocation();
-
   const [showAvatarUploader, setShowAvatarUploader] = useState(false);
 
   const handleAvatarClick = () => {
@@ -120,6 +121,9 @@ function ProfilePage() {
     try {
       const res = await api.get(`/profile/${username}`);
       setProfile(res.data);
+      if (res.data && res.data.avatarUrl) {
+        try { setAvatar(res.data.avatarUrl); } catch (e) { /* ignore */ }
+      }
     } catch (err) {
       // ignore failures here
     }
@@ -177,47 +181,15 @@ function ProfilePage() {
             <button className="sidebar-icon-btn" onClick={goSettings} title="Настройки">
               <SettingsIcon />
             </button>
-            <button className="sidebar-icon-btn" onClick={goSearch} title="Поиск">
-              <SearchIcon />
-            </button>
           </div>
           <div className="sidebar-icon-group-bottom">
-              <button className="sidebar-icon-btn" onClick={() => navigate(`${base}/faq`)} title="FAQ">
-              <FAQIcon />
-            </button>
             <button className="sidebar-icon-btn" onClick={handleLogout} title="Выход">
               <LogoutIcon />
             </button>
           </div>
         </aside>
         <div className="dashboard-main">
-          <header className="dashboard-header">
-            <div className="header-left">
-              <LightningIcon />
-              <span className="header-logo">Flashlearn</span>
-            </div>
-            <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              {/* Notifications bell placeholder in loading state */}
-              <button className="icon-btn" aria-label="Notifications" style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 17H9" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              </button>
-              <div
-                className="user-avatar"
-                title={currentUsername ? currentUsername : 'User'}
-                onClick={handleAvatarClick}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleAvatarClick(); }}
-                style={{ cursor: 'pointer' }}
-              >
-                { (profile && profile.avatarUrl) || getAvatar() ? (
-                  <img src={(profile && profile.avatarUrl) || getAvatar()} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
-                ) : (
-                  (currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U')
-                ) }
-              </div>
-            </div>
-          </header>
+          <TopBar showNewSet={false} onAvatarClick={handleAvatarClick} />
           <main className="dashboard-content">
             <div className="stats-card">
               <p>Загрузка...</p>
@@ -242,46 +214,17 @@ function ProfilePage() {
             <button className="sidebar-icon-btn" onClick={goSettings} title="Настройки">
               <SettingsIcon />
             </button>
-            <button className="sidebar-icon-btn" onClick={goSearch} title="Поиск">
-              <SearchIcon />
-            </button>
+
           </div>
           <div className="sidebar-icon-group-bottom">
-              <button className="sidebar-icon-btn" onClick={() => navigate(`${base}/faq`)} title="FAQ">
-              <FAQIcon />
-            </button>
+
             <button className="sidebar-icon-btn" onClick={handleLogout} title="Выход">
               <LogoutIcon />
             </button>
           </div>
         </aside>
         <div className="dashboard-main">
-          <header className="dashboard-header">
-            <div className="header-left">
-              <LightningIcon />
-              <span className="header-logo">Flashlearn</span>
-            </div>
-            <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <button className="icon-btn" aria-label="Notifications" style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 17H9" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              </button>
-              <div
-                className="user-avatar"
-                title={currentUsername ? currentUsername : 'User'}
-                onClick={handleAvatarClick}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleAvatarClick(); }}
-                style={{ cursor: 'pointer' }}
-              >
-                { (profile && profile.avatarUrl) || getAvatar() ? (
-                  <img src={(profile && profile.avatarUrl) || getAvatar()} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
-                ) : (
-                  (currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U')
-                ) }
-              </div>
-            </div>
-          </header>
+          <TopBar showNewSet={false} onAvatarClick={handleAvatarClick} />
           <main className="dashboard-content">
             <div className="stats-card">
               <p className="profile-error">{error || 'Профиль не найден'}</p>
@@ -305,45 +248,17 @@ function ProfilePage() {
           <button className="sidebar-icon-btn" onClick={goSettings} title="Настройки">
             <SettingsIcon />
           </button>
-          <button className="sidebar-icon-btn" onClick={goSearch} title="Поиск">
-            <SearchIcon />
-          </button>
+
         </div>
         <div className="sidebar-icon-group-bottom">
-            <button className="sidebar-icon-btn" onClick={() => navigate(`${base}/faq`)} title="FAQ">
-            <FAQIcon />
-          </button>
+
           <button className="sidebar-icon-btn" onClick={handleLogout} title="Выход">
             <LogoutIcon />
           </button>
         </div>
       </aside>
       <div className="dashboard-main">
-        <header className="dashboard-header">
-          <div className="header-left">
-            <LightningIcon />
-            <span className="header-logo">Flashlearn</span>
-          </div>
-          <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <NotificationBell />
-
-            <div
-              className="user-avatar"
-              title={currentUsername ? currentUsername : 'User'}
-              onClick={handleAvatarClick}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleAvatarClick(); }}
-              style={{ cursor: 'pointer' }}
-            >
-              { (profile && profile.avatarUrl) || getAvatar() ? (
-                <img src={(profile && profile.avatarUrl) || getAvatar()} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
-              ) : (
-                (currentUsername ? currentUsername.charAt(0).toUpperCase() : 'U')
-              ) }
-            </div>
-          </div>
-        </header>
+        <TopBar showNewSet={false} onAvatarClick={handleAvatarClick} />
         <main className="dashboard-content" style={{ display: 'flex', gap: 20, paddingRight: 20 }}>
           {/* Main profile section */}
           <div style={{ flex: 1 }}>

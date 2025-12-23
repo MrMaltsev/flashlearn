@@ -8,8 +8,6 @@ import {
   HomeIcon,
   ProfileIcon,
   SettingsIcon,
-  SearchIcon,
-  FAQIcon,
   LogoutIcon,
   LightningIcon,
   FlameIcon,
@@ -28,6 +26,7 @@ import {
   FilterIcon
 } from '../components/Icons';
 import '../styles/Dashboard.css';
+import TopBar from '../components/TopBar';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -101,10 +100,6 @@ function Dashboard() {
 
   const goSettings = () => {
     navigate(`${base}/settings`);
-  };
-
-  const goSearch = () => {
-    navigate(`${base}/search`);
   };
 
   const handleNewSet = () => {
@@ -355,22 +350,8 @@ function Dashboard() {
           >
             <SettingsIcon />
           </button>
-          <button 
-            className="sidebar-icon-btn" 
-            onClick={goSearch}
-            title="Поиск"
-          >
-            <SearchIcon />
-          </button>
         </div>
         <div className="sidebar-icon-group-bottom">
-          <button 
-            className="sidebar-icon-btn" 
-            onClick={() => navigate(`${base}/faq`)}
-            title="FAQ"
-          >
-            <FAQIcon />
-          </button>
           <button 
             className="sidebar-icon-btn" 
             onClick={handleLogout}
@@ -384,25 +365,7 @@ function Dashboard() {
       {/* Основной контент */}
       <div className="dashboard-main">
         {/* Верхняя панель */}
-        <header className="dashboard-header">
-          <div className="header-left">
-            <LightningIcon />
-            <span className="header-logo">Flashlearn</span>
-          </div>
-          <div className="header-right">
-            <NotificationBell />
-            <button className="new-set-btn" onClick={handleNewSet}>
-              + New set
-            </button>
-            <div className="user-avatar">
-              { getAvatar() ? (
-                <img src={getAvatar()} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }} />
-              ) : (
-                (username ? username.charAt(0).toUpperCase() : 'U')
-              ) }
-            </div>
-          </div>
-        </header>
+        <TopBar showNewSet={true} onNewSet={handleNewSet} />
 
         {/* Основной контент */}
         <main className="dashboard-content">

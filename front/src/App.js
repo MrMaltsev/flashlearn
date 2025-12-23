@@ -9,7 +9,6 @@ import ProfilePage from "./pages/ProfilePage";
 import EditProfilePage from "./pages/EditProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import SearchPage from "./pages/SearchPage";
-import FAQPage from "./pages/FAQPage";
 import StudySessionPage from "./pages/StudySessionPage";
 
 function App() {
@@ -25,7 +24,6 @@ function App() {
         <Route path="/:username/study-session/:setId" element={<StudySessionPage />} />
         <Route path="/:username/settings" element={<SettingsPage />} />
         <Route path="/:username/search" element={<SearchPage />} />
-        <Route path="/:username/faq" element={<FAQPage />} />
         <Route path="/:username" element={<ProfilePage />} />
         <Route path="/:username/edit" element={<EditProfilePage />} />
       </Routes>
