@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-12-22T17:41:25+0300",
-    comments = "version: 1.6.3, compiler: javac, environment: Java 24.0.1 (Oracle Corporation)"
+    date = "2026-02-12T15:06:23+0300",
+    comments = "version: 1.6.3, compiler: Eclipse JDT (IDE) 3.45.0.v20260128-0750, environment: Java 21.0.9 (Eclipse Adoptium)"
 )
 @Component
 public class FlashCardSetMapperImpl implements FlashCardSetMapper {
@@ -58,17 +58,17 @@ public class FlashCardSetMapperImpl implements FlashCardSetMapper {
 
         FlashCardSet flashCardSet = new FlashCardSet();
 
+        flashCardSet.setDescription( flashCardSetResponse.description() );
+        flashCardSet.setFlashCards( flashCardResponseListToFlashCardList( flashCardSetResponse.flashCards() ) );
         if ( flashCardSetResponse.id() != null ) {
             flashCardSet.setId( flashCardSetResponse.id() );
         }
-        flashCardSet.setTitle( flashCardSetResponse.title() );
-        flashCardSet.setDescription( flashCardSetResponse.description() );
-        flashCardSet.setVisibility( flashCardSetResponse.visibility() );
-        List<String> list = flashCardSetResponse.tags();
-        if ( list != null ) {
-            flashCardSet.setTags( new ArrayList<String>( list ) );
+        List<String> list1 = flashCardSetResponse.tags();
+        if ( list1 != null ) {
+            flashCardSet.setTags( new ArrayList<String>( list1 ) );
         }
-        flashCardSet.setFlashCards( flashCardResponseListToFlashCardList( flashCardSetResponse.flashCards() ) );
+        flashCardSet.setTitle( flashCardSetResponse.title() );
+        flashCardSet.setVisibility( flashCardSetResponse.visibility() );
 
         return flashCardSet;
     }
@@ -126,9 +126,9 @@ public class FlashCardSetMapperImpl implements FlashCardSetMapper {
 
         FlashCard flashCard = new FlashCard();
 
+        flashCard.setAnswer( flashCardResponse.answer() );
         flashCard.setId( flashCardResponse.id() );
         flashCard.setQuestion( flashCardResponse.question() );
-        flashCard.setAnswer( flashCardResponse.answer() );
 
         return flashCard;
     }
