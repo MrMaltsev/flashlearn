@@ -27,7 +27,13 @@ export default function TopBar({ showNewSet = true, onNewSet, onAvatarClick }) {
       <div className="header-right">
         <NotificationBell />
         {showNewSet && (
-          <button className="new-set-btn" onClick={() => { if (onNewSet) onNewSet(); else navigate(`${base}/create`); }}>
+          <button
+            className="new-set-btn"
+            onClick={() => {
+              if (onNewSet) onNewSet();
+              else navigate(`${base}/create-set`);
+            }}
+          >
             + New set
           </button>
         )}

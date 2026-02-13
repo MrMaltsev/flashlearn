@@ -48,26 +48,33 @@ function LandingPage() {
       <Navigation activeSection={activeSection} />
 
       {/* Hero Section */}
-      <section id="home" className="min-h-screen flex items-center justify-center pt-20 px-6">
+      <section
+        id="home"
+        className="min-h-screen flex items-center justify-center pt-24 px-6 bg-gradient-to-b from-white to-orange-50 border-b border-gray-100"
+      >
         <div className="max-w-7xl w-full grid md:grid-cols-2 gap-12 items-center">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
           >
+            <p className="uppercase tracking-[0.25em] text-xs font-semibold text-orange-500 mb-3">
+              Платформа для запоминания
+            </p>
             <h1 className="text-gray-900 mb-6">
-              Master Anything with{" "}
+              Освой любой материал с{" "}
               <span className="text-orange-500">FlashLearn</span>
             </h1>
             <p className="text-gray-600 mb-8">
-              The smartest way to learn and retain information. Create flashcards, track your progress, and achieve your educational goals faster than ever.
+              Умный способ учиться и запоминать надолго. Создавайте наборы карточек, следите за прогрессом и
+              достигайте учебных целей быстрее и увереннее.
             </p>
             <div className="flex gap-4">
               <Button className="bg-orange-500 hover:bg-orange-600 px-8 py-6">
-                Get Started Free
+                Начать бесплатно
               </Button>
               <Button variant="outline" className="border-orange-500 text-orange-500 hover:bg-orange-50 px-8 py-6">
-                Watch Demo
+                Смотреть демо
               </Button>
             </div>
           </motion.div>
@@ -91,12 +98,18 @@ function LandingPage() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="min-h-screen flex items-center justify-center py-20 px-6 bg-gradient-to-b from-white to-orange-50">
+      <section
+        id="about"
+        className="min-h-screen flex items-center justify-center py-24 px-6 bg-white border-y border-gray-100"
+      >
         <div className="max-w-7xl w-full">
           <motion.div {...fadeInUp} className="text-center mb-16">
-            <h2 className="text-gray-900 mb-4">About FlashLearn</h2>
+            <p className="uppercase tracking-[0.25em] text-xs font-semibold text-orange-500 mb-3">
+              О платформе
+            </p>
+            <h2 className="text-gray-900 mb-4">Что такое FlashLearn</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              We're revolutionizing the way people learn by combining proven study techniques with modern technology.
+              Мы меняем подход к обучению, соединяя проверенные методики запоминания и современные технологии.
             </p>
           </motion.div>
 
@@ -117,18 +130,19 @@ function LandingPage() {
               className="space-y-6"
             >
               <motion.div {...fadeInUp}>
-                <h3 className="text-gray-900 mb-3">Our Mission</h3>
+                <h3 className="text-gray-900 mb-3">Наша миссия</h3>
                 <p className="text-gray-600">
-                  To make learning accessible, effective, and enjoyable for everyone. We believe that with the right tools, anyone can master any subject.
+                  Сделать обучение доступным, эффективным и по‑настоящему увлекательным для каждого.
+                  Мы уверены, что с правильными инструментами любой человек может освоить любой предмет.
                 </p>
               </motion.div>
 
               <motion.div {...fadeInUp} className="space-y-4">
                 {[
-                  "Scientifically-proven learning methods",
-                  "Personalized study plans",
-                  "Progress tracking and analytics",
-                  "Collaborative learning features"
+                  "Научно обоснованные методики запоминания",
+                  "Персонализированные планы обучения",
+                  "Наглядная аналитика и прогресс",
+                  "Совместная работа и обмен наборами"
                 ].map((feature, index) => (
                   <div key={index} className="flex items-center gap-3">
                     <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
@@ -144,12 +158,18 @@ function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="min-h-screen flex items-center justify-center py-20 px-6 bg-white">
+      <section
+        id="features"
+        className="min-h-screen flex items-center justify-center py-24 px-6 bg-gradient-to-b from-white to-orange-50 border-y border-gray-100"
+      >
         <div className="max-w-7xl w-full">
           <motion.div {...fadeInUp} className="text-center mb-16">
-            <h2 className="text-gray-900 mb-4">Powerful Features</h2>
+            <p className="uppercase tracking-[0.25em] text-xs font-semibold text-orange-500 mb-3">
+              Возможности
+            </p>
+            <h2 className="text-gray-900 mb-4">Мощные инструменты для учёбы</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Everything you need to supercharge your learning journey
+              Всё, что нужно, чтобы ускорить и упростить ваш путь в обучении.
             </p>
           </motion.div>
 
@@ -157,18 +177,18 @@ function LandingPage() {
             {[
               {
                 icon: Brain,
-                title: "Smart Flashcards",
-                description: "AI-powered flashcards that adapt to your learning style and pace"
+                title: "Умные карточки",
+                description: "Карточки, которые подстраиваются под ваш темп и стиль обучения"
               },
               {
                 icon: Zap,
-                title: "Spaced Repetition",
-                description: "Optimize retention with scientifically-backed spaced repetition algorithms"
+                title: "Интервальные повторения",
+                description: "Максимальное запоминание благодаря алгоритмам интервального повторения"
               },
               {
                 icon: Trophy,
-                title: "Track Progress",
-                description: "Visualize your learning journey with detailed analytics and achievements"
+                title: "Прогресс и достижения",
+                description: "Наглядные графики и достижения, которые мотивируют продолжать"
               }
             ].map((feature, index) => (
               <motion.div
@@ -198,12 +218,12 @@ function LandingPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-r from-orange-500/80 to-transparent flex items-center">
               <div className="text-white p-12 max-w-xl">
-                <h3 className="text-white mb-4">Study Smarter, Not Harder</h3>
+                <h3 className="text-white mb-4">Учитесь умнее, а не дольше</h3>
                 <p className="text-white/90 mb-6">
-                  Our platform is designed to maximize your learning efficiency, helping you achieve better results in less time.
+                  Платформа FlashLearn помогает учиться эффективнее и получать больше результатов за меньшее время.
                 </p>
                 <Button variant="outline" className="border-white text-white hover:bg-white hover:text-orange-500">
-                  Learn More
+                  Узнать больше
                 </Button>
               </div>
             </div>
@@ -212,25 +232,31 @@ function LandingPage() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="min-h-screen flex items-center justify-center py-20 px-6 bg-gradient-to-b from-white to-orange-50">
+      <section
+        id="pricing"
+        className="min-h-screen flex items-center justify-center py-24 px-6 bg-white border-y border-gray-100"
+      >
         <div className="max-w-7xl w-full">
           <motion.div {...fadeInUp} className="text-center mb-16">
-            <h2 className="text-gray-900 mb-4">Simple Pricing</h2>
+            <p className="uppercase tracking-[0.25em] text-xs font-semibold text-orange-500 mb-3">
+              Тарифы
+            </p>
+            <h2 className="text-gray-900 mb-4">Простые и понятные планы</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Choose the plan that's right for you
+              Выберите тариф, который лучше всего подходит под ваши задачи.
             </p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                name: "Free",
+                name: "Бесплатный",
                 price: "$0",
                 features: [
-                  "Up to 50 flashcards",
-                  "Basic spaced repetition",
-                  "Mobile app access",
-                  "Community support"
+                  "До 50 карточек",
+                  "Базовые интервальные повторения",
+                  "Доступ с мобильных устройств",
+                  "Поддержка сообщества"
                 ]
               },
               {
@@ -238,22 +264,22 @@ function LandingPage() {
                 price: "$9",
                 popular: true,
                 features: [
-                  "Unlimited flashcards",
-                  "Advanced algorithms",
-                  "Progress analytics",
-                  "Priority support",
-                  "Collaboration tools"
+                  "Безлимитные наборы карточек",
+                  "Продвинутые алгоритмы повторения",
+                  "Расширенная аналитика прогресса",
+                  "Приоритетная поддержка",
+                  "Инструменты для совместной работы"
                 ]
               },
               {
-                name: "Team",
+                name: "Команда",
                 price: "$29",
                 features: [
-                  "Everything in Pro",
-                  "Team management",
-                  "Shared decks",
-                  "Admin dashboard",
-                  "Dedicated support"
+                  "Всё из тарифа Pro",
+                  "Управление участниками команды",
+                  "Общие наборы карточек",
+                  "Админ‑панель для мониторинга",
+                  "Выделенная линия поддержки"
                 ]
               }
             ].map((plan, index) => (
@@ -290,7 +316,7 @@ function LandingPage() {
                       ? "bg-orange-500 hover:bg-orange-600" 
                       : "bg-white border-2 border-orange-500 text-orange-500 hover:bg-orange-50"
                   }`}>
-                    Get Started
+                    Подключиться
                   </Button>
                 </Card>
               </motion.div>
@@ -300,12 +326,18 @@ function LandingPage() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="min-h-screen flex items-center justify-center py-20 px-6 bg-white">
+      <section
+        id="contact"
+        className="min-h-screen flex items-center justify-center py-24 px-6 bg-gradient-to-b from-white to-orange-50 border-y border-gray-100"
+      >
         <div className="max-w-7xl w-full">
           <motion.div {...fadeInUp} className="text-center mb-16">
-            <h2 className="text-gray-900 mb-4">Get in Touch</h2>
+            <p className="uppercase tracking-[0.25em] text-xs font-semibold text-orange-500 mb-3">
+              Контакты
+            </p>
+            <h2 className="text-gray-900 mb-4">Свяжитесь с нами</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Have questions? We'd love to hear from you.
+              Остались вопросы или есть идеи по улучшению платформы? Напишите нам — мы всегда открыты к диалогу.
             </p>
           </motion.div>
 
@@ -330,7 +362,7 @@ function LandingPage() {
                   <Mail className="w-6 h-6 text-orange-500" />
                 </div>
                 <div>
-                  <h3 className="text-gray-900 mb-2">Email Us</h3>
+                  <h3 className="text-gray-900 mb-2">Напишите нам на почту</h3>
                   <p className="text-gray-600">support@flashlearn.com</p>
                   <p className="text-gray-600">hello@flashlearn.com</p>
                 </div>
@@ -341,9 +373,9 @@ function LandingPage() {
                   <Phone className="w-6 h-6 text-orange-500" />
                 </div>
                 <div>
-                  <h3 className="text-gray-900 mb-2">Call Us</h3>
+                  <h3 className="text-gray-900 mb-2">Позвоните нам</h3>
                   <p className="text-gray-600">+1 (555) 123-4567</p>
-                  <p className="text-gray-600">Mon-Fri 9am-6pm EST</p>
+                  <p className="text-gray-600">Пн–Пт, 9:00–18:00 (по местному времени)</p>
                 </div>
               </motion.div>
 
@@ -352,7 +384,7 @@ function LandingPage() {
                   <MapPin className="w-6 h-6 text-orange-500" />
                 </div>
                 <div>
-                  <h3 className="text-gray-900 mb-2">Visit Us</h3>
+                  <h3 className="text-gray-900 mb-2">Наш офис</h3>
                   <p className="text-gray-600">123 Learning Street</p>
                   <p className="text-gray-600">San Francisco, CA 94102</p>
                 </div>
@@ -360,7 +392,7 @@ function LandingPage() {
 
               <motion.div {...fadeInUp}>
                 <Button className="bg-orange-500 hover:bg-orange-600 w-full md:w-auto px-8 py-6">
-                  Send Message
+                  Отправить сообщение
                 </Button>
               </motion.div>
             </motion.div>
@@ -372,7 +404,7 @@ function LandingPage() {
       <footer className="bg-gray-900 text-white py-12 px-6">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-gray-400">
-            © 2025 FlashLearn. All rights reserved.
+            © 2025 FlashLearn. Все права защищены.
           </p>
         </div>
       </footer>

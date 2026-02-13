@@ -7,11 +7,11 @@ interface NavigationProps {
 
 export function Navigation({ activeSection }: NavigationProps) {
   const navItems = [
-    { id: "home", label: "Home" },
-    { id: "about", label: "About App" },
-    { id: "features", label: "Features" },
-    { id: "pricing", label: "Pricing" },
-    { id: "contact", label: "Contact" },
+    { id: "home", label: "Главная" },
+    { id: "about", label: "О приложении" },
+    { id: "features", label: "Возможности" },
+    { id: "pricing", label: "Тарифы" },
+    { id: "contact", label: "Контакты" },
   ];
 
   const scrollToSection = (id: string) => {
@@ -53,8 +53,8 @@ export function Navigation({ activeSection }: NavigationProps) {
           <Button
             asChild
             className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-5 py-2.5 shadow-sm hover:shadow-md transition-shadow">
-            <a href="/login" aria-label="Go to login page">
-              Login
+            <a href="/login" aria-label="Перейти на страницу входа">
+              Войти
             </a>
           </Button>
         </div>
