@@ -5,9 +5,31 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Check, Brain, Zap, Trophy, Mail, MapPin, Phone } from "lucide-react";
+// @ts-ignore — модуль api.js без декларации типов
+import api from "../utils/api";
+
+interface LandingImagesResponse {
+  heroImage: string | null;
+  aboutImage: string | null;
+  featuresImage: string | null;
+  contactImage: string | null;
+}
 
 function LandingPage() {
   const [activeSection, setActiveSection] = useState("home");
+  const [landingImages, setLandingImages] = useState<LandingImagesResponse | null>(null);
+
+  useEffect(() => {
+    api
+      .get<LandingImagesResponse>("/landing/images")
+      .then((res: { data: LandingImagesResponse }) => setLandingImages(res.data))
+      .catch(() => setLandingImages(null));
+  }, []);
+
+  const heroSrc = landingImages?.heroImage ?? null;
+  const aboutSrc = landingImages?.aboutImage ?? null;
+  const featuresSrc = landingImages?.featuresImage ?? null;
+  const contactSrc = landingImages?.contactImage ?? null;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -86,12 +108,20 @@ function LandingPage() {
             className="relative"
           >
             <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-              <ImageWithFallback
-                src="https://images.unsplash.com/photo-1701576766277-c6160505581d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdHVkZW50JTIwbGVhcm5pbmclMjBsYXB0b3B8ZW58MXx8fHwxNzYyOTk5NDU4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-                alt="Student learning"
-                className="w-full h-[500px] object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-orange-500/20 to-transparent" />
+              {heroSrc ? (
+                <>
+                  <ImageWithFallback
+                    src={heroSrc}
+                    alt="Учёба с FlashLearn"
+                    className="w-full h-[500px] object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-orange-500/20 to-transparent pointer-events-none" />
+                </>
+              ) : (
+                <div className="w-full h-[500px] flex items-center justify-center bg-gray-100 text-gray-400 text-sm">
+                  Изображение загружается
+                </div>
+              )}
             </div>
           </motion.div>
         </div>
@@ -116,13 +146,19 @@ function LandingPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <motion.div
               {...fadeInUp}
-              className="relative rounded-2xl overflow-hidden shadow-xl"
+              className="relative rounded-2xl overflow-hidden shadow-xl bg-gray-100 min-h-[400px]"
             >
-              <ImageWithFallback
-                src="https://images.unsplash.com/photo-1759984782199-a4f6d1b6054e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvbmxpbmUlMjBlZHVjYXRpb24lMjBkZXNrfGVufDF8fHx8MTc2Mjk2NTI5MXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-                alt="Online education"
-                className="w-full h-[400px] object-cover"
-              />
+              {aboutSrc ? (
+                <ImageWithFallback
+                  src={aboutSrc}
+                  alt="О платформе FlashLearn"
+                  className="w-full h-[400px] object-cover"
+                />
+              ) : (
+                <div className="w-full h-[400px] flex items-center justify-center text-gray-400 text-sm">
+                  Нет изображения
+                </div>
+              )}
             </motion.div>
 
             <motion.div
@@ -211,11 +247,17 @@ function LandingPage() {
             {...fadeInUp}
             className="relative rounded-2xl overflow-hidden shadow-2xl"
           >
-            <ImageWithFallback
-              src="https://images.unsplash.com/photo-1600783355700-5d2424dc013e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdHVkeWluZyUyMGJvb2tzJTIwY29mZmVlfGVufDF8fHx8MTc2MzA1NDUxNXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-              alt="Studying"
-              className="w-full h-[400px] object-cover"
-            />
+            {featuresSrc ? (
+              <ImageWithFallback
+                src={featuresSrc}
+                alt="Возможности платформы"
+                className="w-full h-[400px] object-cover"
+              />
+            ) : (
+              <div className="w-full h-[400px] flex items-center justify-center bg-gray-100 text-gray-400 text-sm rounded-2xl">
+                Нет изображения
+              </div>
+            )}
             <div className="absolute inset-0 bg-gradient-to-r from-orange-500/80 to-transparent flex items-center">
               <div className="text-white p-12 max-w-xl">
                 <h3 className="text-white mb-4">Учитесь умнее, а не дольше</h3>
@@ -346,11 +388,17 @@ function LandingPage() {
               {...fadeInUp}
               className="relative rounded-2xl overflow-hidden shadow-xl"
             >
-              <ImageWithFallback
-                src="https://images.unsplash.com/photo-1739298061707-cefee19941b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0ZWFtJTIwY29sbGFib3JhdGlvbiUyMHdvcmtzcGFjZXxlbnwxfHx8fDE3NjI5NjUxMjV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-                alt="Team collaboration"
-                className="w-full h-[500px] object-cover"
-              />
+              {contactSrc ? (
+                <ImageWithFallback
+                  src={contactSrc}
+                  alt="Свяжитесь с нами"
+                  className="w-full h-[500px] object-cover"
+                />
+              ) : (
+                <div className="w-full h-[500px] flex items-center justify-center bg-gray-100 text-gray-400 text-sm">
+                  Нет изображения
+                </div>
+              )}
             </motion.div>
 
             <motion.div

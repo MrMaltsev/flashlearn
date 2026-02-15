@@ -18,8 +18,8 @@ public class AvatarStorageService {
 
     private final S3Client s3Client;
 
-    @Value("${supabase.s3.bucket}")
-    private String bucket;
+    @Value("${supabase.s3.avatars-bucket}")
+    private String avatarsBucket;
 
     public String uploadAvatar(String username, MultipartFile file) {
         String key = "avatars/" + username + "/" + UUID.randomUUID() + ".jpg";
@@ -27,7 +27,7 @@ public class AvatarStorageService {
         try {
             s3Client.putObject(
                     PutObjectRequest.builder()
-                            .bucket(bucket)
+                            .bucket(avatarsBucket)
                             .key(key)
                             .contentType(file.getContentType())
                             .build(),

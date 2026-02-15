@@ -56,8 +56,9 @@ public class SecurityConfig {
 
                 // Настройка правил авторизации для различных эндпоинтов
                 .authorizeHttpRequests(auth -> auth
-                        // Разрешаем доступ без аутентификации только к эндпоинтам регистрации и логина
+                        // Разрешаем доступ без аутентификации к эндпоинтам регистрации, логина и лендинга
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/landing/**").permitAll()
                         // Все остальные эндпоинты требуют аутентификации
                         .anyRequest().authenticated()
                 )

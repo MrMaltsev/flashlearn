@@ -9,8 +9,8 @@ public class AvatarUrlService {
     @Value("${supabase.project-id}")
     private String projectId;
 
-    @Value("${supabase.s3.bucket}")
-    private String bucket;
+    @Value("${supabase.s3.avatars-bucket}")
+    private String avatarBucket;
 
     public String buildPublicAvatarUrl(String avatarKey) {
         if (avatarKey == null || avatarKey.isBlank()) {
@@ -19,6 +19,6 @@ public class AvatarUrlService {
 
         return "https://" + projectId +
                 ".supabase.co/storage/v1/object/public/" +
-                bucket + "/" + avatarKey;
+                avatarBucket + "/" + avatarKey;
     }
 }

@@ -1,6 +1,5 @@
 package io.github.flashlearn.app.user.entity;
 
-import io.github.flashlearn.app.flashcard.entity.FlashCard;
 import io.github.flashlearn.app.flashcard.entity.FlashCardSet;
 import io.github.flashlearn.app.settings.entity.UserSettings;
 import io.github.flashlearn.app.user_stats.entity.UserStats;
