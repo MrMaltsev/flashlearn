@@ -7,7 +7,8 @@ import { getAvatar, getUsername } from '../utils/auth';
 export default function TopBar({ showNewSet = true, onNewSet, onAvatarClick }) {
   const navigate = useNavigate();
   const username = getUsername();
-  const avatar = getAvatar();
+  // Only show stored avatar image for the special user 'dock'
+  const avatar = username === 'dock' ? getAvatar() : null;
   const base = username ? `/${username}` : '';
 
   const goHome = () => navigate(`${base}/dashboard`);

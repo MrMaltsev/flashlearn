@@ -44,12 +44,15 @@ function ProfilePage() {
     const fetchProfile = async () => {
       try {
         // Получаем информацию о профиле с контроллера profile
-        const response = await api.get(`/profile/${username}`);
-        setProfile(response.data);
-        // persist avatar for TopBar across pages
-        if (response.data && response.data.avatarUrl) {
-          try { setAvatar(response.data.avatarUrl); } catch (e) { /* ignore */ }
-        }
+            const response = await api.get(`/profile/${username}`);
+            setProfile(response.data);
+            // persist avatar for TopBar across pages ONLY if this is the logged-in user's profile
+            try {
+              const logged = getUsername();
+              if (response.data && response.data.avatarUrl && response.data.username === logged) {
+                setAvatar(response.data.avatarUrl);
+              }
+            } catch (e) { /* ignore */ }
         // Загружаем друзей
         const friendsRes = await api.get('/friendship/friends');
         setFriends(friendsRes.data || []);
