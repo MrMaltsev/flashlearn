@@ -10,7 +10,6 @@ import lombok.Data;
 public class UserSettings {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne

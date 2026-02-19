@@ -41,7 +41,7 @@ public class FriendshipService {
         }
 
         Optional<Friendship> existing = friendshipRepository.findBetween(requester, receiver);
-
+        // не оч понял как работает
         if (existing.isPresent()) {
             Friendship friendship = existing.get();
             switch (friendship.getStatus()) {
@@ -69,6 +69,7 @@ public class FriendshipService {
 
     public Friendship acceptFriendshipRequest(Long requestId) {
         User currentUser = securityUtils.getCurrentUser();
+        // любое исключение снизу = зря достал юзера из бд
         Friendship friendship = friendshipRepository.findById(requestId)
                 .orElseThrow(() -> new FiendshipRequestNotFoundException("friendship request not found: " + requestId));
 
@@ -103,6 +104,7 @@ public class FriendshipService {
 
     public List<FriendRequestNotificationDto> getIncomingRequests() {
         User current = securityUtils.getCurrentUser();
+        // фильтровать в коде хуже, чем в бд. бд = выдача данных, код = обработка данных
         return friendshipRepository.findAll().stream()
                 .filter(f -> f.getReceiver().getId().equals(current.getId()) && f.getStatus() == PENDING)
                 .map(f -> new FriendRequestNotificationDto(f.getId(), f.getRequester().getUsername(), f.getStatus().name()))
@@ -110,7 +112,7 @@ public class FriendshipService {
     }
 
     public List<UserSearchResponseDto> searchUsers(String query) {
-        User current = securityUtils.getCurrentUser();
+        User current = securityUtils.getCurrentUser(); // нах тебе пользователь целиком, если ты только имя юзаешь
         if (query == null || query.isBlank()) {
             return List.of();
         }

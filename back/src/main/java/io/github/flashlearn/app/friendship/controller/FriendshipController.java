@@ -24,7 +24,6 @@ public class FriendshipController {
     private final FriendshipService friendshipService;
     private final FriendshipMapper mapper;
 
-    @PreAuthorize("isAuthenticated()")
     @PostMapping("/send")
     public ResponseEntity<FriendRequestResponseDto> sendRequest(
             @RequestBody @Valid SendFriendRequestDto request) {
@@ -34,7 +33,6 @@ public class FriendshipController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PreAuthorize("isAuthenticated()")
     @PutMapping("/accept")
     public ResponseEntity<FriendRequestResponseDto> acceptRequest(
             @RequestBody @Valid AcceptFriendRequestDto request) {
@@ -44,7 +42,6 @@ public class FriendshipController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 
-    @PreAuthorize("isAuthenticated()")
     @PutMapping("/decline")
     public ResponseEntity<FriendRequestResponseDto> declineRequest(
             @RequestBody @Valid AcceptFriendRequestDto request) {
@@ -54,19 +51,16 @@ public class FriendshipController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/requests")
     public ResponseEntity<List<FriendRequestNotificationDto>> incomingRequests() {
         return ResponseEntity.ok(friendshipService.getIncomingRequests());
     }
 
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/friends")
     public ResponseEntity<List<String>> friends() {
         return ResponseEntity.ok(friendshipService.getFriends());
     }
 
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/search")
     public ResponseEntity<List<UserSearchResponseDto>> searchUsers(@RequestParam("query") String query) {
         return ResponseEntity.ok(friendshipService.searchUsers(query));

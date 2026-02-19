@@ -26,7 +26,6 @@ public class FlashCardController {
      * Карточка автоматически привязывается к текущему пользователю.
      */
     @PostMapping("/create")
-    @PreAuthorize("isAuthenticated()") // Проверяем, что пользователь аутентифицирован
     public ResponseEntity<FlashCardSetResponse> createFlashCardSet(@Valid @RequestBody CreateFlashCardSetRequest request) {
         FlashCardSet createdSet = flashCardService.createFlashCardSet(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toFlashCardSetResponse(createdSet));
@@ -38,7 +37,6 @@ public class FlashCardController {
      * @param username идентификатор пользователя (используется для проверки, что пользователь запрашивает свои карточки)
      */
     @GetMapping("/{username}")
-    @PreAuthorize("isAuthenticated()") // Проверяем, что пользователь аутентифицирован
     public ResponseEntity<List<FlashCardSetResponse>> getAllFlashCards(@PathVariable String username) {
         // Сервис проверяет, что userId соответствует текущему аутентифицированному пользователю
         List<FlashCardSetResponse> flashCards = flashCardService.getAllFlashCardSets(username)
@@ -50,21 +48,18 @@ public class FlashCardController {
     }
 
     @GetMapping("/getSet/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<FlashCardSetResponse> getFlashCardSet(@PathVariable Long id) {
         FlashCardSetResponse flashCardSetResponse = mapper.toFlashCardSetResponse(flashCardService.getFlashCardSet(id));
         return ResponseEntity.status(HttpStatus.OK).body(flashCardSetResponse);
     }
 
     @DeleteMapping("/delete/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deleteFlashCardSet(@PathVariable Long id) {
         flashCardService.deleteFlashCardSet(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/edit/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<FlashCardSetResponse> editFlashCardSet(@RequestBody @Valid EditFlashCardSetRequest request,
                                                                      @PathVariable Long id) {
         FlashCardSet flashCardSet = flashCardService.editFlashCardSet(mapper.toFlashCardSet(request), id);
@@ -72,7 +67,6 @@ public class FlashCardController {
     }
 
     @PostMapping("/save/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<SaveFlashCardSetResponse> saveFlashCardSet(@PathVariable Long id,
                                                                      @RequestBody SaveFlashCardSetRequest request) {
         SaveFlashCardSetResponse response = mapper.toSaveFlashCardSetResponse(flashCardService.saveFlashCardSet(id, request));

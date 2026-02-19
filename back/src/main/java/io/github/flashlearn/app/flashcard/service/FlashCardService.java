@@ -69,14 +69,14 @@ public class FlashCardService {
      */
     public List<FlashCardSet> getAllFlashCardSets(String username) {
         // Получаем текущего аутентифицированного пользователя
-        User currentUser = securityUtils.getCurrentUser();
+        User currentUser = securityUtils.getCurrentUser(); // зачем юзера из бд тащить, если по сути нужно только его имя
 
         // Проверяем, что пользователь запрашивает свои собственные карточки
         if (!currentUser.getUsername().equals(username)) {
             throw new UnauthorizedAccessException("У вас нет прав для просмотра карточек другого пользователя");
         }
 
-        return flashCardSetRepository.findAllByOwner(currentUser);
+        return flashCardSetRepository.findAllByOwner(currentUser); // решается запросом в репозитории через @Query
     }
 
     @Transactional
@@ -89,7 +89,7 @@ public class FlashCardService {
     public FlashCardSet editFlashCardSet(FlashCardSet newFlashCardSet, Long id) {
         FlashCardSet flashCardSet = flashCardSetRepository.findById(id)
                 .orElseThrow(() -> new FlashCardSetNotFoundException("Flashcard set not found"));
-
+        // а если менять нужно не все, а только часть параметров
         flashCardSet.setTitle(newFlashCardSet.getTitle());
         flashCardSet.setDescription(newFlashCardSet.getDescription());
         flashCardSet.setVisibility(newFlashCardSet.getVisibility());
@@ -115,6 +115,7 @@ public class FlashCardService {
                 .orElseThrow(() -> new FlashCardSetNotFoundException("Flash card set not found"));
     }
 
+    // фа ватафа
     @Transactional
     public FlashCardSet saveFlashCardSet(Long id, SaveFlashCardSetRequest request) {
         FlashCardSet flashCardSet = flashCardSetRepository.findById(id)

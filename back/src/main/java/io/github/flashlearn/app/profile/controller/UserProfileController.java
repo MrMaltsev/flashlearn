@@ -31,7 +31,6 @@ public class UserProfileController {
      * Любой аутентифицированный пользователь может просматривать профили других пользователей.
      */
     @GetMapping("/{username}")
-    @PreAuthorize("isAuthenticated()") // Проверяем, что пользователь аутентифицирован
     public ResponseEntity<UserProfileResponse> getProfileInfo(@PathVariable String username) {
         UserProfileResponse userProfileResponse = mapper.toUserProfileResponse(
                 userProfileService.findByUsername(username),
@@ -44,7 +43,6 @@ public class UserProfileController {
      * Пользователь может обновлять только свой собственный профиль (проверка в сервисе).
      */
     @PutMapping("/update/{username}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UpdateUserProfileResponse> updateProfile(@PathVariable String username,
                                                                    @RequestBody UpdateUserProfileRequest updatedUser) {
         UpdateUserProfileResponse updateUserProfileResponse =
@@ -54,7 +52,6 @@ public class UserProfileController {
     }
 
     @PostMapping("/avatar")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> uploadAvatar(Authentication authentication,
                                           @RequestParam("file") MultipartFile file) {
         String username = authentication.getName();
