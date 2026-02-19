@@ -5,6 +5,7 @@ import io.github.flashlearn.app.settings.entity.UserSettings;
 import io.github.flashlearn.app.settings.repository.UserSettingsRepository;
 import io.github.flashlearn.app.user.entity.Role;
 import io.github.flashlearn.app.user.entity.User;
+import io.github.flashlearn.app.user.exception.EmailIsTakenException;
 import io.github.flashlearn.app.user.exception.UserAlreadyExistsException;
 import io.github.flashlearn.app.user.repository.UserRepository;
 import io.github.flashlearn.app.user_stats.entity.UserStats;
@@ -28,13 +29,18 @@ public class RegistrationService {
     // Service for registration attempts
     public User registerUser(UserRegistrationRequest request) {
         String username = request.username();
-        String encodedPassword = passwordEncoder.encode(request.password());
         String email = request.email();
 
-        if(userRepository.existsByUsername(username)) {
-            throw new UserAlreadyExistsException("User already exists");
+        if (userRepository.existsByUsername(username)) { // all exceptions should be thrown as fast as possible
+            throw new UserAlreadyExistsException(username);
         }
-        
+
+        if (userRepository.existsByEmail(email)) {
+            throw new EmailIsTakenException(email);
+        }
+
+        String encodedPassword = passwordEncoder.encode(request.password());
+
         User user = new User(username, encodedPassword, email, Role.USER);
         userRepository.save(user);
 

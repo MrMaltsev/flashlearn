@@ -1,5 +1,8 @@
 package io.github.flashlearn.app.user.exception;
 
+import lombok.Getter;
+
+@Getter
 public class UserAlreadyExistsException extends RuntimeException {
     private final String username;
 
@@ -8,7 +11,4 @@ public class UserAlreadyExistsException extends RuntimeException {
         this.username = username;
     }
 
-    public String getUsername() {
-        return username;
-    }
 }

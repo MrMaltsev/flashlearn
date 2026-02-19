@@ -1,23 +1,18 @@
 package io.github.flashlearn.app.auth.service;
 
 import io.github.flashlearn.app.auth.dto.UserLoginRequest;
-import io.github.flashlearn.app.auth.entity.VerificationToken;
-import io.github.flashlearn.app.auth.exception.TokenExpiredException;
-import io.github.flashlearn.app.auth.exception.TokenNotFoundException;
 import io.github.flashlearn.app.auth.repository.VerificationTokenRepository;
+import io.github.flashlearn.app.auth.security.CustomUserDetails;
+import io.github.flashlearn.app.auth.security.JwtTokenProvider;
 import io.github.flashlearn.app.user.entity.User;
 import io.github.flashlearn.app.user.exception.UserNotFoundException;
 import io.github.flashlearn.app.user.repository.UserRepository;
-import io.github.flashlearn.app.auth.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 @Service
 @RequiredArgsConstructor
@@ -38,9 +33,9 @@ public class AuthService {
             )
         );
 
-        User user = (User) authentication.getPrincipal();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        return tokenProvider.generateToken(user.getUsername());
+        return tokenProvider.generateToken(Long.valueOf(userDetails.getUsername()));
     }
 
     public User findUserByUsername(String username) {
@@ -55,9 +50,9 @@ public class AuthService {
             throw new RuntimeException("User is not authenticated");
         }
 
-        String username = auth.getName();
+        Long userId = Long.valueOf(auth.getName());
 
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
     }
 }

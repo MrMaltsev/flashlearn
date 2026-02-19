@@ -1,13 +1,13 @@
 package io.github.flashlearn.app.auth.security;
 
 import io.github.flashlearn.app.user.entity.User;
+import io.github.flashlearn.app.user.exception.UserNotFoundException;
 import io.github.flashlearn.app.user.repository.UserRepository;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -32,15 +32,15 @@ public class JwtTokenProvider {
     /**
      * Генерирует JWT токен для пользователя с указанным именем
      *
-     * @param username имя пользователя
+     * @param id идентификатор пользователя
      * @return JWT токен
      */
-    public String generateToken(String username) {
+    public String generateToken(Long id) {
         Date now = new Date();
         // Вычисляем дату истечения токена: текущее время + время жизни токена
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(username)); // fetching user to get id, roles and to check if he is actually in db
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id)); // fetching user to get id, roles and to check if he is actually in db
         return Jwts.builder()
                 .subject(String.valueOf(user.getId())) // replaced username with id
                 .claims().add("roles", user.getRole())
