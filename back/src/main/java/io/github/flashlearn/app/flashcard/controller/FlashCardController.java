@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -69,6 +68,7 @@ public class FlashCardController {
     @PostMapping("/save/{id}")
     public ResponseEntity<SaveFlashCardSetResponse> saveFlashCardSet(@PathVariable Long id,
                                                                      @RequestBody SaveFlashCardSetRequest request) {
+        // TODO edit contract
         SaveFlashCardSetResponse response = mapper.toSaveFlashCardSetResponse(flashCardService.saveFlashCardSet(id, request));
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
