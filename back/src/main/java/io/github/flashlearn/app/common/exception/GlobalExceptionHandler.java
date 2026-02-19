@@ -14,6 +14,7 @@ import io.github.flashlearn.app.flashcard.exception.FlashCardSetNotFoundExceptio
 import io.github.flashlearn.app.flashcard.exception.UnauthorizedAccessException;
 import io.github.flashlearn.app.profile.exception.AvatarUploadException;
 import io.github.flashlearn.app.settings.exception.UserSettingsNotFoundException;
+import io.github.flashlearn.app.user.exception.EmailIsTakenException;
 import io.github.flashlearn.app.user.exception.UserAlreadyExistsException;
 import io.github.flashlearn.app.user.exception.UserNotFoundException;
 import io.micrometer.tracing.Tracer;
@@ -46,9 +47,9 @@ public class GlobalExceptionHandler{
 
         log.warn("Registration attempt failed - user exists: {}", ex.getUsername());
 
-        ApiError body = new ApiError(HttpStatus.BAD_REQUEST.value(), "USER_EXISTS", ex.getMessage(),
+        ApiError body = new ApiError(HttpStatus.CONFLICT.value(), "USER_EXISTS", ex.getMessage(), // 400 - unreadable data, 409 - illegal state
                                     Instant.now(), request.getRequestURI(), traceId);
-        return ResponseEntity.badRequest().body(body);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
     // Invalid password
@@ -61,9 +62,9 @@ public class GlobalExceptionHandler{
 
         log.info("Login attempt failed - wrong password");
 
-        ApiError body = new ApiError(HttpStatus.FORBIDDEN.value(), "WRONG_PASSWORD", ex.getMessage(),
+        ApiError body = new ApiError(HttpStatus.UNAUTHORIZED.value(), "WRONG_PASSWORD", ex.getMessage(), // 403 - authorized, no access; 401 - unauthorized
                                     Instant.now(), request.getRequestURI(), traceId);
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
     }
 
     // FlashCard already exists
@@ -104,11 +105,25 @@ public class GlobalExceptionHandler{
                 ? tracer.currentSpan().context().traceId()
                 : "N/A";
 
-        log.error("User not found in database: {}", ex.getUsername());
+        log.error(ex.getMessage());
 
         ApiError body = new ApiError(HttpStatus.NOT_FOUND.value(), "USER_NOT_FOUND", ex.getMessage(),
                                     Instant.now(), request.getRequestURI(), traceId);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(EmailIsTakenException.class)
+    public ResponseEntity<ApiError> emailIsTakenExceptionHandler(EmailIsTakenException ex,
+                                                                 HttpServletRequest request) {
+        String traceId = tracer.currentSpan() != null
+                ? tracer.currentSpan().context().traceId()
+                : "N/A";
+
+        log.error(ex.getMessage());
+
+        ApiError body = new ApiError(HttpStatus.CONFLICT.value(), "EMAIL_IS_TAKEN", ex.getMessage(),
+                Instant.now(), request.getRequestURI(), traceId);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
     // Unauthorized access attempt - пользователь пытается получить доступ к ресурсу, к которому у него нет прав
@@ -283,9 +298,9 @@ public class GlobalExceptionHandler{
 
         log.error("Can not upload avatar: {}", ex.getMessage(), ex);
 
-        ApiError body = new ApiError(HttpStatus.FORBIDDEN.value(), "AVATAR_NOT_UPLOADED", ex.getMessage(),
+        ApiError body = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "AVATAR_NOT_UPLOADED", ex.getMessage(),
                 Instant.now(), request.getRequestURI(), traceId);
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 
     // Unexpected exception
