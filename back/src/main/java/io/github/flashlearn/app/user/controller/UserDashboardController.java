@@ -10,7 +10,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/api/dashboard")
@@ -22,15 +21,15 @@ public class UserDashboardController {
     private final UserDashboardMapper userDashboardMapper;
     private final FlashCardSetMapper flashCardSetMapper;
 
-    @GetMapping("/{username}")
-    public ResponseEntity<UserDashboardResponseDto> getUserInfo(@PathVariable String username) {
-        UserStats userInfo = userDashboardService.findByUsername(username);
+    @GetMapping
+    public ResponseEntity<UserDashboardResponseDto> getUserInfo() {
+        UserStats userInfo = userDashboardService.loadFreshUserStats();
         UserDashboardResponseDto userResponse = new UserDashboardResponseDto(
                 userInfo.getStreak(),
                 userInfo.getDailyGoal(),
                 userInfo.getReviewedToday(),
                 userInfo.isDailyGoalCompleted(),
-                userDashboardService.getOwnerSets(username).stream()
+                userDashboardService.getOwnerSets().stream()
                         .map(flashCardSetMapper::toFlashCardSetResponse)
                         .toList());
 

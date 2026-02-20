@@ -67,16 +67,9 @@ public class FlashCardService {
      * @return список флешкарт пользователя
      * @throws UnauthorizedAccessException если пользователь пытается получить карточки другого пользователя
      */
-    public List<FlashCardSet> getAllFlashCardSets(String username) {
-        // Получаем текущего аутентифицированного пользователя
-        User currentUser = securityUtils.getCurrentUser(); // зачем юзера из бд тащить, если по сути нужно только его имя
-
+    public List<FlashCardSet> getAllFlashCardSets() {
         // Проверяем, что пользователь запрашивает свои собственные карточки
-        if (!currentUser.getUsername().equals(username)) {
-            throw new UnauthorizedAccessException("У вас нет прав для просмотра карточек другого пользователя");
-        }
-
-        return flashCardSetRepository.findAllByOwner(currentUser); // решается запросом в репозитории через @Query
+        return flashCardSetRepository.findAllByOwner_Id(SecurityUtils.getCurrentUserId());
     }
 
     @Transactional

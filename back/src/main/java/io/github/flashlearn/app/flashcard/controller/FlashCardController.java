@@ -35,10 +35,10 @@ public class FlashCardController {
      * Пользователь получает только свои карточки.
      * @param username идентификатор пользователя (используется для проверки, что пользователь запрашивает свои карточки)
      */
-    @GetMapping("/{username}")
-    public ResponseEntity<List<FlashCardSetResponse>> getAllFlashCards(@PathVariable String username) {
+    @GetMapping
+    public ResponseEntity<List<FlashCardSetResponse>> getAllFlashCards() { // доступ по id оставить для админа
         // Сервис проверяет, что userId соответствует текущему аутентифицированному пользователю
-        List<FlashCardSetResponse> flashCards = flashCardService.getAllFlashCardSets(username)
+        List<FlashCardSetResponse> flashCards = flashCardService.getAllFlashCardSets()
                 .stream()
                 .map(mapper::toFlashCardSetResponse)
                 .toList();

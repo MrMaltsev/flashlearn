@@ -4,6 +4,7 @@ import io.github.flashlearn.app.user.entity.User;
 import io.github.flashlearn.app.user.exception.UserNotFoundException;
 import io.github.flashlearn.app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,22 +21,22 @@ public class SecurityUtils {
 
     /**
      * Получает имя пользователя из SecurityContext
+     *
      * @return имя текущего аутентифицированного пользователя
      * @throws IllegalStateException если пользователь не аутентифицирован
      */
-    public String getCurrentUsername() {
+    public static Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
-        if (authentication == null || !authentication.isAuthenticated()) {
+
+        if (authentication == null || authentication.isAuthenticated()
+                || authentication.getPrincipal().equals("anonymousUser")) {
             throw new IllegalStateException("Пользователь не аутентифицирован");
         }
 
         Object principal = authentication.getPrincipal();
-        
-        if (principal instanceof UserDetails) {
-            return ((UserDetails) principal).getUsername();
-        } else if (principal instanceof String) {
-            return (String) principal;
+
+        if (principal instanceof CustomUserDetails userDetails) {
+            return Long.valueOf(userDetails.getUsername());
         } else {
             throw new IllegalStateException("Неизвестный тип principal: " + principal.getClass());
         }
@@ -43,25 +44,36 @@ public class SecurityUtils {
 
     /**
      * Получает объект User текущего аутентифицированного пользователя из базы данных
+     *
      * @return объект User текущего пользователя
      * @throws UserNotFoundException если пользователь не найден в базе данных
      * @throws IllegalStateException если пользователь не аутентифицирован
      */
     public User getCurrentUser() {
-        String username = getCurrentUsername();
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден: " + username));
+        Long userId = getCurrentUserId();
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+    }
+
+    public User getCurrentUserRef(){
+        Long userId = getCurrentUserId();
+        User user = userRepository.getReferenceById(userId);
+        if (user.getUsername().isBlank()){
+            throw new UserNotFoundException(userId);
+        }
+        return user;
     }
 
     /**
      * Проверяет, является ли текущий пользователь владельцем указанного ресурса
+     *
      * @param resourceOwnerUsername имя пользователя-владельца ресурса
      * @return true, если текущий пользователь является владельцем
      */
-    public boolean isCurrentUser(String resourceOwnerUsername) {
+    public static boolean isCurrentUser(Long userId) {
         try {
-            String currentUsername = getCurrentUsername();
-            return currentUsername.equals(resourceOwnerUsername);
+            Long currentUserId = getCurrentUserId();
+            return currentUserId.equals(userId);
         } catch (IllegalStateException e) {
             return false;
         }
@@ -69,11 +81,12 @@ public class SecurityUtils {
 
     /**
      * Проверяет, аутентифицирован ли текущий пользователь
+     *
      * @return true, если пользователь аутентифицирован
      */
     public boolean isAuthenticated() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null && authentication.isAuthenticated() 
+        return authentication != null && authentication.isAuthenticated()
                 && !"anonymousUser".equals(authentication.getPrincipal());
     }
 }
