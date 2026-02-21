@@ -43,10 +43,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String roleStr = claims.get("role", String.class);
                 Role role = Role.valueOf(roleStr);
                 // Защита: если уже есть аутентификация в контексте — не перезаписываем её
-//                if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                if (SecurityContextHolder.getContext().getAuthentication() == null) {
                     CustomUserDetails userDetails = new CustomUserDetails(
                             userId,
                             username,
+                            null,
                             role
                     );
 
@@ -56,7 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 }
-//            }
+            }
 
         } catch (Exception ex) {
             log.warn("Could not set user authentication from JWT: {}", ex.getMessage());

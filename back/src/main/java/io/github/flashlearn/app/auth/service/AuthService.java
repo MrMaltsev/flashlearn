@@ -43,17 +43,4 @@ public class AuthService {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User not found " + username));
     }
-
-    public User getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if(auth == null || !auth.isAuthenticated()) {
-            throw new RuntimeException("User is not authenticated");
-        }
-
-        Long userId = Long.valueOf(auth.getName());
-
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
-    }
 }

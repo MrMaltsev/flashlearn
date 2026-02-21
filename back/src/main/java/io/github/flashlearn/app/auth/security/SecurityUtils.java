@@ -34,7 +34,7 @@ public class SecurityUtils {
         Object principal = authentication.getPrincipal();
 
         if (principal instanceof CustomUserDetails userDetails) {
-            return userDetails.getId();
+            return userDetails.id();
         } else {
             throw new IllegalStateException("Неизвестный тип principal: " + principal.getClass());
         }
