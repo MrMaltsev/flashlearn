@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/friendship")
@@ -57,7 +58,7 @@ public class FriendshipController {
     }
 
     @GetMapping("/friends")
-    public ResponseEntity<List<String>> friends() {
+    public ResponseEntity<Set<String>> friends() {
         return ResponseEntity.ok(friendshipService.getFriends());
     }
 

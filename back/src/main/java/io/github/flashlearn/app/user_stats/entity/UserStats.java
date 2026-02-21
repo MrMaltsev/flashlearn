@@ -11,8 +11,7 @@ import java.time.LocalDate;
 @Table(name = "user_stats")
 public class UserStats {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // MapsId
+    @Id // removed @GeneratedValue cuz @MapsId
     private Long id;
 
     @OneToOne

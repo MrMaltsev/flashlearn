@@ -1,5 +1,6 @@
 package io.github.flashlearn.app.user_stats.controller;
 
+import io.github.flashlearn.app.auth.security.SecurityUtils;
 import io.github.flashlearn.app.auth.service.AuthService;
 import io.github.flashlearn.app.user.entity.User;
 import io.github.flashlearn.app.user_stats.service.UserStatsService;
@@ -21,18 +22,16 @@ public class UserStatsController {
     private final UserStatsService userStatsService;
     private final AuthService authService;
 
-    @GetMapping("/ping")
+    @GetMapping("/ping") // redundant parameter, userId is already in security context
     public ResponseEntity<?> ping() {
-        User user = authService.getCurrentUser();
-        userStatsService.updateStreak(user);
+        userStatsService.updateStreak();
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/user-stats/progress")
+    @PostMapping("/user-stats/progress") // redundant parameter, userId is already in security context
     public ResponseEntity<?> addProgress(@RequestBody Map<String, Integer> payload) {
         int reviewed = payload.getOrDefault("reviewed", 1);
-        User user = authService.getCurrentUser();
-        return ResponseEntity.ok(userStatsService.addReviewed(user, reviewed));
+        return ResponseEntity.ok(userStatsService.addReviewed(reviewed));
     }
 
 }

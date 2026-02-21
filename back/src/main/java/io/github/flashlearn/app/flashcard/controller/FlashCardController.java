@@ -33,12 +33,23 @@ public class FlashCardController {
     /**
      * Получение всех флешкарт текущего пользователя. Требуется аутентификация.
      * Пользователь получает только свои карточки.
-     * @param username идентификатор пользователя (используется для проверки, что пользователь запрашивает свои карточки)
      */
     @GetMapping
     public ResponseEntity<List<FlashCardSetResponse>> getAllFlashCards() { // доступ по id оставить для админа
         // Сервис проверяет, что userId соответствует текущему аутентифицированному пользователю
         List<FlashCardSetResponse> flashCards = flashCardService.getAllFlashCardSets()
+                .stream()
+                .map(mapper::toFlashCardSetResponse)
+                .toList();
+
+        return ResponseEntity.ok(flashCards);
+    }
+
+    @GetMapping("/user/{id}")
+//    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<FlashCardSetResponse>> getAllFlashCards(Long id) {
+        // Сервис проверяет, что userId соответствует текущему аутентифицированному пользователю
+        List<FlashCardSetResponse> flashCards = flashCardService.getAllFlashCardSets(id)
                 .stream()
                 .map(mapper::toFlashCardSetResponse)
                 .toList();
@@ -59,8 +70,8 @@ public class FlashCardController {
     }
 
     @PutMapping("/edit/{id}")
-    public ResponseEntity<FlashCardSetResponse> editFlashCardSet(@RequestBody @Valid EditFlashCardSetRequest request,
-                                                                     @PathVariable Long id) {
+    public ResponseEntity<FlashCardSetResponse> editFlashCardSet(@RequestBody EditFlashCardSetRequest request, // removed valid, cuz no fields are mapped with constraint annotations
+                                                                 @PathVariable Long id) {
         FlashCardSet flashCardSet = flashCardService.editFlashCardSet(mapper.toFlashCardSet(request), id);
         return ResponseEntity.status(HttpStatus.OK).body(mapper.toFlashCardSetResponse(flashCardSet));
     }

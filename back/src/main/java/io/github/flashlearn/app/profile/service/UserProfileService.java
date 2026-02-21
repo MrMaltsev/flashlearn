@@ -9,6 +9,8 @@ import io.github.flashlearn.app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import static io.github.flashlearn.app.auth.security.SecurityUtils.isCurrentUser;
+
 @Service
 @RequiredArgsConstructor
 public class UserProfileService {
@@ -23,7 +25,7 @@ public class UserProfileService {
      */
     public User findByUsername(String username) {
         return userRepository.findByUsername(username).
-                orElseThrow(() -> new UserNotFoundException("user not found: " + username));
+                orElseThrow(() -> new UserNotFoundException(username));
     }
 
     /**
@@ -33,18 +35,10 @@ public class UserProfileService {
      * @return обновленный пользователь
      * @throws UnauthorizedAccessException если пользователь пытается обновить чужой профиль
      */
-    public User updateProfile(String username, UpdateUserProfileRequest updatedUser) {
-        // Получаем текущего аутентифицированного пользователя
-        User currentUser = securityUtils.getCurrentUser();
+    public User updateProfile(UpdateUserProfileRequest updatedUser) {
         
         // Находим пользователя, профиль которого нужно обновить
-        User user = userRepository.findByUsername(username).
-                orElseThrow(() -> new UserNotFoundException("can not find user " + username));
-
-        // Проверяем, что текущий пользователь обновляет свой собственный профиль
-        if (!currentUser.getId().equals(user.getId())) {
-            throw new UnauthorizedAccessException("У вас нет прав для обновления профиля другого пользователя");
-        }
+        User user = securityUtils.getCurrentUser();
 
         // Обновляем данные профиля
         user.setUsername(updatedUser.username());
@@ -53,9 +47,8 @@ public class UserProfileService {
         return userRepository.save(user);
     }
 
-    public void uploadAvatar(String username, String avatarKey) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("User with username not found: " + username));
+    public void uploadAvatar(String avatarKey) {
+        User user = securityUtils.getCurrentUser();
 
         user.setAvatarKey(avatarKey);
         userRepository.save(user);

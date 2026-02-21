@@ -8,6 +8,8 @@ import io.github.flashlearn.app.friendship.exception.FriendshipAlreadyExistsExce
 import io.github.flashlearn.app.friendship.repository.FriendshipRepository;
 import io.github.flashlearn.app.friendship.dto.FriendRequestNotificationDto;
 import io.github.flashlearn.app.friendship.dto.UserSearchResponseDto;
+import io.github.flashlearn.app.profile.dto.UserProfileResponse;
+import io.github.flashlearn.app.profile.service.UserProfileService;
 import io.github.flashlearn.app.user.entity.User;
 import io.github.flashlearn.app.user.exception.UserNotFoundException;
 import io.github.flashlearn.app.user.repository.UserRepository;
@@ -16,8 +18,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.github.flashlearn.app.friendship.entity.FriendshipStatus.*;
@@ -34,7 +39,7 @@ public class FriendshipService {
     public Friendship sendFriendshipRequest(String receiverUsername) {
         User requester = securityUtils.getCurrentUser();
         User receiver = userRepository.findByUsername(receiverUsername).
-                orElseThrow(() -> new UserNotFoundException("User not found: " + receiverUsername));
+                orElseThrow(() -> new UserNotFoundException(receiverUsername));
 
         if (requester.getId().equals(receiver.getId())) {
             throw new Forbidden("Нельзя добавить самого себя в друзья");
@@ -54,7 +59,19 @@ public class FriendshipService {
                     }
                     throw new FriendshipAlreadyExistsException("Заявка уже отправлена");
                 }
-                case DECLINED, BLOCKED -> throw new FriendshipAlreadyExistsException("Дружба заблокирована или отклонена");
+                case DECLINED -> {
+                    friendship.setRequester(requester); // если запрос был отклонен, его можно отправить заново
+                    friendship.setReceiver(receiver);
+                    friendship.setStatus(PENDING);
+                    friendship.setCreatedAt(LocalDateTime.now());
+                    return friendshipRepository.save(friendship);
+                }
+                case BLOCKED -> throw new FriendshipAlreadyExistsException("Пользователь заблокирован");
+                // TODO fetch blocked requests and unblock them
+                /* блок - не состояние дружбы, а санкции к пользователю (запрет функционала).
+                 * пока из затрагиваемых функций только отправка дружбы, но в будущем будет
+                 * правильнее вынести список заблокированных в отдельную сущность (как UserStats)
+                 */
             }
         }
 
@@ -68,17 +85,15 @@ public class FriendshipService {
     }
 
     public Friendship acceptFriendshipRequest(Long requestId) {
-        User currentUser = securityUtils.getCurrentUser();
-        // любое исключение снизу = зря достал юзера из бд
         Friendship friendship = friendshipRepository.findById(requestId)
                 .orElseThrow(() -> new FiendshipRequestNotFoundException("friendship request not found: " + requestId));
 
-        if (!friendship.getReceiver().getId().equals(currentUser.getId())) {
-            throw new Forbidden("Нельзя принять чужую заявку");
-        }
-
         if (friendship.getStatus() != PENDING) {
             throw new FriendshipAlreadyExistsException("Заявка уже обработана");
+        }
+
+        if (!friendship.getReceiver().getId().equals(SecurityUtils.getCurrentUserId())) {
+            throw new Forbidden("Нельзя принять чужую заявку");
         }
 
         friendship.setStatus(ACCEPTED);
@@ -103,26 +118,30 @@ public class FriendshipService {
     }
 
     public List<FriendRequestNotificationDto> getIncomingRequests() {
-        User current = securityUtils.getCurrentUser();
-        // фильтровать в коде хуже, чем в бд. бд = выдача данных, код = обработка данных
-        return friendshipRepository.findAll().stream()
-                .filter(f -> f.getReceiver().getId().equals(current.getId()) && f.getStatus() == PENDING)
-                .map(f -> new FriendRequestNotificationDto(f.getId(), f.getRequester().getUsername(), f.getStatus().name()))
+        User current = securityUtils.getCurrentUserRef();
+        return friendshipRepository.findIncomingForUser(current).stream()
+                .map(f ->
+                        new FriendRequestNotificationDto(
+                                f.getId(),
+                                f.getRequester().getUsername(),
+                                f.getStatus().name()
+                        ) // TODO use mapper
+                )
                 .toList();
     }
 
     public List<UserSearchResponseDto> searchUsers(String query) {
-        User current = securityUtils.getCurrentUser(); // нах тебе пользователь целиком, если ты только имя юзаешь
         if (query == null || query.isBlank()) {
             return List.of();
         }
-        return userRepository.findTop5ByUsernameContainingIgnoreCaseAndUsernameNot(query, current.getUsername())
+        return userRepository.findTop5ByUsernameContainingIgnoreCaseAndIdNot(query, SecurityUtils.getCurrentUserId()) // а почему нельзя себя найти
                 .stream()
-                .map(u -> new UserSearchResponseDto(u.getUsername()))
+                .map(u -> new UserSearchResponseDto(u.getId(), u.getUsername()))
                 .toList();
     }
 
-    public List<String> getFriends() {
+    @Deprecated
+    public Set<String> getFriends() {
         User current = securityUtils.getCurrentUser();
         return friendshipRepository.findAcceptedForUser(current).stream()
                 .flatMap(f -> {
@@ -132,7 +151,36 @@ public class FriendshipService {
                         return Stream.of(f.getRequester().getUsername());
                     }
                 })
-                .distinct()
-                .toList();
+                .collect(Collectors.toSet()); // distinct + list = set
+        /* не оч понятно, что делать просто с именами.
+         * только, если опять дергать бэк для каждого имени,
+         * но тогда лучше сразу вернуть всю нужную инфу,
+         * например профили или другие DTO
+         */
+    }
+
+    public List<UserProfileResponse> getFriendsProfiles() {
+        User current = securityUtils.getCurrentUserRef();
+        // TODO use mapper
+        Set<UserProfileResponse> incomingAccepted = friendshipRepository.findAcceptedFriendsReceivedBy(current)
+                .stream().map(u -> new UserProfileResponse(
+                        u.getId(),
+                        u.getUsername(),
+                        u.getAvatarKey(),
+                        u.getAboutMe()
+                )).collect(Collectors.toSet());
+
+        Set<UserProfileResponse> outcomingAccepted = friendshipRepository.findAcceptedFriendsSentBy(current)
+                .stream().map(u -> new UserProfileResponse(
+                        u.getId(),
+                        u.getUsername(),
+                        u.getAvatarKey(),
+                        u.getAboutMe()
+                )).collect(Collectors.toSet());
+
+        List<UserProfileResponse> res = new ArrayList<>(incomingAccepted);
+        res.addAll(outcomingAccepted);
+
+        return res;
     }
 }

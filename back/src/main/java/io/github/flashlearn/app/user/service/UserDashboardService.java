@@ -8,11 +8,12 @@ import io.github.flashlearn.app.user_stats.exception.UserStatsNotFoundException;
 import io.github.flashlearn.app.user_stats.entity.UserStats;
 import io.github.flashlearn.app.user_stats.repository.UserStatsRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.time.LocalDate;
+
+import static io.github.flashlearn.app.auth.security.SecurityUtils.getCurrentUserId;
 
 @Service
 @RequiredArgsConstructor
@@ -31,10 +32,11 @@ public class UserDashboardService {
         return flashCardService.getAllFlashCardSets();
     }
 
-    public UserStats updateUserDailyGoal(Long userId, UpdateDailyGoalRequestDto request) {
-        verifyOwnership(userId);
-
-        UserStats userStats = ensureFresh(loadUserStats(userId));
+    public UserStats updateUserDailyGoal(UpdateDailyGoalRequestDto request) {
+        // redundant parameter, userId is already in security context
+        UserStats userStats = ensureFresh(
+                loadUserStats(getCurrentUserId())
+        );
 
         userStats.setDailyGoal(request.dailyGoal());
         return userStatsRepository.save(userStats);
@@ -54,11 +56,5 @@ public class UserDashboardService {
             return userStatsRepository.save(stats);
         }
         return stats;
-    }
-
-    private void verifyOwnership(Long userId) {
-        if (!SecurityUtils.isCurrentUser(userId)) {
-            throw new AccessDeniedException("Нельзя работать с дашбордом другого пользователя");
-        }
     }
 }

@@ -1,10 +1,7 @@
 package io.github.flashlearn.app.flashcard.entity;
 
-import io.github.flashlearn.app.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Data

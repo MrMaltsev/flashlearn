@@ -28,15 +28,16 @@ public class FlashCardService {
 
     /**
      * Создает новую флешкарту для текущего аутентифицированного пользователя
+     *
      * @param request данные для создания карточки
      * @return созданная флешкарта
      */
     @Transactional
     public FlashCardSet createFlashCardSet(CreateFlashCardSetRequest request) {
         // Получаем текущего аутентифицированного пользователя
-        User currentUser = securityUtils.getCurrentUser();
+        User currentUser = securityUtils.getCurrentUserRef();
         FlashCardSet flashCardSet = new FlashCardSet();
-        
+
         flashCardSet.setTitle(request.title());
         flashCardSet.setDescription(request.description());
         flashCardSet.setVisibility(request.visibility());
@@ -63,42 +64,61 @@ public class FlashCardService {
 
     /**
      * Получает все флешкарты пользователя. Пользователь может получить только свои карточки.
-     * @param username идентификатор пользователя
-     * @return список флешкарт пользователя
-     * @throws UnauthorizedAccessException если пользователь пытается получить карточки другого пользователя
+     *
+     * @return список флешкарт авторизованного в данный момент пользователя
      */
     public List<FlashCardSet> getAllFlashCardSets() {
         // Проверяем, что пользователь запрашивает свои собственные карточки
         return flashCardSetRepository.findAllByOwner_Id(SecurityUtils.getCurrentUserId());
     }
 
+    // В КОНТРОЛЕРЕ МЕТОД ДОЛЖЕН БЫТЬ ПОМЕЧЕН @Preauthorize("hasRole('ADMIN'))
+    public List<FlashCardSet> getAllFlashCardSets(Long userId) {
+        return flashCardSetRepository.findAllByOwner_Id(userId);
+    }
+
     @Transactional
     public void deleteFlashCardSet(Long id) {
-        flashCardSetRepository.delete(flashCardSetRepository.findById(id)
-                .orElseThrow(() -> new FlashCardSetNotFoundException("Flashcard set not found")));
+        flashCardSetRepository.deleteById(id);
     }
 
     @Transactional
     public FlashCardSet editFlashCardSet(FlashCardSet newFlashCardSet, Long id) {
         FlashCardSet flashCardSet = flashCardSetRepository.findById(id)
                 .orElseThrow(() -> new FlashCardSetNotFoundException("Flashcard set not found"));
-        // а если менять нужно не все, а только часть параметров
-        flashCardSet.setTitle(newFlashCardSet.getTitle());
-        flashCardSet.setDescription(newFlashCardSet.getDescription());
-        flashCardSet.setVisibility(newFlashCardSet.getVisibility());
-        flashCardSet.setTags(newFlashCardSet.getTags());
-        flashCardSet.setUpdatedAt(LocalDateTime.now());
-
-        flashCardSet.getFlashCards().clear();
-
-        for (FlashCard incomingCard : newFlashCardSet.getFlashCards()) {
-            FlashCard flashCard = new FlashCard();
-            flashCard.setQuestion(incomingCard.getQuestion());
-            flashCard.setAnswer(incomingCard.getAnswer());
-            flashCard.setSet(flashCardSet);
-
-            flashCardSet.getFlashCards().add(flashCard);
+        boolean updated = false;
+        if (newFlashCardSet.getTitle() != null && !newFlashCardSet.getTitle().isBlank()) {
+            flashCardSet.setTitle(newFlashCardSet.getTitle());
+            updated = true;
         }
+        if (newFlashCardSet.getDescription() != null && !newFlashCardSet.getDescription().isBlank()) {
+            flashCardSet.setDescription(newFlashCardSet.getDescription());
+            updated = true;
+        }
+        if (newFlashCardSet.getVisibility() != null) {
+            flashCardSet.setVisibility(newFlashCardSet.getVisibility());
+            updated = true;
+        }
+        if (newFlashCardSet.getTags() != null && !newFlashCardSet.getTags().isEmpty()) {
+            flashCardSet.setTags(newFlashCardSet.getTags());
+            updated = true;
+        }
+
+        if (newFlashCardSet.getFlashCards() != null && !newFlashCardSet.getFlashCards().isEmpty()) {
+            flashCardSet.getFlashCards().clear();
+
+            for (FlashCard incomingCard : newFlashCardSet.getFlashCards()) {
+                FlashCard flashCard = new FlashCard();
+                flashCard.setQuestion(incomingCard.getQuestion());
+                flashCard.setAnswer(incomingCard.getAnswer());
+                flashCard.setSet(flashCardSet);
+
+                flashCardSet.getFlashCards().add(flashCard);
+            }
+        }
+
+        if (updated)
+            flashCardSet.setUpdatedAt(LocalDateTime.now());
 
         return flashCardSetRepository.save(flashCardSet);
     }
@@ -108,7 +128,6 @@ public class FlashCardService {
                 .orElseThrow(() -> new FlashCardSetNotFoundException("Flash card set not found"));
     }
 
-    // фа ватафа
     @Transactional
     public FlashCardSet saveFlashCardSet(Long id, SaveFlashCardSetRequest request) {
         FlashCardSet flashCardSet = flashCardSetRepository.findById(id)

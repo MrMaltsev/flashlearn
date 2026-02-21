@@ -21,7 +21,7 @@ public class UserDashboardController {
     private final UserDashboardMapper userDashboardMapper;
     private final FlashCardSetMapper flashCardSetMapper;
 
-    @GetMapping
+    @GetMapping("/{username}")
     public ResponseEntity<UserDashboardResponseDto> getUserInfo() {
         UserStats userInfo = userDashboardService.loadFreshUserStats();
         UserDashboardResponseDto userResponse = new UserDashboardResponseDto(
@@ -36,11 +36,10 @@ public class UserDashboardController {
         return ResponseEntity.status(HttpStatus.OK).body(userResponse);
     }
 
-    @PutMapping("/update_daily_goal/{username}")
-    public ResponseEntity<UserDashboardResponseDto> updateUserDailyGoal(@PathVariable String username,
-                                                                    @RequestBody @Valid UpdateDailyGoalRequestDto request) {
+    @PutMapping("/update_daily_goal") // redundant parameter, userId is already in security context
+    public ResponseEntity<UserDashboardResponseDto> updateUserDailyGoal(@RequestBody @Valid UpdateDailyGoalRequestDto request) {
         UserDashboardResponseDto userResponse = userDashboardMapper
-                .toUserDashboardResponseDto(userDashboardService.updateUserDailyGoal(username, request));
+                .toUserDashboardResponseDto(userDashboardService.updateUserDailyGoal(request));
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(userResponse);
     }
 }

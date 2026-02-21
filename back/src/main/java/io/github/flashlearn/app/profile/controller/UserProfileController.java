@@ -42,22 +42,19 @@ public class UserProfileController {
      * Обновление профиля пользователя. Требуется аутентификация.
      * Пользователь может обновлять только свой собственный профиль (проверка в сервисе).
      */
-    @PutMapping("/update/{username}")
-    public ResponseEntity<UpdateUserProfileResponse> updateProfile(@PathVariable String username,
-                                                                   @RequestBody UpdateUserProfileRequest updatedUser) {
+    @PutMapping("/update/{userId}")// redundant parameter, userId is already in security context
+    public ResponseEntity<UpdateUserProfileResponse> updateProfile(@RequestBody UpdateUserProfileRequest updatedUser) {
         UpdateUserProfileResponse updateUserProfileResponse =
-                mapper.toUpdateUserProfileResponse(userProfileService.updateProfile(username, updatedUser));
+                mapper.toUpdateUserProfileResponse(userProfileService.updateProfile(updatedUser));
 
         return ResponseEntity.status(HttpStatus.OK).body(updateUserProfileResponse);
     }
 
     @PostMapping("/avatar")
-    public ResponseEntity<?> uploadAvatar(Authentication authentication,
-                                          @RequestParam("file") MultipartFile file) {
-        String username = authentication.getName();
+    public ResponseEntity<?> uploadAvatar(@RequestParam("file") MultipartFile file) {
 
-        String avatarKey = avatarStorageService.uploadAvatar(username, file);
-        userProfileService.uploadAvatar(username, avatarKey);
+        String avatarKey = avatarStorageService.uploadAvatar(file);
+        userProfileService.uploadAvatar(avatarKey);
 
         return ResponseEntity.ok().body(avatarKey);
     }

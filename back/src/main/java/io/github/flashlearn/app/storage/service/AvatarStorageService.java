@@ -1,5 +1,6 @@
 package io.github.flashlearn.app.storage.service;
 
+import io.github.flashlearn.app.auth.security.SecurityUtils;
 import io.github.flashlearn.app.profile.exception.AvatarUploadException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,8 +22,8 @@ public class AvatarStorageService {
     @Value("${supabase.s3.avatars-bucket}")
     private String avatarsBucket;
 
-    public String uploadAvatar(String username, MultipartFile file) {
-        String key = "avatars/" + username + "/" + UUID.randomUUID() + ".jpg";
+    public String uploadAvatar(MultipartFile file) {
+        String key = "avatars/" + SecurityUtils.getCurrentUserId() + "/" + UUID.randomUUID() + ".jpg";
 
         try {
             s3Client.putObject(
@@ -34,7 +35,7 @@ public class AvatarStorageService {
                     RequestBody.fromBytes(file.getBytes())
             );
         } catch (IOException e) {
-            throw new AvatarUploadException("Failed to upload avatar for user: " + username);
+            throw new AvatarUploadException("Failed to upload avatar for user: " + SecurityUtils.getCurrentUserId());
         }
 
         return key;

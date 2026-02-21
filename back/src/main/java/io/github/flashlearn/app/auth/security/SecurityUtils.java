@@ -1,9 +1,11 @@
 package io.github.flashlearn.app.auth.security;
 
+import io.github.flashlearn.app.flashcard.exception.UnauthorizedAccessException;
 import io.github.flashlearn.app.user.entity.User;
 import io.github.flashlearn.app.user.exception.UserNotFoundException;
 import io.github.flashlearn.app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,9 +30,8 @@ public class SecurityUtils {
     public static Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || authentication.isAuthenticated()
-                || authentication.getPrincipal().equals("anonymousUser")) {
-            throw new IllegalStateException("Пользователь не аутентифицирован");
+        if (!isAuthenticated()) {
+            throw new UnauthorizedAccessException("Пользователь не аутентифицирован");
         }
 
         Object principal = authentication.getPrincipal();
@@ -57,11 +58,7 @@ public class SecurityUtils {
 
     public User getCurrentUserRef(){
         Long userId = getCurrentUserId();
-        User user = userRepository.getReferenceById(userId);
-        if (user.getUsername().isBlank()){
-            throw new UserNotFoundException(userId);
-        }
-        return user;
+        return userRepository.getReferenceById(userId);
     }
 
     /**
@@ -84,7 +81,7 @@ public class SecurityUtils {
      *
      * @return true, если пользователь аутентифицирован
      */
-    public boolean isAuthenticated() {
+    public static boolean isAuthenticated() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null && authentication.isAuthenticated()
                 && !"anonymousUser".equals(authentication.getPrincipal());

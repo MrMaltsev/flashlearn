@@ -112,6 +112,7 @@ public class GlobalExceptionHandler{
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
+    // Email is taken by another user
     @ExceptionHandler(EmailIsTakenException.class)
     public ResponseEntity<ApiError> emailIsTakenExceptionHandler(EmailIsTakenException ex,
                                                                  HttpServletRequest request) {
