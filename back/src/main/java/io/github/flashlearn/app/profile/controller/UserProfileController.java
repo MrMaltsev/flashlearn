@@ -1,18 +1,15 @@
 package io.github.flashlearn.app.profile.controller;
 
+import io.github.flashlearn.app.auth.mapper.UserAuthMapper;
 import io.github.flashlearn.app.profile.dto.UpdateUserProfileRequest;
 import io.github.flashlearn.app.profile.dto.UpdateUserProfileResponse;
 import io.github.flashlearn.app.profile.dto.UserProfileResponse;
-import io.github.flashlearn.app.auth.mapper.UserAuthMapper;
 import io.github.flashlearn.app.profile.service.AvatarUrlService;
 import io.github.flashlearn.app.profile.service.UserProfileService;
 import io.github.flashlearn.app.storage.service.AvatarStorageService;
-import jakarta.mail.Multipart;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

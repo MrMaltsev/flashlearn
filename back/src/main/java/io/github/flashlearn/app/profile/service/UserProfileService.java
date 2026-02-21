@@ -9,8 +9,6 @@ import io.github.flashlearn.app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import static io.github.flashlearn.app.auth.security.SecurityUtils.isCurrentUser;
-
 @Service
 @RequiredArgsConstructor
 public class UserProfileService {
@@ -30,7 +28,6 @@ public class UserProfileService {
 
     /**
      * Обновляет профиль пользователя. Пользователь может обновлять только свой собственный профиль.
-     * @param username имя пользователя, профиль которого нужно обновить
      * @param updatedUser новые данные профиля
      * @return обновленный пользователь
      * @throws UnauthorizedAccessException если пользователь пытается обновить чужой профиль

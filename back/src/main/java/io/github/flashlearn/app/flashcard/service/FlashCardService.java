@@ -2,18 +2,14 @@ package io.github.flashlearn.app.flashcard.service;
 
 import io.github.flashlearn.app.auth.security.SecurityUtils;
 import io.github.flashlearn.app.flashcard.dto.CreateFlashCardSetRequest;
-import io.github.flashlearn.app.flashcard.dto.FlashCardResponse;
 import io.github.flashlearn.app.flashcard.dto.SaveFlashCardSetRequest;
 import io.github.flashlearn.app.flashcard.entity.FlashCard;
 import io.github.flashlearn.app.flashcard.entity.FlashCardSet;
 import io.github.flashlearn.app.flashcard.exception.FlashCardSetNotFoundException;
 import io.github.flashlearn.app.flashcard.repository.FlashCardSetRepository;
 import io.github.flashlearn.app.user.entity.User;
-import io.github.flashlearn.app.flashcard.exception.UnauthorizedAccessException;
-import io.github.flashlearn.app.flashcard.repository.FlashCardRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.web.embedded.netty.NettyWebServer;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

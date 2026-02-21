@@ -1,15 +1,14 @@
 package io.github.flashlearn.app.friendship.service;
 
 import io.github.flashlearn.app.auth.security.SecurityUtils;
+import io.github.flashlearn.app.friendship.dto.FriendRequestNotificationDto;
+import io.github.flashlearn.app.friendship.dto.UserSearchResponseDto;
 import io.github.flashlearn.app.friendship.entity.Friendship;
 import io.github.flashlearn.app.friendship.exception.FiendshipRequestNotFoundException;
 import io.github.flashlearn.app.friendship.exception.Forbidden;
 import io.github.flashlearn.app.friendship.exception.FriendshipAlreadyExistsException;
 import io.github.flashlearn.app.friendship.repository.FriendshipRepository;
-import io.github.flashlearn.app.friendship.dto.FriendRequestNotificationDto;
-import io.github.flashlearn.app.friendship.dto.UserSearchResponseDto;
 import io.github.flashlearn.app.profile.dto.UserProfileResponse;
-import io.github.flashlearn.app.profile.service.UserProfileService;
 import io.github.flashlearn.app.user.entity.User;
 import io.github.flashlearn.app.user.exception.UserNotFoundException;
 import io.github.flashlearn.app.user.repository.UserRepository;
@@ -19,8 +18,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

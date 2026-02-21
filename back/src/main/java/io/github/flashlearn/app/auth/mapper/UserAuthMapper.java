@@ -1,14 +1,13 @@
 package io.github.flashlearn.app.auth.mapper;
 
+import io.github.flashlearn.app.auth.dto.UserRegistrationResponse;
 import io.github.flashlearn.app.profile.dto.UpdateUserProfileResponse;
 import io.github.flashlearn.app.profile.dto.UserProfileResponse;
-import io.github.flashlearn.app.auth.dto.UserRegistrationResponse;
-import io.github.flashlearn.app.user.entity.User;
 import io.github.flashlearn.app.profile.service.AvatarUrlService;
+import io.github.flashlearn.app.user.entity.User;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.context.annotation.Configuration;
 
 @Mapper(componentModel = "spring")
 public interface UserAuthMapper {

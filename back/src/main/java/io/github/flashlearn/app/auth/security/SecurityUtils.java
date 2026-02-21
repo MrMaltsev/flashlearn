@@ -5,11 +5,8 @@ import io.github.flashlearn.app.user.entity.User;
 import io.github.flashlearn.app.user.exception.UserNotFoundException;
 import io.github.flashlearn.app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 /**
@@ -64,7 +61,7 @@ public class SecurityUtils {
     /**
      * Проверяет, является ли текущий пользователь владельцем указанного ресурса
      *
-     * @param resourceOwnerUsername имя пользователя-владельца ресурса
+     * @param userId имя пользователя-владельца ресурса
      * @return true, если текущий пользователь является владельцем
      */
     public static boolean isCurrentUser(Long userId) {

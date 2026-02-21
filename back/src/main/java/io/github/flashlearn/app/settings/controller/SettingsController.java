@@ -2,7 +2,6 @@ package io.github.flashlearn.app.settings.controller;
 
 import io.github.flashlearn.app.settings.dto.UserSettingsResponse;
 import io.github.flashlearn.app.settings.dto.UserSettingsUpdateRequest;
-import io.github.flashlearn.app.settings.entity.UserSettings;
 import io.github.flashlearn.app.settings.mapper.UserSettingsMapper;
 import io.github.flashlearn.app.settings.service.SettingsService;
 import lombok.RequiredArgsConstructor;

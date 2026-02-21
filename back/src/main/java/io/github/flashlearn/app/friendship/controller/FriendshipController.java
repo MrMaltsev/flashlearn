@@ -1,17 +1,12 @@
 package io.github.flashlearn.app.friendship.controller;
 
-import io.github.flashlearn.app.friendship.dto.AcceptFriendRequestDto;
-import io.github.flashlearn.app.friendship.dto.SendFriendRequestDto;
-import io.github.flashlearn.app.friendship.dto.FriendRequestResponseDto;
-import io.github.flashlearn.app.friendship.dto.FriendRequestNotificationDto;
-import io.github.flashlearn.app.friendship.dto.UserSearchResponseDto;
+import io.github.flashlearn.app.friendship.dto.*;
 import io.github.flashlearn.app.friendship.mapper.FriendshipMapper;
 import io.github.flashlearn.app.friendship.service.FriendshipService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

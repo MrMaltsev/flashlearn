@@ -4,14 +4,14 @@ import io.github.flashlearn.app.auth.security.SecurityUtils;
 import io.github.flashlearn.app.flashcard.entity.FlashCardSet;
 import io.github.flashlearn.app.flashcard.service.FlashCardService;
 import io.github.flashlearn.app.user.dto.UpdateDailyGoalRequestDto;
-import io.github.flashlearn.app.user_stats.exception.UserStatsNotFoundException;
 import io.github.flashlearn.app.user_stats.entity.UserStats;
+import io.github.flashlearn.app.user_stats.exception.UserStatsNotFoundException;
 import io.github.flashlearn.app.user_stats.repository.UserStatsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.time.LocalDate;
+import java.util.List;
 
 import static io.github.flashlearn.app.auth.security.SecurityUtils.getCurrentUserId;
 
