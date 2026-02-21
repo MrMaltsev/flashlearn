@@ -1,6 +1,9 @@
 package io.github.flashlearn.app.auth.security;
 
+import io.github.flashlearn.app.user.entity.Role;
 import io.github.flashlearn.app.user.entity.User;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -10,22 +13,27 @@ import java.util.Collection;
 import java.util.List;
 
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class CustomUserDetails implements UserDetails {
-    private final User user;
+    @Getter
+    private final Long id;
+    private final String username;
+    private String password;
+    private final Role role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(user.getRole().name()));
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return password;
     }
 
     @Override
     public String getUsername() {
-        return String.valueOf(user.getId());
+        return username;
     }
 
     @Override

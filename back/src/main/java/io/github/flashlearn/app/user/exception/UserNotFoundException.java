@@ -1,9 +1,10 @@
 package io.github.flashlearn.app.user.exception;
 
 import lombok.Getter;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @Getter
-public class UserNotFoundException extends RuntimeException {
+public class UserNotFoundException extends UsernameNotFoundException {
 
     private final Object key;
 

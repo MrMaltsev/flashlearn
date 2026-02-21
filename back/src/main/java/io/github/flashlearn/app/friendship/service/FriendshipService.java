@@ -133,7 +133,7 @@ public class FriendshipService {
         if (query == null || query.isBlank()) {
             return List.of();
         }
-        return userRepository.findTop5ByUsernameContainingIgnoreCaseAndIdNot(query, SecurityUtils.getCurrentUserId()) // а почему нельзя себя найти
+        return userRepository.findTop5ByUsernameContainingIgnoreCaseAndIdNot(query, SecurityUtils.getCurrentUserId())
                 .stream()
                 .map(u -> new UserSearchResponseDto(u.getId(), u.getUsername()))
                 .toList();

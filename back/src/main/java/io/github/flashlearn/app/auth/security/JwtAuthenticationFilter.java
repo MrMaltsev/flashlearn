@@ -1,5 +1,7 @@
 package io.github.flashlearn.app.auth.security;
 
+import io.github.flashlearn.app.user.entity.Role;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -23,7 +24,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final CustomUserDetailsService userDetailsService;
 
     @Override
     public void doFilterInternal(HttpServletRequest request,
@@ -33,16 +33,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String bearer = request.getHeader("Authorization");
             String token = null;
-            if(bearer != null && bearer.startsWith("Bearer ")) {
+            if (bearer != null && bearer.startsWith("Bearer ")) {
                 token = bearer.substring(7);
             }
-
-            if(token != null && jwtTokenProvider.validateToken(token)) {
-                String userId = jwtTokenProvider.getIdFromToken(token);
-
+            if (token != null) {
+                Claims claims = jwtTokenProvider.parse(token);
+                Long userId = claims.get("id", Long.class);
+                String username = claims.getSubject();
+                String roleStr = claims.get("role", String.class);
+                Role role = Role.valueOf(roleStr);
                 // Защита: если уже есть аутентификация в контексте — не перезаписываем её
-                if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    UserDetails userDetails = userDetailsService.loadUserById(Long.valueOf(userId));
+//                if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                    CustomUserDetails userDetails = new CustomUserDetails(
+                            userId,
+                            username,
+                            role
+                    );
 
                     UsernamePasswordAuthenticationToken authenticationToken =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -50,12 +56,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 }
-            }
+//            }
+
         } catch (Exception ex) {
             log.warn("Could not set user authentication from JWT: {}", ex.getMessage());
             SecurityContextHolder.clearContext();
         }
-
 
         filterChain.doFilter(request, response);
     }

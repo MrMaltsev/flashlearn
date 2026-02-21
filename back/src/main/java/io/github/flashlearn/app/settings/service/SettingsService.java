@@ -1,5 +1,6 @@
 package io.github.flashlearn.app.settings.service;
 
+import io.github.flashlearn.app.auth.security.SecurityUtils;
 import io.github.flashlearn.app.settings.entity.UserSettings;
 import io.github.flashlearn.app.settings.exception.UserSettingsNotFoundException;
 import io.github.flashlearn.app.settings.repository.UserSettingsRepository;
@@ -12,14 +13,14 @@ public class SettingsService {
 
     private final UserSettingsRepository userSettingsRepository;
 
-    public UserSettings getUserSettings(String username) {
-        return userSettingsRepository.findByUser_Username(username)
-                .orElseThrow(() -> new UserSettingsNotFoundException("user with username not found: " + username));
+    public UserSettings getUserSettings() {
+        return userSettingsRepository.findByUser_Id(SecurityUtils.getCurrentUserId())
+                .orElseThrow(() -> new UserSettingsNotFoundException("user with username not found: " + SecurityUtils.getCurrentUsername()));
     }
 
-    public UserSettings updateUserSettings(String username, UserSettings newUserSettings) {
-        UserSettings userSettings = userSettingsRepository.findByUser_Username(username)
-                .orElseThrow(() -> new UserSettingsNotFoundException("user settings not found: " + username));
+    public UserSettings updateUserSettings(UserSettings newUserSettings) {
+        UserSettings userSettings = userSettingsRepository.findByUser_Id(SecurityUtils.getCurrentUserId())
+                .orElseThrow(() -> new UserSettingsNotFoundException("user settings not found: " + SecurityUtils.getCurrentUsername()));
 
         userSettings.setLanguage(newUserSettings.getLanguage());
         userSettings.setDarkMode(newUserSettings.isDarkMode());

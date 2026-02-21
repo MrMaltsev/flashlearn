@@ -35,7 +35,7 @@ public class AvatarStorageService {
                     RequestBody.fromBytes(file.getBytes())
             );
         } catch (IOException e) {
-            throw new AvatarUploadException("Failed to upload avatar for user: " + SecurityUtils.getCurrentUserId());
+            throw new AvatarUploadException("Failed to upload avatar for user: " + SecurityUtils.getCurrentUsername());
         }
 
         return key;

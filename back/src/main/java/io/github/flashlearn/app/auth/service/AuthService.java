@@ -26,16 +26,17 @@ public class AuthService {
     // Service for login attempts
     public String loginUser(UserLoginRequest request) {
 
-        Authentication authentication = authenticationManager.authenticate(
+        authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                 request.username(),
                 request.password()
             )
         );
 
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-
-        return tokenProvider.generateToken(Long.valueOf(userDetails.getUsername()));
+        return tokenProvider.generateToken(
+                userRepository.findByUsername(request.username())
+                        .orElseThrow(() -> new UserNotFoundException(request.username())) // fetching user to get id, roles and to check if he is actually in db
+        );
     }
 
     public User findUserByUsername(String username) {

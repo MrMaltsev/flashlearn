@@ -1,7 +1,6 @@
 package io.github.flashlearn.app.common.exception;
 
 import io.github.flashlearn.app.auth.exception.EmailSendingException;
-import io.github.flashlearn.app.auth.exception.InvalidCredentialsException;
 import io.github.flashlearn.app.auth.exception.TokenExpiredException;
 import io.github.flashlearn.app.auth.exception.TokenNotFoundException;
 import io.github.flashlearn.app.common.dto.ApiError;
@@ -25,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -53,8 +53,8 @@ public class GlobalExceptionHandler{
     }
 
     // Invalid password
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<ApiError> invalidCredentialsExceptionHandler(InvalidCredentialsException ex,
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiError> invalidCredentialsExceptionHandler(BadCredentialsException ex,
                                                                        HttpServletRequest request) {
         String traceId = tracer.currentSpan() != null
                 ? tracer.currentSpan().context().traceId()
@@ -312,7 +312,7 @@ public class GlobalExceptionHandler{
                 ? tracer.currentSpan().context().traceId()
                 : "N/A";
 
-        log.error("Unexpected exception");
+        log.error("Unexpected exception: {}", ex.getClass().getSimpleName());
 
         ApiError body = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "INTERNAL_SERVER_ERROR", ex.getMessage(),
                                     Instant.now(), request.getRequestURI(), traceId);

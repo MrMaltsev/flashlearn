@@ -1,5 +1,6 @@
 package io.github.flashlearn.app.auth.security;
 
+import io.github.flashlearn.app.user.entity.User;
 import io.github.flashlearn.app.user.exception.UserNotFoundException;
 import io.github.flashlearn.app.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +17,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException { // used by authentication manager to allow token generation
-        return new CustomUserDetails(userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException(username)));
-    }
-    public UserDetails loadUserById(Long id) throws UsernameNotFoundException { // used within filter chain to manage access based on token info
-        return new CustomUserDetails(userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id)));
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
+        return new CustomUserDetails(user.getId(), user.getUsername(), user.getPassword(), user.getRole());
     }
 }

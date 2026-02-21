@@ -18,19 +18,16 @@ public class SettingsController {
     private final UserSettingsMapper userSettingsMapper;
 
     @GetMapping("/{username}")
-    public ResponseEntity<UserSettingsResponse> getSettings(@PathVariable String username) {
-        // открываешь доступ к чужим настройкам
-        UserSettingsResponse userSettings = userSettingsMapper.toUserSettingsResponse(settingsService.getUserSettings(username));
+    public ResponseEntity<UserSettingsResponse> getSettings() {
+        UserSettingsResponse userSettings = userSettingsMapper.toUserSettingsResponse(settingsService.getUserSettings());
         return ResponseEntity.ok(userSettings);
     }
 
     @PutMapping("/update/{username}")
-    public ResponseEntity<UserSettingsResponse> updateSettings(@PathVariable String username,
-                                                               @RequestBody UserSettingsUpdateRequest request) {
-        // и разрешаешь их менять
+    public ResponseEntity<UserSettingsResponse> updateSettings(@RequestBody UserSettingsUpdateRequest request) {
         UserSettingsResponse response =
                 userSettingsMapper.toUserSettingsResponse(
-                        settingsService.updateUserSettings(username, userSettingsMapper.toUserSettings(request)));
+                        settingsService.updateUserSettings(userSettingsMapper.toUserSettings(request)));
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }

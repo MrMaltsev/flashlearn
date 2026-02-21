@@ -27,14 +27,30 @@ public class SecurityUtils {
     public static Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (!isAuthenticated()) {
+        if (unauthorized()) {
             throw new UnauthorizedAccessException("Пользователь не аутентифицирован");
         }
 
         Object principal = authentication.getPrincipal();
 
         if (principal instanceof CustomUserDetails userDetails) {
-            return Long.valueOf(userDetails.getUsername());
+            return userDetails.getId();
+        } else {
+            throw new IllegalStateException("Неизвестный тип principal: " + principal.getClass());
+        }
+    }
+
+    public static String getCurrentUsername(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (unauthorized()) {
+            throw new UnauthorizedAccessException("Пользователь не аутентифицирован");
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof CustomUserDetails userDetails) {
+            return userDetails.getUsername();
         } else {
             throw new IllegalStateException("Неизвестный тип principal: " + principal.getClass());
         }
@@ -78,10 +94,10 @@ public class SecurityUtils {
      *
      * @return true, если пользователь аутентифицирован
      */
-    public static boolean isAuthenticated() {
+    public static boolean unauthorized() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null && authentication.isAuthenticated()
-                && !"anonymousUser".equals(authentication.getPrincipal());
+        return authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal());
     }
 }
 
