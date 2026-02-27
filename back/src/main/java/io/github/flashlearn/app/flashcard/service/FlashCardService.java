@@ -68,7 +68,6 @@ public class FlashCardService {
         return flashCardSetRepository.findAllByOwner_Id(SecurityUtils.getCurrentUserId());
     }
 
-    // В КОНТРОЛЕРЕ МЕТОД ДОЛЖЕН БЫТЬ ПОМЕЧЕН @Preauthorize("hasRole('ADMIN'))
     public List<FlashCardSet> getAllFlashCardSets(Long userId) {
         return flashCardSetRepository.findAllByOwner_Id(userId);
     }

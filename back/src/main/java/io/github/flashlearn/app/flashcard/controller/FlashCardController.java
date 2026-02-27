@@ -47,7 +47,6 @@ public class FlashCardController {
     }
 
     @GetMapping("/user/{id}")
-//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<FlashCardSetResponse>> getAllFlashCards(Long id) {
         // Сервис проверяет, что userId соответствует текущему аутентифицированному пользователю
         List<FlashCardSetResponse> flashCards = flashCardService.getAllFlashCardSets(id)
