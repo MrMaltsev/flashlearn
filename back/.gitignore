@@ -11,7 +11,5 @@
 # OS
 .DS_Store
 
-# Docker (опционально)
+# Docker
 mysql_data/
-
-src/main/resources/application.properties

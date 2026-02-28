@@ -3,7 +3,6 @@ services:
   mysql:
     image: mysql:8.0
     container_name: flashlearn-mysql
-    restart: always
     environment:
       MYSQL_DATABASE: flashlearn
       MYSQL_USER: flashuser

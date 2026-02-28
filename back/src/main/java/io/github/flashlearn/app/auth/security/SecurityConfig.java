@@ -59,6 +59,11 @@ public class SecurityConfig {
                         // Разрешаем доступ без аутентификации к эндпоинтам регистрации, логина и лендинга
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/landing/**").permitAll()
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html")
+                        .permitAll()
                         // Все остальные эндпоинты требуют аутентификации
                         .anyRequest().authenticated()
                 )
